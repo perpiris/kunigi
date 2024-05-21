@@ -66,4 +66,10 @@ public class AccountController(UserManager<AppUser> userManager, SignInManager<A
 
         return View(model);
     }
+    
+    [HttpGet]
+    public IActionResult Account()
+    {
+        return View();
+    }
 }
