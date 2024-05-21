@@ -2,13 +2,13 @@
 
 namespace Kunigi.Data;
 
-public class SeedData
+public abstract class SeedData
 {
     public static async Task SeedRoles(IServiceProvider serviceProvider)
     {
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-        string[] roleNames = ["Admin", "User"];
+        string[] roleNames = ["Admin", "Moderator", "Manager"];
 
         foreach (var roleName in roleNames)
         {

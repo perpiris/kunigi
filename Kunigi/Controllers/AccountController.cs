@@ -1,5 +1,6 @@
 ﻿using Kunigi.Entities;
 using Kunigi.ViewModels.Account;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +20,7 @@ public class AccountController(UserManager<AppUser> userManager, SignInManager<A
     {
         if (!ModelState.IsValid) return View(model);
         var result =
-            await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe,
+            await signInManager.PasswordSignInAsync(model.Email, model.Password, true,
                 lockoutOnFailure: false);
 
         if (result.Succeeded)
@@ -68,6 +69,7 @@ public class AccountController(UserManager<AppUser> userManager, SignInManager<A
     }
     
     [HttpGet]
+    [Authorize]
     public IActionResult Account()
     {
         return View();
