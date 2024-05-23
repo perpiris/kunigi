@@ -1,0 +1,23 @@
+﻿@model TeamCreateViewModel
+
+@{
+    ViewData["Title"] = "Δημιουργία Ομάδας";
+}
+
+<div class="text-center">
+    <h2>Δημιουργία νέας Ομάδας</h2>
+</div>
+
+<div style="max-width: 450px; margin: auto">
+    @using (Html.BeginForm("Create", "Teams", FormMethod.Post))
+    {
+        <div class="form-group mb-3">
+            <label asp-for="Name" class="form-label mt-4"></label>
+            <input asp-for="Name" class="form-control @(ViewData.ModelState["Name"] != null ? "is-invalid" : "")"/>
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Προσθήκη</button>
+        <a asp-controller="Teams" asp-action="List" class="btn btn-secondary">Πίσω</a>
+    }
+</div>

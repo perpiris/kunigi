@@ -37,6 +37,12 @@
                             Αρχική
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(GetActive("Teams", "List"))"
+                           asp-area="" asp-controller="Teams" asp-action="List">
+                            Ομάδες
+                        </a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav">
                     @if (User.Identity is { IsAuthenticated: true })
@@ -44,12 +50,12 @@
                         <li class="nav-item">
                             <a class="nav-link @(GetActive("Account", "Account"))"
                                asp-controller="Account" asp-action="Account">
-                                Account
+                                Λογαριασμός
                             </a>
                         </li>
                         <li class="nav-item">
                             <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
-                                <button type="submit" class="btn btn-link nav-link">Logout</button>
+                                <button type="submit" class="btn btn-link nav-link">Αποσύνδεση</button>
                             </form>
                         </li>
                     }
@@ -58,7 +64,7 @@
                         <li class="nav-item">
                             <a class="nav-link @(GetActive("Home", "Login"))"
                                asp-controller="Account" asp-action="Login">
-                                Login
+                                Σύνδεση
                             </a>
                         </li>
                     }

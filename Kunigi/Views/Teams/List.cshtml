@@ -1,0 +1,43 @@
+﻿@model List<TeamDetailsViewModel>
+
+@{
+    ViewData["Title"] = "Όλες οι Ομάδες";
+}
+
+@if (Model == null || Model.Count == 0)
+{
+    <h2>No records found.</h2>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="card">
+                    @if (string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="~/images/profile.jpg" class="card-img-top" alt="Default Team Image">
+                    }
+                    else
+                    {
+                        <img src="~/@item.ImageUrl" class="card-img-top" alt="Team Image">
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Name</h5>
+                        <a class="card-link" asp-controller="Teams" asp-action="Details" asp-route-id="@item.Id">Πληροφορίες</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <ul class="pagination justify-content-center mt-5">
+        @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
+        {
+            <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
+                <a class="page-link" asp-controller="Teams" asp-action="List" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
+            </li>
+        }
+    </ul>
+}

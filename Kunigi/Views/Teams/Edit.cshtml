@@ -1,0 +1,45 @@
+﻿@model TeamEditViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="text-center">
+    <h2>@Model.Name</h2>
+</div>
+
+<div style="max-width: 450px; margin: auto">
+    <form method="post" enctype="multipart/form-data">
+        <div class="row form-group mb-3">
+            <label asp-for="Facebook" class="form-label"></label>
+            <input asp-for="Facebook" class="form-control"/>
+            <span asp-validation-for="Facebook" class="text-danger"></span>
+        </div>
+        
+        <div class="row form-group mb-3">
+            <label asp-for="Instagram" class="form-label"></label>
+            <input asp-for="Instagram" class="form-control"/>
+            <span asp-validation-for="Instagram" class="text-danger"></span>
+        </div>
+        
+        <div class="row form-group mb-3">
+            <label asp-for="Youtube" class="form-label"></label>
+            <input asp-for="Youtube" class="form-control"/>
+            <span asp-validation-for="Youtube" class="text-danger"></span>
+        </div>
+        
+        <div class="row form-group mb-3">
+            <label asp-for="Website" class="form-label"></label>
+            <input asp-for="Website" class="form-control"/>
+            <span asp-validation-for="Website" class="text-danger"></span>
+        </div>
+        
+        <div class="row form-group mb-3">
+            <label asp-for="ImageUrl"></label>
+            <input type="file" name="profileImage" class="form-control" accept="image/png, image/jpeg"/>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+        <a asp-controller="Teams" asp-action="List" class="btn btn-secondary">Άκυρο</a>
+    </form>
+</div>

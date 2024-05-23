@@ -1,0 +1,50 @@
+﻿@model TeamDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="row">
+    <div class="col-md-4">
+        @if (string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="~/images/profile.jpg" class="img-fluid" alt="Default Team Image">
+        }
+        else
+        {
+            <img src="~/@Model.ImageUrl" class="img-fluid" alt="Team Image">
+        }
+    </div>
+    <div class="col-md-8">
+        <h1 class="mb-4">@Model.Name</h1>
+        <div>
+            <p>
+                <strong>Description:</strong> @Model.Description
+            </p>
+            @if (!string.IsNullOrEmpty(Model.Website))
+            {
+                <p>
+                    <strong>Website:</strong> <a href="@Model.Website">@Model.Website</a>
+                </p>
+            }
+            @if (!string.IsNullOrEmpty(Model.Facebook))
+            {
+                <p>
+                    <strong>Facebook:</strong> <a href="@Model.Facebook">@Model.Facebook</a>
+                </p>
+            }
+            @if (!string.IsNullOrEmpty(Model.Youtube))
+            {
+                <p>
+                    <strong>Youtube:</strong> <a href="@Model.Youtube">@Model.Youtube</a>
+                </p>
+            }
+            @if (!string.IsNullOrEmpty(Model.Instagram))
+            {
+                <p>
+                    <strong>Instagram:</strong> <a href="@Model.Instagram">@Model.Instagram</a>
+                </p>
+            }
+        </div>
+    </div>
+</div>
