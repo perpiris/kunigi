@@ -74,6 +74,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Moderator")]
     public async Task<IActionResult> Edit(int id)
     {
         if (id <= 0)
@@ -133,5 +134,20 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
 
         TempData["success"] = $"Η ομάδα {selected.Name} επεξεργάστηκε επιτυχώς.";
         return RedirectToAction("List");
+    }
+    
+    [HttpGet]
+    [Authorize(Roles = "Admin,Moderator")]
+    public async Task<IActionResult> Management(int pageIndex = 1)
+    {
+        var resultsCount = context.Teams.Count();
+
+        var pageInfo = new PageInfo(resultsCount, pageIndex);
+        var skip = (pageIndex - 1) * pageInfo.PageSize;
+        ViewBag.PageInfo = pageInfo;
+
+        var viewModel = await context.Teams.Skip(skip).Take(pageInfo.PageSize)
+            .ProjectTo<TeamDetailsViewModel>(mapper.ConfigurationProvider).ToListAsync();
+        return View(viewModel);
     }
 }

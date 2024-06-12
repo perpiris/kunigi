@@ -1,8 +1,18 @@
 ﻿@model List<TeamDetailsViewModel>
 
 @{
-    ViewData["Title"] = "Όλες οι Ομάδες";
+    ViewData["Title"] = "Διαχείρηση Ομάδων";
 }
+
+<div class="d-flex flex-wrap mb-4">
+    <h1 class="flex-grow-1">Διαχείρηση Ομάδων</h1>
+    <div>
+        <a class="btn btn-primary"
+           asp-controller="Teams" asp-action="Create">
+            Προσθήκη νέας ομάδες
+        </a>
+    </div>
+</div>
 
 @if (Model == null || Model.Count == 0)
 {

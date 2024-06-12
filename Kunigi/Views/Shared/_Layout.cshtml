@@ -43,6 +43,15 @@
                             Ομάδες
                         </a>
                     </li>
+                    @if (User.Identity is { IsAuthenticated: true } && (User.IsInRole("Admin") || User.IsInRole("Μοδερατορ")))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link @(GetActive("Teams", "Management"))"
+                               asp-controller="Teams" asp-action="Management">
+                                Διαχείρηση Ομάδων
+                            </a>
+                        </li>
+                    }
                 </ul>
                 <ul class="navbar-nav">
                     @if (User.Identity is { IsAuthenticated: true })
@@ -74,7 +83,7 @@
     </nav>
 </header>
 
-<div class="container mt-2">
+<div class="container mt-4">
     <main role="main" class="pb-3">
         @RenderBody()
     </main>

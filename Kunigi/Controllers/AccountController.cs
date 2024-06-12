@@ -41,12 +41,14 @@ public class AccountController(UserManager<AppUser> userManager, SignInManager<A
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public IActionResult Register()
     {
         return View();
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
         if (!ModelState.IsValid) return View(model);
@@ -55,7 +57,6 @@ public class AccountController(UserManager<AppUser> userManager, SignInManager<A
 
         if (result.Succeeded)
         {
-            await userManager.AddToRoleAsync(user, "User");
             await signInManager.SignInAsync(user, isPersistent: false);
             return RedirectToAction("Index", "Home");
         }
@@ -69,8 +70,8 @@ public class AccountController(UserManager<AppUser> userManager, SignInManager<A
     }
     
     [HttpGet]
-    [Authorize]
-    public IActionResult Account()
+    [Authorize(Roles = "Admin")]
+    public IActionResult Management()
     {
         return View();
     }

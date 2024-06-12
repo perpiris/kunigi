@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Kunigi.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace Kunigi.Data;
 
@@ -19,6 +20,19 @@ public abstract class SeedData
             {
                 throw new Exception($"Role creation failed: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
             }
+        }
+    }
+
+    public static async Task SeedMainAdmin(IServiceProvider serviceProvider)
+    {
+        var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+        
+        var user = new AppUser { UserName = "iperpirakis@gmail.com", Email = "iperpirakis@gmail.com" };
+        var result = await userManager.CreateAsync(user, "0123456789");
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(user, "Admin");
         }
     }
 }
