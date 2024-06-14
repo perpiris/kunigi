@@ -1,0 +1,55 @@
+﻿@model List<TeamDetailsViewModel>
+
+@{
+    ViewData["Title"] = "Διαχείρηση Ομάδων";
+}
+
+<div class="d-flex flex-wrap mb-4">
+    <h1 class="flex-grow-1">Διαχείρηση Ομάδων</h1>
+    <div>
+        <a class="btn btn-primary"
+           asp-controller="Teams" asp-action="Create">
+            Δημιουργία νέας ομάδες
+        </a>
+    </div>
+</div>
+
+@if (Model == null || Model.Count == 0)
+{
+    <div class="text-center">
+        <h2>Δεν βρέθηκαν δεδομένα.</h2>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="card">
+                    @if (string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="~/images/profile.jpg" class="card-img-top" alt="Default Team Image">
+                    }
+                    else
+                    {
+                        <img src="~/@item.ImageUrl" class="card-img-top" alt="Team Image">
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Name</h5>
+                        <a class="card-link" asp-controller="Teams" asp-action="Details" asp-route-id="@item.Id">Πληροφορίες</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <ul class="pagination justify-content-center mt-5">
+        @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
+        {
+            <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
+                <a class="page-link" asp-controller="Teams" asp-action="List" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
+            </li>
+        }
+    </ul>
+}

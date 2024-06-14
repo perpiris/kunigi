@@ -43,12 +43,33 @@
                             Ομάδες
                         </a>
                     </li>
-                    @if (User.Identity is { IsAuthenticated: true } && (User.IsInRole("Admin") || User.IsInRole("Μοδερατορ")))
+                    <li class="nav-item">
+                        <a class="nav-link @(GetActive("Games", "List"))"
+                           asp-area="" asp-controller="Games" asp-action="List">
+                            Παιχνίδια
+                        </a>
+                    </li>
+                    @if (User.Identity is { IsAuthenticated: true } && (User.IsInRole("Admin") || User.IsInRole("Moderator")))
                     {
                         <li class="nav-item">
-                            <a class="nav-link @(GetActive("Teams", "Management"))"
-                               asp-controller="Teams" asp-action="Management">
+                            <a class="nav-link @(GetActive("Teams", "Manage"))"
+                               asp-controller="Teams" asp-action="Manage">
                                 Διαχείρηση Ομάδων
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(GetActive("Games", "Manage"))"
+                               asp-controller="Games" asp-action="Manage">
+                                Διαχείρηση Παιχνιδιών
+                            </a>
+                        </li>
+                    }
+                    @if (User.Identity is { IsAuthenticated: true } && User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link @(GetActive("Account", "Manage"))"
+                               asp-controller="Account" asp-action="Manage">
+                                Διαχείρηση Χρηστών
                             </a>
                         </li>
                     }
@@ -56,12 +77,6 @@
                 <ul class="navbar-nav">
                     @if (User.Identity is { IsAuthenticated: true })
                     {
-                        <li class="nav-item">
-                            <a class="nav-link @(GetActive("Account", "Account"))"
-                               asp-controller="Account" asp-action="Account">
-                                Λογαριασμός
-                            </a>
-                        </li>
                         <li class="nav-item">
                             <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
                                 <button type="submit" class="btn btn-link nav-link">Αποσύνδεση</button>

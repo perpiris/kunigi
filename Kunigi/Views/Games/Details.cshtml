@@ -1,0 +1,35 @@
+﻿@model GameDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="row">
+    <div class="col-md-4">
+        @if (string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="~/images/profile.jpg" class="img-fluid" alt="Default Team Image">
+        }
+        else
+        {
+            <img src="~/@Model.ImageUrl" class="img-fluid" alt="Team Image">
+        }
+    </div>
+    <div class="col-md-8">
+        <h1 class="mb-4">@Model.Title</h1>
+        <div>
+            <p>
+                <strong>Χρονιά:</strong> @Model.Year
+            </p>
+            <p>
+                <strong>Διοργανωτής:</strong> @Model.Host
+            </p>
+            <p>
+                <strong>Νικητής:</strong> @Model.Winner
+            </p>
+            <p>
+                <strong>Περιγραφή:</strong> @Model.Description
+            </p>
+        </div>
+    </div>
+</div>

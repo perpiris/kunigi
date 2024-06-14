@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Δημιουργία Παιχνιδιού";
+    @model GameCreateViewModel
+}
+
+<div class="text-center mb-3">
+    <h2>Δημιουργία νέου παιχνιδιού</h2>
+</div>
+
+<div style="max-width: 450px; margin: auto">
+    @using (Html.BeginForm("Create", "Games", FormMethod.Post))
+    {
+        <div class="row form-group mb-3">
+            <label asp-for="Year" class="form-label"></label>
+            <input asp-for="Year" class="form-control @(ViewData.ModelState["Year"] != null ? "is-invalid" : "")" min="1989" max="@DateTime.Now.Year.ToString()" pattern="[0-9]{4}"/>
+            <span asp-validation-for="Year" class="text-danger"></span>
+        </div>
+        
+        <div class="row form-group mb-3">
+            <label asp-for="Order" class="form-label"></label>
+            <input asp-for="Order" class="form-control @(ViewData.ModelState["Order"] != null ? "is-invalid" : "")" min="1"/>
+            <span asp-validation-for="Order" class="text-danger"></span>
+        </div>
+
+        <div class="row form-group mb-3">
+            <label asp-for="HostId" class="form-label"></label>
+            <select asp-for="HostId" asp-items="Model.HostSelectList" class="form-select @(ViewData.ModelState["HostId"] != null ? "is-invalid" : "")">
+
+            </select>
+            <span asp-validation-for="HostId" class="text-danger"></span>
+        </div>
+
+        <div class="row form-group mb-3">
+            <label asp-for="WinnerId" class="form-label"></label>
+            <select asp-for="WinnerId" asp-items="Model.WinnerSelectList" class="form-select @(ViewData.ModelState["WinnerId"] != null ? "is-invalid" : "")">
+
+            </select>
+            <span asp-validation-for="WinnerId" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Προσθήκη</button>
+        <a asp-controller="Games" asp-action="List" class="btn btn-secondary">Πίσω</a>
+    }
+</div>

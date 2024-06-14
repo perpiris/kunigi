@@ -71,7 +71,7 @@ public class AccountController(UserManager<AppUser> userManager, SignInManager<A
     
     [HttpGet]
     [Authorize(Roles = "Admin")]
-    public IActionResult Management()
+    public IActionResult Manage()
     {
         return View();
     }

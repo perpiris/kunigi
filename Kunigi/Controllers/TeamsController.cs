@@ -138,7 +138,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
     
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
-    public async Task<IActionResult> Management(int pageIndex = 1)
+    public async Task<IActionResult> Manage(int pageIndex = 1)
     {
         var resultsCount = context.Teams.Count();
 
