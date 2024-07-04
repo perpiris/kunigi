@@ -63,28 +63,6 @@ public class GamesController(DataContext context, IMapper mapper, IWebHostEnviro
         }
 
         var extraErrors = false;
-        var itemList = await context.Games.ToListAsync();
-        var exists = itemList.Any(x => x.Year == viewModel.Year);
-        if (exists)
-        {
-            extraErrors = true;
-            ModelState.AddModelError("Year", "Έχει ήδη καταχωρηθεί παιχνίδι για αυτή τη χρονιά.");
-        }
-        else
-        {
-            ModelState.Remove("Year");
-        }
-        
-        exists = itemList.Any(x => x.Order == viewModel.Order);
-        if (exists)
-        {
-            extraErrors = true;
-            ModelState.AddModelError("Order", "Έχει ήδη καταχωρηθεί παιχνίδι για αυτή τη σειρά.");
-        }
-        else
-        {
-            ModelState.Remove("Order");
-        }
 
         if (viewModel.HostId <=0)
         {
@@ -114,10 +92,6 @@ public class GamesController(DataContext context, IMapper mapper, IWebHostEnviro
         
         context.Games.Add(new Game
         {
-            Year = viewModel.Year,
-            Order = viewModel.Order,
-            HostId = viewModel.HostId,
-            WinnerId = viewModel.WinnerId
         });
         await context.SaveChangesAsync();
 

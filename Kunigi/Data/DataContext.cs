@@ -14,15 +14,15 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
     {
         base.OnModelCreating(modelBuilder);
         
-        modelBuilder.Entity<Game>()
+        modelBuilder.Entity<Year>()
             .HasOne(g => g.Host)
-            .WithMany(t => t.HostedGames)
+            .WithMany(t => t.HostedYears)
             .HasForeignKey(g => g.HostId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        modelBuilder.Entity<Game>()
+        modelBuilder.Entity<Year>()
             .HasOne(g => g.Winner)
-            .WithMany(t => t.WonGames)
+            .WithMany(t => t.WonYears)
             .HasForeignKey(g => g.WinnerId)
             .OnDelete(DeleteBehavior.Cascade);
     }
