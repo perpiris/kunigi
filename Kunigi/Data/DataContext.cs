@@ -8,7 +8,9 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
 {
     public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<Team> Teams { get; set; }
+    public DbSet<Year> Years { get; set; }
     public DbSet<Game> Games { get; set; }
+    public DbSet<MediaFile> Files { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

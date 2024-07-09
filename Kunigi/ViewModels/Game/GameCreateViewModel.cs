@@ -9,10 +9,6 @@ public class GameCreateViewModel
     [DisplayName("Έτος διεξαγωγής")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
     public short Year { get; set; }
-
-    [DisplayName("Σειρά")]
-    [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
-    public short Order { get; set; }
     
     [DisplayName("Διοργανωτής")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
@@ -25,4 +21,9 @@ public class GameCreateViewModel
     public SelectList HostSelectList { get; set; }
     
     public SelectList WinnerSelectList { get; set; }
+    
+    public List<string> Options { get; set; } = ["Χωρός", "Σάββατο", "Κυριακή", "Διαδικτυακό"];
+
+    [DisplayName("Επιλογές")]
+    public List<string> SelectedOptions { get; set; } = [];
 }

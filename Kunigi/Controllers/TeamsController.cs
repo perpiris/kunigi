@@ -61,11 +61,19 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
             ModelState.AddModelError("Name", "Υπάρχει ήδη ομάδα με αυτό το όνομα.");
             return View();
         }
+        
+        var slug = SlugGenerator.GenerateSlug(viewModel.Name);
+        var wwwRootPath = webHostEnvironment.WebRootPath;
+        var imagePath = Path.Combine(wwwRootPath, "media", "teams", slug);
+        if (!Directory.Exists(imagePath))
+        {
+            Directory.CreateDirectory(imagePath);
+        }
 
         context.Teams.Add(new Team
         {
             Name = viewModel.Name,
-            Slug = SlugGenerator.GenerateSlug(viewModel.Name)
+            Slug = slug
         });
         await context.SaveChangesAsync();
 
