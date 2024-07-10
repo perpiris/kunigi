@@ -1,6 +1,9 @@
 ﻿@{
     ViewData["Title"] = "Δημιουργία Παιχνιδιού";
     @model GameCreateViewModel
+
+
+
 }
 
 <div class="text-center mb-3">
@@ -31,15 +34,14 @@
             </select>
             <span asp-validation-for="WinnerId" class="text-danger"></span>
         </div>
-        
+
         <div class="row form-group mb-3">
-            <label asp-for="SelectedOptions" class="form-label"></label>
-            @foreach (var option in Model.Options)
+            <label class="form-label">Επιλογές</label>
+            @foreach (var gameType in Model.GameTypes)
             {
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="SelectedOptions" value="@option" 
-                           @(Model.SelectedOptions.Contains(option) ? "checked" : "") />
-                    <label class="form-check-label">@option</label>
+                    <input class="form-check-input" type="checkbox" name="SelectedGameTypeIds" value="@gameType.Id"/>
+                    <label class="form-check-label">@gameType.Description</label>
                 </div>
             }
         </div>

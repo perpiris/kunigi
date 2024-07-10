@@ -3,9 +3,12 @@
 public class Game
 {
     public int Id { get; set; }
+    
+    public string Description { get; set; }
 
-    public string Category { get; set; }
+    public int GameTypeId { get; set; }
+    public virtual GameType GameType { get; set; }
 
-    public int YearId { get; set; }
-    public virtual Year Year { get; set; }
+    public int GameYearId { get; set; }
+    public virtual GameYear GameYear { get; set; }
 }

@@ -1,5 +1,6 @@
 ﻿using Kunigi.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kunigi.Data;
 
@@ -34,5 +35,26 @@ public abstract class SeedData
         {
             await userManager.AddToRoleAsync(user, "Admin");
         }
+    }
+    
+    public static async Task SeedGameTypes(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<DataContext>();
+        if (await context.GameTypes.AnyAsync()) return;
+        
+        var gameTypes = new List<GameType>
+        {
+            new() { Description = "Χωρός" },
+            new() { Description = "Σάββατο" },
+            new() { Description = "Κυριακή" },
+            new() { Description = "Διαδικτυακό" }
+        };
+
+        foreach (var gameType in gameTypes)
+        {
+            context.GameTypes.Add(gameType);
+        }
+
+        await context.SaveChangesAsync();
     }
 }

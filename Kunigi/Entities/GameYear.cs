@@ -2,16 +2,14 @@
 
 namespace Kunigi.Entities;
 
-public class Year
+public class GameYear
 {
-    public int YearId { get; set; }
+    public int Id { get; set; }
 
-    public short Value { get; set; }
+    public short Year { get; set; }
     
     [Column(TypeName = "varchar(255)")]
     public string Title { get; set; }
-    
-    public string Description { get; set; }
     
     [Column(TypeName = "varchar(255)")]
     public string Slug { get; set; }
@@ -24,4 +22,6 @@ public class Year
     
     public int WinnerId { get; set; }
     public virtual Team Winner { get; set; }
+    
+    public virtual ICollection<Game> Games { get; set; }
 }

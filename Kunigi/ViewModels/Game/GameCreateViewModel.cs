@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Kunigi.Data.Migrations;
+using Kunigi.Entities;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Kunigi.ViewModels.Game;
@@ -21,9 +23,9 @@ public class GameCreateViewModel
     public SelectList HostSelectList { get; set; }
     
     public SelectList WinnerSelectList { get; set; }
-    
-    public List<string> Options { get; set; } = ["Χωρός", "Σάββατο", "Κυριακή", "Διαδικτυακό"];
 
     [DisplayName("Επιλογές")]
-    public List<string> SelectedOptions { get; set; } = [];
+    public List<int> SelectedGameTypeIds { get; set; } = [];
+    
+    public List<GameType> GameTypes { get; set; } = [];
 }

@@ -3,6 +3,7 @@ using System;
 using Kunigi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kunigi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240710161817_year fix")]
+    partial class yearfix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.5");
@@ -87,36 +90,17 @@ namespace Kunigi.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Category")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("GameTypeId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int>("GameYearId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GameTypeId");
-
                     b.HasIndex("GameYearId");
 
                     b.ToTable("Games");
-                });
-
-            modelBuilder.Entity("Kunigi.Entities.GameType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("varchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("GameTypes");
                 });
 
             modelBuilder.Entity("Kunigi.Entities.GameYear", b =>
@@ -124,6 +108,9 @@ namespace Kunigi.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("HostId")
                         .HasColumnType("INTEGER");
@@ -334,19 +321,11 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.Game", b =>
                 {
-                    b.HasOne("Kunigi.Entities.GameType", "GameType")
-                        .WithMany()
-                        .HasForeignKey("GameTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Kunigi.Entities.GameYear", "GameYear")
-                        .WithMany("Games")
+                        .WithMany()
                         .HasForeignKey("GameYearId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("GameType");
 
                     b.Navigation("GameYear");
                 });
@@ -419,11 +398,6 @@ namespace Kunigi.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Kunigi.Entities.GameYear", b =>
-                {
-                    b.Navigation("Games");
                 });
 
             modelBuilder.Entity("Kunigi.Entities.Team", b =>

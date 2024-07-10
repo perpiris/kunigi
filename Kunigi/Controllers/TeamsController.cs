@@ -15,9 +15,9 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
     [HttpGet]
     public async Task<IActionResult> List(int pageIndex = 1)
     {
-        var resultsCount = context.Teams.Count();
+        var resultCount = context.Teams.Count();
 
-        var pageInfo = new PageInfo(resultsCount, pageIndex);
+        var pageInfo = new PageInfo(resultCount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
 
@@ -54,8 +54,8 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
     {
         if (!ModelState.IsValid) return View();
 
-        var itemList = await context.Teams.ToListAsync();
-        var exists = itemList.Any(x => x.Name.Equals(viewModel.Name, StringComparison.OrdinalIgnoreCase));
+        var teamList = await context.Teams.ToListAsync();
+        var exists = teamList.Any(x => x.Name.Equals(viewModel.Name, StringComparison.OrdinalIgnoreCase));
         if (exists)
         {
             ModelState.AddModelError("Name", "Υπάρχει ήδη ομάδα με αυτό το όνομα.");
@@ -106,22 +106,22 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
             return RedirectToAction("List");
         }
 
-        var selected = await context.Teams.SingleOrDefaultAsync(x => x.Id == viewModel.Id);
-        if (selected == null)
+        var team = await context.Teams.SingleOrDefaultAsync(x => x.Id == viewModel.Id);
+        if (team == null)
         {
             return RedirectToAction("List");
         }
 
-        selected.Facebook = viewModel.Facebook;
-        selected.Youtube = viewModel.Youtube;
-        selected.Instagram = viewModel.Instagram;
-        selected.Website = viewModel.Website;
+        team.Facebook = viewModel.Facebook;
+        team.Youtube = viewModel.Youtube;
+        team.Instagram = viewModel.Instagram;
+        team.Website = viewModel.Website;
 
         if (profileImage != null)
         {
             var wwwRootPath = webHostEnvironment.WebRootPath;
             var fileName = "profile" + Path.GetExtension(profileImage.FileName);
-            var productPath = $"images/{selected.Slug}/";
+            var productPath = $"images/{team.Slug}/";
             var finalPath = Path.Combine(wwwRootPath, productPath);
 
             if (!Directory.Exists(finalPath))
@@ -134,13 +134,13 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
                 await profileImage.CopyToAsync(fileStream);
             }
 
-            selected.ImageUrl = Path.Combine(productPath, fileName);
+            team.ImageUrl = Path.Combine(productPath, fileName);
         }
 
-        context.Teams.Update(selected);
+        context.Teams.Update(team);
         await context.SaveChangesAsync();
 
-        TempData["success"] = $"Η ομάδα {selected.Name} επεξεργάστηκε επιτυχώς.";
+        TempData["success"] = $"Η ομάδα {team.Name} επεξεργάστηκε επιτυχώς.";
         return RedirectToAction("List");
     }
     
@@ -148,9 +148,9 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
     [Authorize(Roles = "Admin,Moderator")]
     public async Task<IActionResult> Manage(int pageIndex = 1)
     {
-        var resultsCount = context.Teams.Count();
+        var resultcount = context.Teams.Count();
 
-        var pageInfo = new PageInfo(resultsCount, pageIndex);
+        var pageInfo = new PageInfo(resultcount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
 

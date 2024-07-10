@@ -4,7 +4,6 @@ using Kunigi.Data;
 using Kunigi.Entities;
 using Kunigi.Utilities;
 using Kunigi.ViewModels.Game;
-using Kunigi.ViewModels.Team;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -17,13 +16,13 @@ public class GamesController(DataContext context, IMapper mapper, IWebHostEnviro
     [HttpGet]
     public async Task<IActionResult> List(int pageIndex = 1)
     {
-        var resultsCount = context.Games.Count();
+        var resultCount = context.GameYears.Count();
 
-        var pageInfo = new PageInfo(resultsCount, pageIndex);
+        var pageInfo = new PageInfo(resultCount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
 
-        var viewModel = await context.Years.Skip(skip).Take(pageInfo.PageSize)
+        var viewModel = await context.GameYears.Skip(skip).Take(pageInfo.PageSize)
             .ProjectTo<GameDetailsViewModel>(mapper.ConfigurationProvider).OrderBy(x => x.Year).ToListAsync();
         return View(viewModel);
     }
@@ -36,7 +35,7 @@ public class GamesController(DataContext context, IMapper mapper, IWebHostEnviro
             return RedirectToAction("List");
         }
 
-        var viewModel = await context.Games.ProjectTo<GameDetailsViewModel>(mapper.ConfigurationProvider)
+        var viewModel = await context.GameYears.ProjectTo<GameDetailsViewModel>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(x => x.Id == id);
         if (viewModel != null) return View(viewModel);
 
@@ -91,16 +90,33 @@ public class GamesController(DataContext context, IMapper mapper, IWebHostEnviro
             return View(viewModel);
         }
 
-        var year = new Year
+        var gameYear = new GameYear
         {
-            Value = viewModel.Year,
+            Year = viewModel.Year,
             Slug = viewModel.Year.ToString(),
             WinnerId = viewModel.WinnerId,
             HostId = viewModel.HostId,
+            Games = new List<Game>()
         };
 
-        context.Years.Add(year);
+        foreach (var gameTypeId in viewModel.SelectedGameTypeIds)
+        {
+            gameYear.Games.Add(new Game
+            {
+                GameTypeId = gameTypeId
+            });
+        }
+
+        context.GameYears.Add(gameYear);
         await context.SaveChangesAsync();
+        
+        var slug = SlugGenerator.GenerateSlug(viewModel.Year.ToString());
+        var wwwRootPath = webHostEnvironment.WebRootPath;
+        var imagePath = Path.Combine(wwwRootPath, "media", "games", slug);
+        if (!Directory.Exists(imagePath))
+        {
+            Directory.CreateDirectory(imagePath);
+        }
 
         TempData["success"] = "Το παιχνίδι δημιουργήθηκε.";
         return RedirectToAction("List");
@@ -166,13 +182,13 @@ public class GamesController(DataContext context, IMapper mapper, IWebHostEnviro
     [Authorize(Roles = "Admin,Moderator")]
     public async Task<IActionResult> Manage(int pageIndex = 1)
     {
-        var resultsCount = context.Years.Count();
+        var resultsCount = context.GameYears.Count();
 
         var pageInfo = new PageInfo(resultsCount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
 
-        var viewModel = await context.Years.Skip(skip).Take(pageInfo.PageSize)
+        var viewModel = await context.GameYears.Skip(skip).Take(pageInfo.PageSize)
             .ProjectTo<GameDetailsViewModel>(mapper.ConfigurationProvider).ToListAsync();
         return View(viewModel);
     }
@@ -180,9 +196,12 @@ public class GamesController(DataContext context, IMapper mapper, IWebHostEnviro
     private async Task PrepareViewModel(GameCreateViewModel viewModel)
     {
         var teamList = await context.Teams.ToListAsync();
+        var gameTypes = await context.GameTypes.ToListAsync();
         teamList.Insert(0, new Team { Id = 0, Name = "Επιλέξτε..." });
 
         viewModel.HostSelectList = new SelectList(teamList, "Id", "Name", 0);
         viewModel.WinnerSelectList = new SelectList(teamList, "Id", "Name", 0);
+        
+        viewModel.GameTypes = gameTypes;
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Kunigi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kunigi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240710170302_game types")]
+    partial class gametypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.5");
@@ -87,9 +90,6 @@ namespace Kunigi.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("GameTypeId")
                         .HasColumnType("INTEGER");
 
@@ -124,6 +124,9 @@ namespace Kunigi.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("HostId")
                         .HasColumnType("INTEGER");
@@ -341,7 +344,7 @@ namespace Kunigi.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("Kunigi.Entities.GameYear", "GameYear")
-                        .WithMany("Games")
+                        .WithMany()
                         .HasForeignKey("GameYearId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -419,11 +422,6 @@ namespace Kunigi.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Kunigi.Entities.GameYear", b =>
-                {
-                    b.Navigation("Games");
                 });
 
             modelBuilder.Entity("Kunigi.Entities.Team", b =>

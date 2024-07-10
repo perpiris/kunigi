@@ -26,7 +26,8 @@ else
                         <img src="~/@item.ImageUrl" class="card-img-top" alt="Game Image">
                     }
                     <div class="card-body">
-                        <h5 class="card-title">@item.Title</h5>
+                        <h3 class="card-title">@item.Title</h3>
+                        <h5 class="card-title">@item.Year</h5>
                         <a class="card-link" asp-controller="Games" asp-action="Details" asp-route-id="@item.Id">Πληροφορίες</a>
                     </div>
                 </div>

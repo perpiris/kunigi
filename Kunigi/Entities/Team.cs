@@ -28,7 +28,7 @@ public class Team
     
     public string ImageUrl { get; set; }
     
-    public virtual ICollection<Year> HostedYears { get; set; }
+    public virtual ICollection<GameYear> HostedYears { get; set; }
     
-    public virtual ICollection<Year> WonYears { get; set; }
+    public virtual ICollection<GameYear> WonYears { get; set; }
 }

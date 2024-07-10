@@ -53,6 +53,7 @@ try
 {
     await SeedData.SeedRoles(services);
     await SeedData.SeedMainAdmin(services);
+    await SeedData.SeedGameTypes(services);
 }
 catch (Exception ex)
 {

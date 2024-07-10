@@ -12,7 +12,7 @@ public class GameDetailsViewModel
 
     public string Host { get; set; }
     
-    public string Description { get; set; }
-    
     public string ImageUrl { get; set; }
+    
+    public List<SubGameDetailsViewModel> SubGamesList { get; set; }
 }
