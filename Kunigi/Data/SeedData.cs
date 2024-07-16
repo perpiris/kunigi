@@ -47,7 +47,9 @@ public abstract class SeedData
             new() { Description = "Χωρός" },
             new() { Description = "Σάββατο" },
             new() { Description = "Κυριακή" },
-            new() { Description = "Διαδικτυακό" }
+            new() { Description = "Διαδικτυακό" },
+            new() { Description = "Παιδικό" },
+            new() { Description = "Εφηβικό" }
         };
 
         foreach (var gameType in gameTypes)

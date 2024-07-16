@@ -78,7 +78,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
         await context.SaveChangesAsync();
 
         TempData["success"] = "Η ομάδα δημιουργήθηκε.";
-        return RedirectToAction("List");
+        return RedirectToAction("Manage");
     }
 
     [HttpGet]
@@ -87,14 +87,14 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
     {
         if (id <= 0)
         {
-            return RedirectToAction("List");
+            return RedirectToAction("Manage");
         }
 
         var viewModel = await context.Teams.ProjectTo<TeamEditViewModel>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync(x => x.Id == id);
         if (viewModel != null) return View(viewModel);
 
-        return RedirectToAction("List");
+        return RedirectToAction("Manage");
     }
 
     [HttpPost]
@@ -103,13 +103,13 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
     {
         if (viewModel.Id <= 0)
         {
-            return RedirectToAction("List");
+            return RedirectToAction("Manage");
         }
 
         var team = await context.Teams.SingleOrDefaultAsync(x => x.Id == viewModel.Id);
         if (team == null)
         {
-            return RedirectToAction("List");
+            return RedirectToAction("Manage");
         }
 
         team.Facebook = viewModel.Facebook;
@@ -141,7 +141,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
         await context.SaveChangesAsync();
 
         TempData["success"] = $"Η ομάδα {team.Name} επεξεργάστηκε επιτυχώς.";
-        return RedirectToAction("List");
+        return RedirectToAction("Manage");
     }
     
     [HttpGet]

@@ -22,27 +22,26 @@
 }
 else
 {
-    <div class="row row-cols-1 row-cols-md-4 g-4">
-        @foreach (var item in Model)
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Όνομα</th>
+            <th>Ενέργειες</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var team in Model)
         {
-            <div class="col">
-                <div class="card">
-                    @if (string.IsNullOrEmpty(item.ImageUrl))
-                    {
-                        <img src="~/media/profile.jpg" class="card-img-top" alt="Default Team Image">
-                    }
-                    else
-                    {
-                        <img src="~/@item.ImageUrl" class="card-img-top" alt="Team Image">
-                    }
-                    <div class="card-body">
-                        <h5 class="card-title">@item.Name</h5>
-                        <a class="card-link" asp-controller="Teams" asp-action="Details" asp-route-id="@item.Id">Πληροφορίες</a>
-                    </div>
-                </div>
-            </div>
+            <tr>
+                <td>@team.Name</td>
+                <td>
+                    <a href="@Url.Action("Details", "Teams", new { id = team.Id })" class="btn btn-info">Προβολή</a>
+                    <a href="@Url.Action("Edit", "Teams", new { id = team.Id })" class="btn btn-primary">Επεξεργασία</a>
+                </td>
+            </tr>
         }
-    </div>
+        </tbody>
+    </table>
 
     <ul class="pagination justify-content-center mt-5">
         @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)

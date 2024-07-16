@@ -4,7 +4,11 @@
     ViewData["Title"] = "Εγγραφή";
 }
 
-<form asp-action="Register" method="post" style="max-width: 400px; margin: auto">
+<h2 style="text-align: center">Εγγραφή νέου χρήστη.Μόνο για διαχειρηστές ομάδων.</h2>
+<h3 style="text-align: center">Προσοχή - Μόνο για διαχειρηστές ομάδων.</h3>
+<hr/>
+
+<form asp-action="Register" method="post" style="max-width: 400px; margin: auto" class="mt-2" autocomplete="off">
     <div class="form-group mb-3">
         <label asp-for="UserName" class="mt-4"></label>
         <input asp-for="UserName" class="form-control" />

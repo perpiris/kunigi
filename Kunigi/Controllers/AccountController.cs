@@ -41,16 +41,19 @@ public class AccountController(UserManager<AppUser> userManager, SignInManager<A
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin")]
     public IActionResult Register()
     {
         return View();
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
+        if (User.Identity is { IsAuthenticated: true })
+        {
+            return RedirectToAction("Index", "Home");
+        }
+        
         if (!ModelState.IsValid) return View(model);
         var user = new AppUser { UserName = model.Email, Email = model.Email };
         var result = await userManager.CreateAsync(user, model.Password);

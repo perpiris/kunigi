@@ -4,7 +4,10 @@
     ViewData["Title"] = "Σύνδεση";
 }
 
-<form asp-action="Login" method="post" style="max-width: 400px; margin: auto">
+<h2 style="text-align: center">Σύνδεση</h2>
+<hr/>
+
+<form asp-action="Login" method="post" style="max-width: 400px; margin: auto" class="mt-2" autocomplete="off">
     <div class="form-group mb-2">
         <label asp-for="Email"></label>
         <input asp-for="Email" class="form-control"/>

@@ -30,20 +30,22 @@
     <div class="col-md-8">
         <h1 class="mb-4">@Model.Title</h1>
 
-        <div class="accordion" id="games-list">
-            @foreach (var game in Model.SubGamesList)
+        <ul class="nav nav-tabs" role="tablist">
+            @for (var i = 0; i < Model.SubGamesList.Count; i++)
             {
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="sub-game-heading-@game.Id">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sub-game-collapse-@game.Id" aria-expanded="false" aria-controls="sub-game-collapse-@game.Id">
-                            @game.GameType
-                        </button>
-                    </h2>
-                    <div id="sub-game-collapse-@game.Id" class="accordion-collapse collapse" aria-labelledby="sub-game-heading-@game.Id" data-bs-parent="#games-list" style="">
-                        <div class="accordion-body">
-                            @game.Description
-                        </div>
-                    </div>
+                var element = Model.SubGamesList.ElementAt(i);
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" data-bs-toggle="tab" href="#@element.Id" aria-selected="true" role="tab">@element.GameType</a>
+                </li>
+            }
+        </ul>
+
+        <div id="myTabContent" class="tab-content">
+            @for (var i = 0; i < Model.SubGamesList.Count; i++)
+            {
+                var element = Model.SubGamesList.ElementAt(i);
+                <div class="tab-pane" id="@element.Id" role="tabpanel">
+                    <p>@element.Description</p>
                 </div>
             }
         </div>
