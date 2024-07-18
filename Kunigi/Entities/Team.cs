@@ -31,4 +31,6 @@ public class Team
     public virtual ICollection<GameYear> HostedYears { get; set; }
     
     public virtual ICollection<GameYear> WonYears { get; set; }
+    
+    public virtual ICollection<AppUser> Managers { get; set; }
 }

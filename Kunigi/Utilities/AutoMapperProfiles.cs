@@ -9,7 +9,9 @@ public class AutoMapperProfiles : Profile
 {
     public AutoMapperProfiles()
     {
-        CreateMap<Team, TeamDetailsViewModel>();
+        CreateMap<Team, TeamDetailsViewModel>()
+            .ForMember(dest => dest.ManagerList, opt => opt.MapFrom(src => src.Managers));
+
         CreateMap<Team, TeamEditViewModel>();
 
         CreateMap<Game, SubGameDetailsViewModel>()
@@ -19,5 +21,7 @@ public class AutoMapperProfiles : Profile
             .ForMember(x => x.Host, y => y.MapFrom(z => z.Host.Name))
             .ForMember(x => x.Winner, y => y.MapFrom(z => z.Winner.Name));
         CreateMap<Game, GameEditViewModel>();
+
+        CreateMap<AppUser, TeamManagerViewModel>();
     }
 }

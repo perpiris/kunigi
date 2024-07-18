@@ -37,6 +37,7 @@ else
                 <td>
                     <a href="@Url.Action("Details", "Teams", new { id = team.Id })" class="btn btn-info">Προβολή</a>
                     <a href="@Url.Action("Edit", "Teams", new { id = team.Id })" class="btn btn-primary">Επεξεργασία</a>
+                    <a href="@Url.Action("EditManagers", "Teams", new { id = team.Id })" class="btn btn-primary">Επεξεργασία Διαχειριστών</a>
                 </td>
             </tr>
         }

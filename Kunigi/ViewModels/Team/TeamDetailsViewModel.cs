@@ -1,4 +1,8 @@
-﻿namespace Kunigi.ViewModels.Team;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace Kunigi.ViewModels.Team;
 
 public class TeamDetailsViewModel
 {
@@ -19,4 +23,12 @@ public class TeamDetailsViewModel
     public string Instagram { get; set; }
     
     public string ImageUrl { get; set; }
+    
+    public IEnumerable<TeamManagerViewModel> ManagerList { get; set; }
+    
+    [DisplayName("Διαχειριστής")]
+    [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
+    public string ManagerId { get; set; }
+    
+    public SelectList ManagerSelectList { get; set; }
 }

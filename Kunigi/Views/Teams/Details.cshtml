@@ -1,4 +1,5 @@
-﻿@model TeamDetailsViewModel
+﻿@using System.Security.Claims
+@model TeamDetailsViewModel
 
 @{
     ViewData["Title"] = Model.Name;
@@ -17,6 +18,10 @@
     </div>
     <div class="col-md-8">
         <h1 class="mb-4">@Model.Name</h1>
+        @if (User.IsInRole("Admin") || User.IsInRole("Editor") || Model.ManagerList.Any(m => m.Id == User.FindFirstValue(ClaimTypes.NameIdentifier)))
+        {
+            <a href="@Url.Action("Edit", "Teams", new { id = Model.Id })" class="btn btn-primary mt-3">Edit Team</a>
+        }
         <div>
             <p>
                 <strong>Description:</strong> @Model.Description

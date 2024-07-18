@@ -11,6 +11,7 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
     public DbSet<GameYear> GameYears { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<GameType> GameTypes { get; set; }
+    public DbSet<TeamManager> TeamManagers { get; set; }
     public DbSet<MediaFile> Files { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)

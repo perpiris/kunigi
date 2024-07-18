@@ -6,6 +6,7 @@ using Kunigi.Utilities;
 using Kunigi.ViewModels.Team;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kunigi.Controllers;
@@ -153,9 +154,141 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
         var pageInfo = new PageInfo(resultcount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
-
         var viewModel = await context.Teams.Skip(skip).Take(pageInfo.PageSize)
             .ProjectTo<TeamDetailsViewModel>(mapper.ConfigurationProvider).ToListAsync();
         return View(viewModel);
     }
+    
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> EditManagers(int id)
+    {
+        if (id <= 0)
+        {
+            return RedirectToAction("List");
+        }
+
+        var team = await context.Teams
+            .Include(t => t.Managers)
+            .SingleOrDefaultAsync(t => t.Id == id);
+
+        if (team == null)
+        {
+            return RedirectToAction("Manage");
+        }
+
+        var users = await context.AppUsers.ToListAsync();
+        var viewModel = mapper.Map<TeamDetailsViewModel>(team);
+        var managerSelectList = new List<SelectListItem>
+        {
+            new() { Value = "", Text = "Επιλέξτε" }
+        };
+
+        managerSelectList.AddRange(users.Select(u => new SelectListItem
+        {
+            Value = u.Id.ToString(),
+            Text = u.Email
+        }));
+        viewModel.ManagerSelectList = new SelectList(managerSelectList, "Value", "Text");
+        
+        viewModel.ManagerList = team.Managers.Select(m => new TeamManagerViewModel
+        {
+            Id = m.Id,
+            Email = m.Email
+        }).ToList();
+
+        return View(viewModel);
+    }
+    
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> EditManagers(TeamDetailsViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            var team = await context.Teams
+                .Include(t => t.Managers)
+                .SingleOrDefaultAsync(t => t.Id == viewModel.Id);
+
+            if (team == null)
+            {
+                return RedirectToAction("Manage");
+            }
+
+            var users = await context.AppUsers.ToListAsync();
+            viewModel.ManagerSelectList = new SelectList(users.Select(u => new SelectListItem
+            {
+                Value = u.Id.ToString(),
+                Text = u.Email
+            }).ToList(), "Value", "Text");
+
+            viewModel.ManagerList = team.Managers.Select(m => new TeamManagerViewModel
+            {
+                Id = m.Id,
+                Email = m.Email
+            }).ToList();
+
+            return View(viewModel);
+        }
+
+        var teamToUpdate = await context.Teams
+            .Include(t => t.Managers)
+            .SingleOrDefaultAsync(t => t.Id == viewModel.Id);
+
+        if (teamToUpdate == null)
+        {
+            return RedirectToAction("Manage");
+        }
+
+        var selectedManager = await context.AppUsers
+            .SingleOrDefaultAsync(u => u.Id == viewModel.ManagerId);
+
+        if (selectedManager != null)
+        {
+            if (teamToUpdate.Managers.All(m => m.Id != selectedManager.Id))
+            {
+                teamToUpdate.Managers.Add(selectedManager);
+            }
+            else
+            {
+                TempData["error"] = "This user is already a manager.";
+            }
+        }
+    
+        await context.SaveChangesAsync();
+
+        TempData["success"] = "The manager list has been updated.";
+        return RedirectToAction("EditManagers", new { id = viewModel.Id });
+    }
+
+    
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RemoveManager(int teamId, string managerId)
+    {
+        var team = await context.Teams
+            .Include(t => t.Managers)
+            .SingleOrDefaultAsync(t => t.Id == teamId);
+
+        if (team == null)
+        {
+            return RedirectToAction("Manage");
+        }
+    
+        var managerToRemove = team.Managers.SingleOrDefault(m => m.Id == managerId);
+        if (managerToRemove != null)
+        {
+            team.Managers.Remove(managerToRemove);
+            await context.SaveChangesAsync();
+
+            TempData["success"] = "The manager has been removed.";
+        }
+        else
+        {
+            TempData["error"] = "The manager was not found.";
+        }
+
+        return RedirectToAction("EditManagers", new { id = teamId });
+    }
+
 }

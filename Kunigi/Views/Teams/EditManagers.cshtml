@@ -1,0 +1,38 @@
+﻿@model TeamDetailsViewModel
+
+@{
+    ViewData["Title"] = "Edit Team Members";
+}
+
+<h2>Edit Team Members</h2>
+
+<div style="max-width: 450px; margin: auto">
+    @using (Html.BeginForm("EditManagers", "Teams", FormMethod.Post))
+    {
+        <div class="row form-group mb-3">
+            <label asp-for="ManagerId" class="form-label"></label>
+            <select asp-for="ManagerId" asp-items="Model.ManagerSelectList" class="form-select">
+
+            </select>
+            <span asp-validation-for="ManagerId" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Manager</button>
+        <a asp-controller="Teams" asp-action="Manage" class="btn btn-secondary">Back</a>
+    }
+</div>
+
+<ul>
+    @foreach (var item in Model.ManagerList)
+    {
+        <li>
+            @item.Email
+            @using (Html.BeginForm("RemoveManager", "Teams", FormMethod.Post))
+            {
+                <input type="hidden" name="teamId" value="@Model.Id"/>
+                <input type="hidden" name="managerId" value="@item.Id"/>
+                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+            }
+        </li>
+    }
+</ul>
