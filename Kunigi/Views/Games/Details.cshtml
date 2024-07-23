@@ -1,12 +1,11 @@
-﻿@using Microsoft.EntityFrameworkCore.Metadata.Internal
-@model GameDetailsViewModel
+﻿@model GameDetailsViewModel
 
 @{
     ViewData["Title"] = Model.Title;
 }
 
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-3">
         @if (string.IsNullOrEmpty(Model.ImageUrl))
         {
             <img src="~/media/profile.jpg" class="img-fluid" alt="Default Team Image">
@@ -27,7 +26,7 @@
             </p>
         </div>
     </div>
-    <div class="col-md-8">
+    <div class="col-md-9">
         <h1 class="mb-4">@Model.Title</h1>
 
         <ul class="nav nav-tabs" role="tablist">

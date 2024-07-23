@@ -1,6 +1,6 @@
-using System.Diagnostics;
 using Kunigi.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Activity = System.Diagnostics.Activity;
 
 namespace Kunigi.Controllers;
 
