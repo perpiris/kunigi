@@ -4,15 +4,16 @@
     ViewData["Title"] = "Edit Team Members";
 }
 
-<h2>Edit Team Members</h2>
+<h2>Διαχειριστές @Model.Name</h2>
 
 <div style="max-width: 450px; margin: auto">
     @using (Html.BeginForm("EditManagers", "Teams", FormMethod.Post))
     {
         <div class="row form-group mb-3">
             <label asp-for="ManagerId" class="form-label"></label>
-            <select asp-for="ManagerId" asp-items="Model.ManagerSelectList" class="form-select">
-
+            <!-- Input field for filtering -->
+            <input type="text" id="filterInput" placeholder="Φίλτρο" class="form-control"/>
+            <select asp-for="ManagerId" asp-items="Model.ManagerSelectList" class="form-select" id="managerSelect">
             </select>
             <span asp-validation-for="ManagerId" class="text-danger"></span>
         </div>

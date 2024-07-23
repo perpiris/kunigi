@@ -3,3 +3,19 @@
   height: 15vw;
   object-fit: fill;
 }
+
+#options-container {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  z-index: 100;
+}
+
+#options-container div {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+#options-container div:hover {
+  background-color: #f0f0f0;
+}

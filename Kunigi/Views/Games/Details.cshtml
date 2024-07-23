@@ -31,23 +31,26 @@
         <h1 class="mb-4">@Model.Title</h1>
 
         <ul class="nav nav-tabs" role="tablist">
-            @for (var i = 0; i < Model.SubGamesList.Count; i++)
+            @for (int i = 0; i < Model.SubGamesList.Count; i++)
             {
+                var isActive = i == 0 ? "active" : ""; // Make the first tab active by default
                 var element = Model.SubGamesList.ElementAt(i);
+
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link" data-bs-toggle="tab" href="#@element.Id" aria-selected="true" role="tab">@element.GameType</a>
+                    <a class="nav-link @(isActive)" data-bs-toggle="tab" href="#@element.Id" aria-selected="@(isActive == "active" ? "true" : "false")" role="tab">@element.GameType</a>
                 </li>
             }
         </ul>
-
         <div id="myTabContent" class="tab-content">
-            @for (var i = 0; i < Model.SubGamesList.Count; i++)
+            @for (int i = 0; i < Model.SubGamesList.Count; i++)
             {
                 var element = Model.SubGamesList.ElementAt(i);
-                <div class="tab-pane" id="@element.Id" role="tabpanel">
+                <div class="tab-pane fade @(i == 0 ? "show active" : "")" id="@element.Id" role="tabpanel">
                     <p>@element.Description</p>
                 </div>
             }
         </div>
+
+
     </div>
 </div>

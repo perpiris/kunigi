@@ -208,6 +208,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
         {
             var team = await context.Teams
                 .Include(t => t.Managers)
+                
                 .SingleOrDefaultAsync(t => t.Id == viewModel.Id);
 
             if (team == null)

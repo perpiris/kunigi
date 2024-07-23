@@ -1,4 +1,14 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿document.addEventListener('DOMContentLoaded', function() {
+    const filterInput = document.getElementById('filterInput');
+    const managerSelect = document.getElementById('managerSelect');
 
-// Write your JavaScript code.
+    filterInput.addEventListener('input', function() {
+        const filterValue = filterInput.value.toLowerCase();
+        const options = Array.from(managerSelect.options);
+
+        options.forEach(option => {
+            const optionText = option.text.toLowerCase();
+            option.style.display = optionText.includes(filterValue) ? '' : 'none';
+        });
+    });
+});
