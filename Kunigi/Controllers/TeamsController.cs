@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 using Kunigi.Data;
 using Kunigi.Entities;
 using Kunigi.Utilities;
+using Kunigi.ViewModels.GameYear;
 using Kunigi.ViewModels.Team;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,11 +36,20 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
             return RedirectToAction("List");
         }
 
-        var viewModel = await context.Teams.ProjectTo<TeamDetailsViewModel>(mapper.ConfigurationProvider)
-            .SingleOrDefaultAsync(x => x.Id == id);
-        if (viewModel != null) return View(viewModel);
+        var teamDetails = await context
+            .Teams
+            .Include(x => x.HostedYears.OrderBy(y => y.Year))
+            .Include(x => x.WonYears.OrderBy(y => y.Year))
+            .FirstOrDefaultAsync(x => x.Id == id);
 
-        return RedirectToAction("List");
+        if (teamDetails is null)
+        {
+            TempData["error"] = "Η ομάδα δεν υπάρχει.";
+            return RedirectToAction("List");
+        }
+
+        var viewModel = GetMappedDetailsViewModel(teamDetails);
+        return View(viewModel);
     }
 
     [HttpGet]
@@ -74,6 +84,12 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
         context.Teams.Add(new Team
         {
             Name = viewModel.Name,
+            Description = viewModel.Description,
+            ProfileImageUrl = viewModel.ProfileImageUrl,
+            Facebook = viewModel.Facebook,
+            Youtube = viewModel.Youtube,
+            Instagram = viewModel.Instagram,
+            Website = viewModel.Website,
             Slug = slug
         });
         await context.SaveChangesAsync();
@@ -113,6 +129,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
             return RedirectToAction("Manage");
         }
 
+        team.Description = viewModel.Description;
         team.Facebook = viewModel.Facebook;
         team.Youtube = viewModel.Youtube;
         team.Instagram = viewModel.Instagram;
@@ -135,7 +152,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
                 await profileImage.CopyToAsync(fileStream);
             }
 
-            team.ImageUrl = Path.Combine(productPath, fileName);
+            team.ProfileImageUrl = Path.Combine(productPath, fileName);
         }
 
         context.Teams.Update(team);
@@ -292,4 +309,41 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
         return RedirectToAction("EditManagers", new { id = teamId });
     }
 
+    private static TeamDetailsViewModel GetMappedDetailsViewModel(Team teamDetails)
+    {
+        var viewModel = new TeamDetailsViewModel
+        {
+            Name = teamDetails.Name,
+            Description = teamDetails.Description,
+            ProfileImageUrl = teamDetails.ProfileImageUrl,
+            Facebook = teamDetails.Facebook,
+            Youtube = teamDetails.Youtube,
+            Instagram = teamDetails.Instagram,
+            Website = teamDetails.Website,
+            GamesWon = [],
+            GamesHosted = []
+        };
+
+        foreach (var year in teamDetails.WonYears)
+        {
+            viewModel.GamesWon.Add(new GameYearDetailsViewModel
+            {
+                Id = year.Id,
+                Title = year.Title,
+                Year = year.Year
+            });
+        }
+        
+        foreach (var year in teamDetails.HostedYears)
+        {
+            viewModel.GamesHosted.Add(new GameYearDetailsViewModel
+            {
+                Id = year.Id,
+                Title = year.Title,
+                Year = year.Year
+            });
+        }
+
+        return viewModel;
+    }
 }

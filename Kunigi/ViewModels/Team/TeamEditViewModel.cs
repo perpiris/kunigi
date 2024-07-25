@@ -22,5 +22,5 @@ public class TeamEditViewModel
     public string Instagram { get; set; }
     
     [DisplayName("Φωτογραφία")]
-    public string ImageUrl { get; set; }
+    public string ProfileImageUrl { get; set; }
 }

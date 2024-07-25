@@ -1,55 +1,148 @@
-﻿@using System.Security.Claims
-@model TeamDetailsViewModel
+﻿@model TeamDetailsViewModel
 
 @{
     ViewData["Title"] = Model.Name;
 }
 
-<div class="row">
-    <div class="col-md-3">
-        @if (string.IsNullOrEmpty(Model.ImageUrl))
-        {
-            <img src="~/media/profile.jpg" class="img-fluid" alt="Default Team Image">
-        }
-        else
-        {
-            <img src="~/@Model.ImageUrl" class="img-fluid" alt="Team Image">
-        }
-    </div>
-    <div class="col-md-9">
-        <h1 class="mb-4">@Model.Name</h1>
-        @if (User.IsInRole("Admin") || User.IsInRole("Editor") || Model.ManagerList.Any(m => m.Id == User.FindFirstValue(ClaimTypes.NameIdentifier)))
-        {
-            <a href="@Url.Action("Edit", "Teams", new { id = Model.Id })" class="btn btn-primary mt-3">Edit Team</a>
-        }
-        <div>
-            <p>
-                <strong>Description:</strong> @Model.Description
-            </p>
-            @if (!string.IsNullOrEmpty(Model.Website))
-            {
-                <p>
-                    <strong>Website:</strong> <a href="@Model.Website">@Model.Website</a>
-                </p>
-            }
-            @if (!string.IsNullOrEmpty(Model.Facebook))
-            {
-                <p>
-                    <strong>Facebook:</strong> <a href="@Model.Facebook">@Model.Facebook</a>
-                </p>
-            }
-            @if (!string.IsNullOrEmpty(Model.Youtube))
-            {
-                <p>
-                    <strong>Youtube:</strong> <a href="@Model.Youtube">@Model.Youtube</a>
-                </p>
-            }
-            @if (!string.IsNullOrEmpty(Model.Instagram))
-            {
-                <p>
-                    <strong>Instagram:</strong> <a href="@Model.Instagram">@Model.Instagram</a>
-                </p>
-            }
+<section>
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
+                <h2 class="mb-4 display-5 text-center">@Model.Name</h2>
+            </div>
         </div>
     </div>
-</div>
+
+    <div class="container">
+        <div class="row gy-4 gy-lg-0">
+            <div class="col-12 col-lg-4 col-xl-3">
+                <div class="row gy-4">
+                    <div class="col-12">
+                        <div class="card widget-card border-light shadow-sm">
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    @if (string.IsNullOrEmpty(Model.ProfileImageUrl))
+                                    {
+                                        <img src="~/media/profile.jpg" class="img-fluid" alt="Default Team Image">
+                                    }
+                                    else
+                                    {
+                                        <img src="~/@Model.ProfileImageUrl" class="img-fluid" alt="Team Image">
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card widget-card border-light shadow-sm">
+                            <div class="card-header text-bg-primary">Σύνδεσμοι</div>
+                            <div class="card-body">
+
+                                @if (!string.IsNullOrEmpty(Model.Website))
+                                {
+                                    <a href="@Model.Website" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                        <i class="bi bi-globe"></i>
+                                    </a>
+                                }
+
+                                @if (!string.IsNullOrEmpty(Model.Facebook))
+                                {
+                                    <a href="@Model.Facebook" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                        <i class="bi bi-facebook"></i>
+                                    </a>
+                                }
+
+                                @if (!string.IsNullOrEmpty(Model.Youtube))
+                                {
+                                    <a href="@Model.Youtube" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                        <i class="bi bi-youtube"></i>
+                                    </a>
+                                }
+
+                                @if (!string.IsNullOrEmpty(Model.Instagram))
+                                {
+                                    <a href="@Model.Instagram" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                        <i class="bi bi-instagram"></i>
+                                    </a>
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-8 col-xl-9">
+                <div class="card widget-card border-light shadow-sm">
+                    <div class="card-body p-4">
+                        <ul class="nav nav-tabs" id="profileTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-tab-pane" type="button" role="tab" aria-controls="overview-tab-pane" aria-selected="true">Πληροφορίες</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos-tab-pane" type="button" role="tab" aria-controls="photos-tab-pane" aria-selected="true">Υλικό</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-4" id="profileTabContent">
+                            <div class="tab-pane show active" id="overview-tab-pane" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
+                                <p class="lead mb-3">@Model.Description</p>
+                                <div class="row g-0">
+                                    <div class="col-5 col-md-3 bg-light border-bottom border-white border-3">
+                                        <div class="p-2">Νίκες</div>
+                                    </div>
+                                    <div
+                                        class="col-7 col-md-9 bg-light border-start border-bottom border-white border-3">
+                                        <div class="p-2">
+
+                                            @if (Model.GamesWon.Any())
+                                            {
+                                                <ul>
+                                                    @foreach (var game in Model.GamesWon)
+                                                    {
+                                                        <li>
+                                                            <a type="button" class="btn btn-link" asp-controller="Games" asp-action="Details" asp-route-id="@game.Id">@game.GetFullTitle()</a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <span>Καμία</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-5 col-md-3 bg-light border-bottom border-white border-3">
+                                        <div class="p-2">Διοργανώσεις</div>
+                                    </div>
+                                    <div
+                                        class="col-7 col-md-9 bg-light border-start border-bottom border-white border-3">
+                                        <div class="p-2">
+                                            @if (Model.GamesHosted.Any())
+                                            {
+                                                <ul>
+                                                    @foreach (var game in Model.GamesHosted)
+                                                    {
+                                                        <li>
+                                                            <a type="button" class="btn btn-link" asp-controller="Games" asp-action="Details" asp-route-id="@game.Id">@game.GetFullTitle()</a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <span>Κανένα</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="photos-tab-pane" role="tabpanel" aria-labelledby="photos-tab" tabindex="0">
+                                <p class="lead mb-3">photos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>

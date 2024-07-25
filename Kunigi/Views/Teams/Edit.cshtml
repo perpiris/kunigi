@@ -1,45 +1,68 @@
 ﻿@model TeamEditViewModel
 
-@{
-    ViewData["Title"] = Model.Name;
-}
+<section>
 
-<div class="text-center">
-    <h2>@Model.Name</h2>
-</div>
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
+                <h2 class="mb-4 display-5 text-center">@Model.Name</h2>
+            </div>
+        </div>
+    </div>
 
-<div style="max-width: 450px; margin: auto">
-    <form method="post" enctype="multipart/form-data">
-        <div class="row form-group mb-3">
-            <label asp-for="Facebook" class="form-label"></label>
-            <input asp-for="Facebook" class="form-control"/>
-            <span asp-validation-for="Facebook" class="text-danger"></span>
+    <div class="container">
+        <div class="row justify-content-lg-center">
+            <div class="col-12 col-lg-9">
+                <div class="bg-white border rounded shadow-sm overflow-hidden">
+
+                    @using (Html.BeginForm("Edit", "Teams", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        <div class="row gy-4 gy-xl-5 p-4 p-xl-5">
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Name" class="form-label mt-4"></label>
+                                <input asp-for="Name" class="form-control @(ViewData.ModelState["Name"] != null ? "is-invalid" : "")"/>
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label asp-for="ProfileImageUrl" class="form-label mt-4"></label>
+                                <input type="file" name="profileImage" class="form-control" accept="image/png, image/jpeg"/>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Facebook" class="form-label"></label>
+                                <input asp-for="Facebook" class="form-control"/>
+                                <span asp-validation-for="Facebook" class="text-danger"></span>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Instagram" class="form-label"></label>
+                                <input asp-for="Instagram" class="form-control"/>
+                                <span asp-validation-for="Instagram" class="text-danger"></span>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Youtube" class="form-label"></label>
+                                <input asp-for="Youtube" class="form-control"/>
+                                <span asp-validation-for="Youtube" class="text-danger"></span>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label asp-for="Website" class="form-label"></label>
+                                <input asp-for="Website" class="form-control"/>
+                                <span asp-validation-for="Website" class="text-danger"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Description" class="form-label"></label>
+                                <textarea asp-for="Description" class="form-control" rows="6"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+                                    <a asp-controller="Teams" asp-action="List" class="btn btn-secondary">Πίσω</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
         </div>
-        
-        <div class="row form-group mb-3">
-            <label asp-for="Instagram" class="form-label"></label>
-            <input asp-for="Instagram" class="form-control"/>
-            <span asp-validation-for="Instagram" class="text-danger"></span>
-        </div>
-        
-        <div class="row form-group mb-3">
-            <label asp-for="Youtube" class="form-label"></label>
-            <input asp-for="Youtube" class="form-control"/>
-            <span asp-validation-for="Youtube" class="text-danger"></span>
-        </div>
-        
-        <div class="row form-group mb-3">
-            <label asp-for="Website" class="form-label"></label>
-            <input asp-for="Website" class="form-control"/>
-            <span asp-validation-for="Website" class="text-danger"></span>
-        </div>
-        
-        <div class="row form-group mb-3">
-            <label asp-for="ImageUrl"></label>
-            <input type="file" name="profileImage" class="form-control" accept="image/png, image/jpeg"/>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Αποθήκευση</button>
-        <a asp-controller="Teams" asp-action="List" class="btn btn-secondary">Άκυρο</a>
-    </form>
-</div>
+    </div>
+</section>

@@ -6,9 +6,7 @@
 
 @if (Model == null || Model.Count == 0)
 {
-    <div class="text-center">
-        <h2>Δεν βρέθηκαν δεδομένα.</h2>
-    </div>
+    <h2 class="mb-4 display-5 text-center">Δεν βρέθηκαν δεδομένα.</h2>
 }
 else
 {
@@ -17,13 +15,13 @@ else
         {
             <div class="col">
                 <div class="card">
-                    @if (string.IsNullOrEmpty(item.ImageUrl))
+                    @if (string.IsNullOrEmpty(item.ProfileImageUrl))
                     {
                         <img src="~/media/profile.jpg" class="card-img-top" alt="Default Team Image">
                     }
                     else
                     {
-                        <img src="~/@item.ImageUrl" class="card-img-top" alt="Team Image">
+                        <img src="~/@item.ProfileImageUrl" class="card-img-top" alt="Team Image">
                     }
                     <div class="card-body">
                         <h5 class="card-title">@item.Name</h5>

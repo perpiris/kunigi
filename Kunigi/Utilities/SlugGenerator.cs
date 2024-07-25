@@ -1,19 +1,50 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 
 namespace Kunigi.Utilities;
 
 public static class SlugGenerator
 {
+    private static readonly HashSet<char> ValidChars = new(new[] { '-', '_' });
+    private static readonly Dictionary<char, string> TransliterationMap = new()
+    {
+        {'α', "a"}, {'ά', "a"}, {'Α', "a"}, {'Ά', "a"},
+        {'β', "b"}, {'Β', "b"},
+        {'γ', "g"}, {'Γ', "g"},
+        {'δ', "d"}, {'Δ', "d"},
+        {'ε', "e"}, {'έ', "e"}, {'Ε', "e"}, {'Έ', "e"},
+        {'ζ', "z"}, {'Ζ', "z"},
+        {'η', "i"}, {'ή', "i"}, {'Η', "i"}, {'Ή', "i"},
+        {'θ', "th"}, {'Θ', "th"},
+        {'ι', "i"}, {'ί', "i"}, {'ϊ', "i"}, {'Ι', "i"}, {'Ί', "i"}, {'Ϊ', "i"},
+        {'κ', "k"}, {'Κ', "k"},
+        {'λ', "l"}, {'Λ', "l"},
+        {'μ', "m"}, {'Μ', "m"},
+        {'ν', "n"}, {'Ν', "n"},
+        {'ξ', "x"}, {'Ξ', "x"},
+        {'ο', "o"}, {'ό', "o"}, {'Ο', "o"}, {'Ό', "o"},
+        {'π', "p"}, {'Π', "p"},
+        {'ρ', "r"}, {'Ρ', "r"},
+        {'σ', "s"}, {'ς', "s"}, {'Σ', "s"},
+        {'τ', "t"}, {'Τ', "t"},
+        {'υ', "y"}, {'ύ', "y"}, {'ϋ', "y"}, {'Υ', "y"}, {'Ύ', "y"}, {'Ϋ', "y"},
+        {'φ', "f"}, {'Φ', "f"},
+        {'χ', "ch"}, {'Χ', "ch"},
+        {'ψ', "ps"}, {'Ψ', "ps"},
+        {'ω', "o"}, {'ώ', "o"}, {'Ω', "o"}, {'Ώ', "o"}
+    };
+
     public static string GenerateSlug(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
             return string.Empty;
-        
+
+        input = input.Normalize(NormalizationForm.FormD);
         input = TransliterateGreekToLatin(input);
-        input = input.ToLowerInvariant();
+        input = RemoveDiacritics(input).ToLowerInvariant();
         input = RemoveInvalidCharacters(input);
         input = input.Replace(' ', '-');
-        input = input.Replace("--", "-");
+        input = input.Replace("--", "-", StringComparison.Ordinal);
         input = input.Trim('-');
 
         return input;
@@ -21,53 +52,34 @@ public static class SlugGenerator
 
     private static string TransliterateGreekToLatin(string input)
     {
-        var transliterationMap = new Dictionary<char, string>
-        {
-            {'α', "a"},
-            {'β', "b"},
-            {'γ', "g"},
-            {'δ', "d"},
-            {'ε', "e"},
-            {'ζ', "z"},
-            {'η', "i"},
-            {'θ', "th"},
-            {'ι', "i"},
-            {'κ', "k"},
-            {'λ', "l"},
-            {'μ', "m"},
-            {'ν', "n"},
-            {'ξ', "x"},
-            {'ο', "o"},
-            {'π', "p"},
-            {'ρ', "r"},
-            {'σ', "s"},
-            {'τ', "t"},
-            {'υ', "y"},
-            {'φ', "f"},
-            {'χ', "x"},
-            {'ψ', "ps"},
-            {'ω', "o"}
-        };
-        
-        var result = new StringBuilder();
+        var result = new StringBuilder(input.Length);
         foreach (var c in input)
         {
-            if (transliterationMap.TryGetValue(c, out var value))
+            if (TransliterationMap.TryGetValue(c, out var value))
                 result.Append(value);
             else
                 result.Append(c);
         }
-
         return result.ToString();
+    }
+
+    private static string RemoveDiacritics(string input)
+    {
+        var normalizedString = input.Normalize(NormalizationForm.FormD);
+        var stringBuilder = new StringBuilder(capacity: normalizedString.Length);
+
+        for (int i = 0; i < normalizedString.Length; i++)
+        {
+            char c = normalizedString[i];
+            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                stringBuilder.Append(c);
+        }
+
+        return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
     }
 
     private static string RemoveInvalidCharacters(string input)
     {
-        var validChars = new StringBuilder();
-        foreach (var c in input.Where(c => char.IsLetterOrDigit(c) || c == '-' || c == '_'))
-        {
-            validChars.Append(c);
-        }
-        return validChars.ToString();
+        return new string(input.Where(c => char.IsLetterOrDigit(c) || ValidChars.Contains(c)).ToArray());
     }
 }

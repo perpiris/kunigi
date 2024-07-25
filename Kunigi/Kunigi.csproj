@@ -20,4 +20,8 @@
       <Folder Include="wwwroot\media\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\images\test2\profile.jpg" />
+    </ItemGroup>
+
 </Project>

@@ -1,10 +1,10 @@
 ﻿@model List<GameDetailsViewModel>
 
 @{
-    ViewData["Title"] = "Όλα τα Παιχνίδια";
+    ViewData["Title"] = "Διαχείρηση Παιχνιδιών";
 }
 
-<div class="d-flex flex-wrap mb-4">
+<div class="d-flex flex-wrap align-items-center mb-4">
     <h1 class="flex-grow-1">Διαχείρηση Παιχνιδιών</h1>
     <div>
         <a class="btn btn-primary"
@@ -16,9 +16,7 @@
 
 @if (Model == null || Model.Count == 0)
 {
-    <div class="text-center">
-        <h2>Δεν βρέθηκαν δεδομένα.</h2>
-    </div>
+    <h2 class="mb-4 display-5 text-center">Δεν βρέθηκαν δεδομένα.</h2>
 }
 else
 {

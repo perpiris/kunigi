@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Kunigi.ViewModels.GameYear;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Kunigi.ViewModels.Team;
@@ -22,7 +23,7 @@ public class TeamDetailsViewModel
     
     public string Instagram { get; set; }
     
-    public string ImageUrl { get; set; }
+    public string ProfileImageUrl { get; set; }
     
     public IEnumerable<TeamManagerViewModel> ManagerList { get; set; }
     
@@ -31,4 +32,8 @@ public class TeamDetailsViewModel
     public string ManagerId { get; set; }
     
     public SelectList ManagerSelectList { get; set; }
+
+    public List<GameYearDetailsViewModel> GamesWon { get; set; }
+    
+    public List<GameYearDetailsViewModel> GamesHosted { get; set; }
 }

@@ -26,7 +26,9 @@ public class Team
     [Column(TypeName = "varchar(150)")]
     public string Instagram { get; set; }
     
-    public string ImageUrl { get; set; }
+    public string ProfileImageUrl { get; set; }
+    
+    public string TeamFolderUrl { get; set; }
     
     public virtual ICollection<GameYear> HostedYears { get; set; }
     
