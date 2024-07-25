@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Kunigi.Data;
+﻿using Kunigi.Data;
 using Kunigi.Entities;
 using Kunigi.Utilities;
 using Kunigi.ViewModels.Game;
@@ -11,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kunigi.Controllers;
 
-public class GamesController(DataContext context, IMapper mapper, IWebHostEnvironment webHostEnvironment) : Controller
+public class GamesController(DataContext context, IWebHostEnvironment webHostEnvironment) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> List(int pageIndex = 1)

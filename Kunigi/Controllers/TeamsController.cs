@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Kunigi.Data;
+﻿using Kunigi.Data;
 using Kunigi.Entities;
 using Kunigi.Utilities;
 using Kunigi.ViewModels.GameYear;
@@ -12,45 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kunigi.Controllers;
 
-public class TeamsController(DataContext context, IMapper mapper, IWebHostEnvironment webHostEnvironment) : Controller
+public class TeamsController(DataContext context, IWebHostEnvironment webHostEnvironment) : Controller
 {
-    [HttpGet]
-    public async Task<IActionResult> List(int pageIndex = 1)
-    {
-        var resultCount = context.Teams.Count();
-
-        var pageInfo = new PageInfo(resultCount, pageIndex);
-        var skip = (pageIndex - 1) * pageInfo.PageSize;
-        ViewBag.PageInfo = pageInfo;
-
-        var viewModel = await context.Teams.Skip(skip).Take(pageInfo.PageSize)
-            .ProjectTo<TeamDetailsViewModel>(mapper.ConfigurationProvider).ToListAsync();
-        return View(viewModel);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Details(int id)
-    {
-        if (id <= 0)
-        {
-            return RedirectToAction("List");
-        }
-
-        var teamDetails = await context
-            .Teams
-            .Include(x => x.HostedYears.OrderBy(y => y.Year))
-            .Include(x => x.WonYears.OrderBy(y => y.Year))
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-        if (teamDetails is null)
-        {
-            TempData["error"] = "Η ομάδα δεν υπάρχει.";
-            return RedirectToAction("List");
-        }
-
-        var viewModel = GetMappedDetailsViewModel(teamDetails);
-        return View(viewModel);
-    }
+    #region Create
 
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
@@ -61,7 +23,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
 
     [HttpPost]
     [Authorize(Roles = "Admin,Moderator")]
-    public async Task<IActionResult> Create(TeamCreateViewModel viewModel)
+    public async Task<IActionResult> Create(TeamCreateOrEditViewModel viewModel)
     {
         if (!ModelState.IsValid) return View();
 
@@ -72,7 +34,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
             ModelState.AddModelError("Name", "Υπάρχει ήδη ομάδα με αυτό το όνομα.");
             return View();
         }
-        
+
         var slug = SlugGenerator.GenerateSlug(viewModel.Name);
         var wwwRootPath = webHostEnvironment.WebRootPath;
         var imagePath = Path.Combine(wwwRootPath, "media", "teams", slug);
@@ -98,6 +60,10 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
         return RedirectToAction("Manage");
     }
 
+    #endregion
+
+    #region Edit
+
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
     public async Task<IActionResult> Edit(int id)
@@ -107,8 +73,8 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
             return RedirectToAction("Manage");
         }
 
-        var viewModel = await context.Teams.ProjectTo<TeamEditViewModel>(mapper.ConfigurationProvider)
-            .SingleOrDefaultAsync(x => x.Id == id);
+        var teamDetails = await context.Teams.SingleOrDefaultAsync(x => x.Id == id);
+        var viewModel = GetMappedCreateOrEditViewModel(teamDetails);
         if (viewModel != null) return View(viewModel);
 
         return RedirectToAction("Manage");
@@ -116,30 +82,30 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
 
     [HttpPost]
     [Authorize(Roles = "Admin,Moderator")]
-    public async Task<IActionResult> Edit(TeamEditViewModel viewModel, IFormFile profileImage)
+    public async Task<IActionResult> Edit(TeamCreateOrEditViewModel updatedTeamDetails, IFormFile profileImage)
     {
-        if (viewModel.Id <= 0)
+        if (updatedTeamDetails.Id <= 0)
         {
             return RedirectToAction("Manage");
         }
 
-        var team = await context.Teams.SingleOrDefaultAsync(x => x.Id == viewModel.Id);
-        if (team == null)
+        var teamDetails = await context.Teams.SingleOrDefaultAsync(x => x.Id == updatedTeamDetails.Id);
+        if (teamDetails == null)
         {
             return RedirectToAction("Manage");
         }
 
-        team.Description = viewModel.Description;
-        team.Facebook = viewModel.Facebook;
-        team.Youtube = viewModel.Youtube;
-        team.Instagram = viewModel.Instagram;
-        team.Website = viewModel.Website;
+        teamDetails.Description = updatedTeamDetails.Description;
+        teamDetails.Facebook = updatedTeamDetails.Facebook;
+        teamDetails.Youtube = updatedTeamDetails.Youtube;
+        teamDetails.Instagram = updatedTeamDetails.Instagram;
+        teamDetails.Website = updatedTeamDetails.Website;
 
         if (profileImage != null)
         {
             var wwwRootPath = webHostEnvironment.WebRootPath;
             var fileName = "profile" + Path.GetExtension(profileImage.FileName);
-            var productPath = $"images/{team.Slug}/";
+            var productPath = $"images/{teamDetails.Slug}/";
             var finalPath = Path.Combine(wwwRootPath, productPath);
 
             if (!Directory.Exists(finalPath))
@@ -152,16 +118,72 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
                 await profileImage.CopyToAsync(fileStream);
             }
 
-            team.ProfileImageUrl = Path.Combine(productPath, fileName);
+            teamDetails.ProfileImageUrl = Path.Combine(productPath, fileName);
         }
 
-        context.Teams.Update(team);
+        context.Teams.Update(teamDetails);
         await context.SaveChangesAsync();
 
-        TempData["success"] = $"Η ομάδα {team.Name} επεξεργάστηκε επιτυχώς.";
+        TempData["success"] = $"Η ομάδα {teamDetails.Name} επεξεργάστηκε επιτυχώς.";
         return RedirectToAction("Manage");
     }
-    
+
+    #endregion
+
+    #region List
+
+    [HttpGet]
+    public async Task<IActionResult> List(int pageIndex = 1)
+    {
+        var resultCount = await context.Teams.CountAsync();
+
+        var pageInfo = new PageInfo(resultCount, pageIndex);
+        var skip = (pageIndex - 1) * pageInfo.PageSize;
+        ViewBag.PageInfo = pageInfo;
+
+        var teamList = await context.Teams
+            .Include(t => t.WonYears)
+            .Include(t => t.HostedYears)
+            .Skip(skip)
+            .Take(pageInfo.PageSize)
+            .ToListAsync();
+
+        var viewModel = teamList.Select(GetMappedDetailsViewModel).ToList();
+        return View(viewModel);
+    }
+
+    #endregion
+
+    #region Details
+
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        if (id <= 0)
+        {
+            return RedirectToAction("List");
+        }
+
+        var teamDetails = await context
+            .Teams
+            .Include(x => x.HostedYears.OrderBy(y => y.Year))
+            .Include(x => x.WonYears.OrderBy(y => y.Year))
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (teamDetails is null)
+        {
+            TempData["error"] = "Η ομάδα δεν υπάρχει.";
+            return RedirectToAction("List");
+        }
+
+        var viewModel = GetMappedDetailsViewModel(teamDetails);
+        return View(viewModel);
+    }
+
+    #endregion
+
+    #region Manage
+
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
     public async Task<IActionResult> Manage(int pageIndex = 1)
@@ -171,11 +193,21 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
         var pageInfo = new PageInfo(resultcount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
-        var viewModel = await context.Teams.Skip(skip).Take(pageInfo.PageSize)
-            .ProjectTo<TeamDetailsViewModel>(mapper.ConfigurationProvider).ToListAsync();
+        var teamList = await context.Teams
+            .Include(t => t.WonYears)
+            .Include(t => t.HostedYears)
+            .Skip(skip)
+            .Take(pageInfo.PageSize)
+            .ToListAsync();
+
+        var viewModel = teamList.Select(GetMappedDetailsViewModel).ToList();
         return View(viewModel);
     }
-    
+
+    #endregion
+
+    #region Manage Team Managers
+
     [HttpGet]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> EditManagers(int id)
@@ -195,7 +227,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
         }
 
         var users = await context.AppUsers.ToListAsync();
-        var viewModel = mapper.Map<TeamDetailsViewModel>(team);
+        var viewModel = GetMappedDetailsViewModel(team);
         var managerSelectList = new List<SelectListItem>
         {
             new() { Value = "", Text = "Επιλέξτε" }
@@ -207,7 +239,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
             Text = u.Email
         }));
         viewModel.ManagerSelectList = new SelectList(managerSelectList, "Value", "Text");
-        
+
         viewModel.ManagerList = team.Managers.Select(m => new TeamManagerViewModel
         {
             Id = m.Id,
@@ -216,7 +248,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
 
         return View(viewModel);
     }
-    
+
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> EditManagers(TeamDetailsViewModel viewModel)
@@ -225,7 +257,6 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
         {
             var team = await context.Teams
                 .Include(t => t.Managers)
-                
                 .SingleOrDefaultAsync(t => t.Id == viewModel.Id);
 
             if (team == null)
@@ -272,14 +303,14 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
                 TempData["error"] = "This user is already a manager.";
             }
         }
-    
+
         await context.SaveChangesAsync();
 
         TempData["success"] = "The manager list has been updated.";
         return RedirectToAction("EditManagers", new { id = viewModel.Id });
     }
 
-    
+
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RemoveManager(int teamId, string managerId)
@@ -292,7 +323,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
         {
             return RedirectToAction("Manage");
         }
-    
+
         var managerToRemove = team.Managers.SingleOrDefault(m => m.Id == managerId);
         if (managerToRemove != null)
         {
@@ -308,6 +339,10 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
 
         return RedirectToAction("EditManagers", new { id = teamId });
     }
+
+    #endregion
+
+    #region Mappings
 
     private static TeamDetailsViewModel GetMappedDetailsViewModel(Team teamDetails)
     {
@@ -333,7 +368,7 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
                 Year = year.Year
             });
         }
-        
+
         foreach (var year in teamDetails.HostedYears)
         {
             viewModel.GamesHosted.Add(new GameYearDetailsViewModel
@@ -346,4 +381,23 @@ public class TeamsController(DataContext context, IMapper mapper, IWebHostEnviro
 
         return viewModel;
     }
+
+    private static TeamCreateOrEditViewModel GetMappedCreateOrEditViewModel(Team teamDetails)
+    {
+        var viewModel = new TeamCreateOrEditViewModel
+        {
+            Id = teamDetails.Id,
+            Name = teamDetails.Name,
+            Description = teamDetails.Description,
+            ProfileImageUrl = teamDetails.ProfileImageUrl,
+            Facebook = teamDetails.Facebook,
+            Youtube = teamDetails.Youtube,
+            Instagram = teamDetails.Instagram,
+            Website = teamDetails.Website
+        };
+
+        return viewModel;
+    }
+
+    #endregion
 }
