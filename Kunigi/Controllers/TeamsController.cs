@@ -10,8 +10,53 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kunigi.Controllers;
 
-public class TeamsController(DataContext context, IWebHostEnvironment webHostEnvironment, IConfiguration configuration) : Controller
+public class TeamsController(DataContext context, IConfiguration configuration)
+    : Controller
 {
+    [HttpGet]
+    public async Task<IActionResult> List(int pageIndex = 1)
+    {
+        var resultCount = await context.Teams.CountAsync();
+
+        var pageInfo = new PageInfo(resultCount, pageIndex);
+        var skip = (pageIndex - 1) * pageInfo.PageSize;
+        ViewBag.PageInfo = pageInfo;
+
+        var teamList = await context.Teams
+            .Include(t => t.WonYears)
+            .Include(t => t.HostedYears)
+            .Skip(skip)
+            .Take(pageInfo.PageSize)
+            .ToListAsync();
+
+        var viewModel = teamList.Select(GetMappedDetailsViewModel).ToList();
+        return View(viewModel);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        if (id <= 0)
+        {
+            return RedirectToAction("List");
+        }
+
+        var teamDetails = await context
+            .Teams
+            .Include(x => x.HostedYears.OrderBy(y => y.Year))
+            .Include(x => x.WonYears.OrderBy(y => y.Year))
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (teamDetails is null)
+        {
+            TempData["error"] = "Η ομάδα δεν υπάρχει.";
+            return RedirectToAction("List");
+        }
+
+        var viewModel = GetMappedDetailsViewModel(teamDetails);
+        return View(viewModel);
+    }
+    
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
     public IActionResult Create()
@@ -32,7 +77,7 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
             ModelState.AddModelError("Name", "Υπάρχει ήδη ομάδα με αυτό το όνομα.");
             return View(viewModel);
         }
-        
+
         var slug = SlugGenerator.GenerateSlug(viewModel.Name);
         var newTeam = new Team
         {
@@ -45,7 +90,7 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
             Website = viewModel.Website,
             Slug = slug
         };
-        
+
         var basePath = configuration["ImageStoragePath"];
         var teamFolderPath = Path.Combine(basePath!, "teams", slug);
         Directory.CreateDirectory(teamFolderPath);
@@ -60,6 +105,7 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
             {
                 await profileImage.CopyToAsync(stream);
             }
+
             newTeam.ProfileImageUrl = $"/media/{relativePath.Replace("\\", "/")}";
         }
 
@@ -113,7 +159,7 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
             var teamFolderPath = Path.Combine(basePath!, "teams", teamDetails.Slug);
             var fileName = "profile" + Path.GetExtension(profileImage.FileName);
             var filePath = Path.Combine(teamFolderPath, fileName);
-    
+
             if (!Directory.Exists(teamFolderPath))
             {
                 Directory.CreateDirectory(teamFolderPath);
@@ -123,7 +169,7 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
             {
                 await profileImage.CopyToAsync(fileStream);
             }
-                
+
             var relativePath = Path.Combine("teams", teamDetails.Slug, fileName).Replace("\\", "/");
             teamDetails.ProfileImageUrl = $"/media/{relativePath}";
         }
@@ -135,49 +181,7 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
         return RedirectToAction("Manage");
     }
 
-    [HttpGet]
-    public async Task<IActionResult> List(int pageIndex = 1)
-    {
-        var resultCount = await context.Teams.CountAsync();
-
-        var pageInfo = new PageInfo(resultCount, pageIndex);
-        var skip = (pageIndex - 1) * pageInfo.PageSize;
-        ViewBag.PageInfo = pageInfo;
-
-        var teamList = await context.Teams
-            .Include(t => t.WonYears)
-            .Include(t => t.HostedYears)
-            .Skip(skip)
-            .Take(pageInfo.PageSize)
-            .ToListAsync();
-
-        var viewModel = teamList.Select(GetMappedDetailsViewModel).ToList();
-        return View(viewModel);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Details(int id)
-    {
-        if (id <= 0)
-        {
-            return RedirectToAction("List");
-        }
-
-        var teamDetails = await context
-            .Teams
-            .Include(x => x.HostedYears.OrderBy(y => y.Year))
-            .Include(x => x.WonYears.OrderBy(y => y.Year))
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-        if (teamDetails is null)
-        {
-            TempData["error"] = "Η ομάδα δεν υπάρχει.";
-            return RedirectToAction("List");
-        }
-
-        var viewModel = GetMappedDetailsViewModel(teamDetails);
-        return View(viewModel);
-    }
+    
 
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
@@ -218,7 +222,6 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
         }
 
         var users = await context.AppUsers.ToListAsync();
-        var viewModel = GetMappedDetailsViewModel(team);
         var managerSelectList = new List<SelectListItem>
         {
             new() { Value = "", Text = "Επιλέξτε" }
@@ -229,51 +232,35 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
             Value = u.Id.ToString(),
             Text = u.Email
         }));
-        viewModel.ManagerSelectList = new SelectList(managerSelectList, "Value", "Text");
 
-        viewModel.ManagerList = team.Managers.Select(m => new TeamManagerViewModel
+        var viewModel = new TeamManagerUpdateViewModel
         {
-            Id = m.Id,
-            Email = m.Email
-        }).ToList();
+            TeamId = team.Id,
+            TeamName = team.Name,
+            ManagerSelectList = new SelectList(managerSelectList, "Value", "Text"),
+            ManagerList = team.Managers.Select(m => new TeamManagerDetailsViewModel
+            {
+                Id = m.Id,
+                Email = m.Email
+            }).ToList()
+        };
 
         return View(viewModel);
     }
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> EditManagers(TeamDetailsViewModel viewModel)
+    public async Task<IActionResult> EditManagers(TeamManagerUpdateViewModel viewModel)
     {
         if (!ModelState.IsValid)
         {
-            var team = await context.Teams
-                .Include(t => t.Managers)
-                .SingleOrDefaultAsync(t => t.Id == viewModel.Id);
-
-            if (team == null)
-            {
-                return RedirectToAction("Manage");
-            }
-
-            var users = await context.AppUsers.ToListAsync();
-            viewModel.ManagerSelectList = new SelectList(users.Select(u => new SelectListItem
-            {
-                Value = u.Id.ToString(),
-                Text = u.Email
-            }).ToList(), "Value", "Text");
-
-            viewModel.ManagerList = team.Managers.Select(m => new TeamManagerViewModel
-            {
-                Id = m.Id,
-                Email = m.Email
-            }).ToList();
-
+            await PopulateUpdateManagerViewModel(viewModel);
             return View(viewModel);
         }
 
         var teamToUpdate = await context.Teams
             .Include(t => t.Managers)
-            .SingleOrDefaultAsync(t => t.Id == viewModel.Id);
+            .SingleOrDefaultAsync(t => t.Id == viewModel.TeamId);
 
         if (teamToUpdate == null)
         {
@@ -281,24 +268,51 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
         }
 
         var selectedManager = await context.AppUsers
-            .SingleOrDefaultAsync(u => u.Id == viewModel.ManagerId);
+            .SingleOrDefaultAsync(u => u.Id == viewModel.SelectedManagerId);
 
         if (selectedManager != null)
         {
             if (teamToUpdate.Managers.All(m => m.Id != selectedManager.Id))
             {
                 teamToUpdate.Managers.Add(selectedManager);
+                await context.SaveChangesAsync();
+                TempData["success"] = "Ο διαχειριστής προστέθηκε επιτυχώς.";
             }
             else
             {
-                TempData["error"] = "This user is already a manager.";
+                TempData["error"] = "Αυτός ο χρήστης είναι ήδη διαχειριστής.";
             }
         }
+        else
+        {
+            TempData["error"] = "Δεν βρέθηκε ο επιλεγμένος διαχειριστής.";
+        }
 
-        await context.SaveChangesAsync();
+        return RedirectToAction("EditManagers", new { id = viewModel.TeamId });
+    }
 
-        TempData["success"] = "The manager list has been updated.";
-        return RedirectToAction("EditManagers", new { id = viewModel.Id });
+    private async Task PopulateUpdateManagerViewModel(TeamManagerUpdateViewModel viewModel)
+    {
+        var team = await context.Teams
+            .Include(t => t.Managers)
+            .SingleOrDefaultAsync(t => t.Id == viewModel.TeamId);
+
+        if (team != null)
+        {
+            var users = await context.AppUsers.ToListAsync();
+            viewModel.TeamName = team.Name;
+            viewModel.ManagerSelectList = new SelectList(users.Select(u => new SelectListItem
+            {
+                Value = u.Id.ToString(),
+                Text = u.Email
+            }), "Value", "Text");
+
+            viewModel.ManagerList = team.Managers.Select(m => new TeamManagerDetailsViewModel
+            {
+                Id = m.Id,
+                Email = m.Email
+            }).ToList();
+        }
     }
 
     [HttpPost]
@@ -319,12 +333,12 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
         {
             team.Managers.Remove(managerToRemove);
             await context.SaveChangesAsync();
-
-            TempData["success"] = "The manager has been removed.";
+            
+            TempData["success"] = "Ο διαχειριστής αφαιρέθηκε επιτυχώς.";
         }
         else
         {
-            TempData["error"] = "The manager was not found.";
+            TempData["error"] = "Δεν βρέθηκε ο επιλεγμένος διαχειριστής.";
         }
 
         return RedirectToAction("EditManagers", new { id = teamId });

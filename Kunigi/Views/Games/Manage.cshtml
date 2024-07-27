@@ -5,11 +5,11 @@
 }
 
 <div class="d-flex flex-wrap align-items-center mb-4">
-    <h1 class="flex-grow-1">Διαχείρηση Παιχνιδιών</h1>
+    <h2 class="mb-0 me-3 display-5 flex-grow-1">Διαχείριση Παιχνιδιών</h2>
     <div>
         <a class="btn btn-primary"
            asp-controller="Games" asp-action="Create">
-            Δημιουργία νέου Παιχνιδιού
+            Δημιουργία νέου παιχνιδιού
         </a>
     </div>
 </div>
@@ -20,33 +20,32 @@
 }
 else
 {
-    <div class="row row-cols-1 row-cols-md-4 g-4">
-        @foreach (var item in Model)
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Τίτλος</th>
+            <th>Ενέργειες</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var game in Model)
         {
-            <div class="col">
-                <div class="card">
-                    @if (string.IsNullOrEmpty(item.ImageUrl))
-                    {
-                        <img src="~/media/profile.jpg" class="card-img-top" alt="Default Game Image">
-                    }
-                    else
-                    {
-                        <img src="~/@item.ImageUrl" class="card-img-top" alt="Game Image">
-                    }
-                    <div class="card-body">
-                        <h5 class="card-title">@item.Title</h5>
-                        <a class="card-link" asp-controller="Games" asp-action="Details" asp-route-id="@item.Id">Πληροφορίες</a>
-                    </div>
-                </div>
-            </div>
+            <tr>
+                <td>@game.Title</td>
+                <td>
+                    <a href="@Url.Action("Details", "Games", new { id = game.Id })" class="btn btn-info">Προβολή</a>
+                    <a href="@Url.Action("Edit", "Games", new { id = game.Id })" class="btn btn-primary">Επεξεργασία</a>
+                </td>
+            </tr>
         }
-    </div>
+        </tbody>
+    </table>
 
     <ul class="pagination justify-content-center mt-5">
         @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
         {
             <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
-                <a class="page-link" asp-controller="Games" asp-action="List" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
+                <a class="page-link" asp-controller="Teams" asp-action="List" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
             </li>
         }
     </ul>

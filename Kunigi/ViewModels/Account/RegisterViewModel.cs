@@ -5,10 +5,6 @@ namespace Kunigi.ViewModels.Account;
 public class RegisterViewModel
 {
     [Required]
-    [Display(Name = "Username")]
-    public string UserName { get; set; }
-    
-    [Required]
     [EmailAddress]
     public string Email { get; set; }
 

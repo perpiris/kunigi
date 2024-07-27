@@ -1,35 +1,73 @@
-﻿@model TeamDetailsViewModel
+﻿@model TeamManagerUpdateViewModel
 
-<h2>Διαχειριστές @Model.Name</h2>
+@{
+    ViewData["Title"] = $"Διαχειριστές {Model.TeamName}";
+}
 
-<div style="max-width: 450px; margin: auto">
-    @using (Html.BeginForm("EditManagers", "Teams", FormMethod.Post))
-    {
-        <div class="row form-group mb-3">
-            <label asp-for="ManagerId" class="form-label"></label>
-            <!-- Input field for filtering -->
-            <input type="text" id="filterInput" placeholder="Φίλτρο" class="form-control"/>
-            <select asp-for="ManagerId" asp-items="Model.ManagerSelectList" class="form-select" id="managerSelect">
-            </select>
-            <span asp-validation-for="ManagerId" class="text-danger"></span>
+<style>
+    .card {
+        height: 100%;
+    }
+    .list-group-item {
+        word-break: break-all;
+    }
+</style>
+
+<h2 class="text-center mb-4">Διαχειριστές @Model.TeamName</h2>
+
+<div class="container">
+    <div class="row">
+        <!-- Left column: Search and Add -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Προσθήκη Διαχειριστή</h5>
+                    @using (Html.BeginForm("EditManagers", "Teams", FormMethod.Post))
+                    {
+                        @Html.HiddenFor(x => x.TeamId)
+                        <div class="mb-3">
+                            <input type="text" id="filterInput" placeholder="Φίλτρο" class="form-control mb-2"/>
+                            <select asp-for="SelectedManagerId" asp-items="Model.ManagerSelectList" class="form-select" id="managerSelect">
+                            </select>
+                            <span asp-validation-for="SelectedManagerId" class="text-danger"></span>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Προσθήκη Διαχειριστή</button>
+                            <a asp-controller="Teams" asp-action="Manage" class="btn btn-secondary">Επιστροφή</a>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Add Manager</button>
-        <a asp-controller="Teams" asp-action="Manage" class="btn btn-secondary">Back</a>
-    }
+        <!-- Right column: Manager List -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Λίστα Διαχειριστών</h5>
+                    @if (Model.ManagerList.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var item in Model.ManagerList)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @item.Email
+                                    @using (Html.BeginForm("RemoveManager", "Teams", FormMethod.Post, new { @class = "d-inline" }))
+                                    {
+                                        <input type="hidden" name="teamId" value="@Model.TeamId"/>
+                                        <input type="hidden" name="managerId" value="@item.Id"/>
+                                        <button type="submit" class="btn btn-danger btn-sm">Αφαίρεση</button>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Δεν υπάρχουν διαχειριστές.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
-<ul>
-    @foreach (var item in Model.ManagerList)
-    {
-        <li>
-            @item.Email
-            @using (Html.BeginForm("RemoveManager", "Teams", FormMethod.Post))
-            {
-                <input type="hidden" name="teamId" value="@Model.Id"/>
-                <input type="hidden" name="managerId" value="@item.Id"/>
-                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-            }
-        </li>
-    }
-</ul>

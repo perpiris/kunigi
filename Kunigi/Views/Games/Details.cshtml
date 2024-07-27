@@ -4,52 +4,60 @@
     ViewData["Title"] = Model.Title;
 }
 
-<div class="row">
-    <div class="col-md-3">
-        @if (string.IsNullOrEmpty(Model.ImageUrl))
-        {
-            <img src="~/media/profile.jpg" class="img-fluid" alt="Default Team Image">
-        }
-        else
-        {
-            <img src="~/@Model.ImageUrl" class="img-fluid" alt="Team Image">
-        }
-        <div>
-            <p>
-                <strong>Χρονιά:</strong> @Model.Year
-            </p>
-            <p>
-                <strong>Διοργανωτής:</strong> @Model.Host
-            </p>
-            <p>
-                <strong>Νικητής:</strong> @Model.Winner
-            </p>
+<section>
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
+                <h2 class="mb-4 display-5 text-center">@Model.Title</h2>
+            </div>
         </div>
     </div>
-    <div class="col-md-9">
-        <h1 class="mb-4">@Model.Title</h1>
 
-        <ul class="nav nav-tabs" role="tablist">
-            @for (int i = 0; i < Model.SubGamesList.Count; i++)
-            {
-                var isActive = i == 0 ? "active" : ""; // Make the first tab active by default
-                var element = Model.SubGamesList.ElementAt(i);
-
-                <li class="nav-item" role="presentation">
-                    <a class="nav-link @(isActive)" data-bs-toggle="tab" href="#@element.Id" aria-selected="@(isActive == "active" ? "true" : "false")" role="tab">@element.GameType</a>
-                </li>
-            }
-        </ul>
-        <div id="myTabContent" class="tab-content">
-            @for (int i = 0; i < Model.SubGamesList.Count; i++)
-            {
-                var element = Model.SubGamesList.ElementAt(i);
-                <div class="tab-pane fade @(i == 0 ? "show active" : "")" id="@element.Id" role="tabpanel">
-                    <p>@element.Description</p>
+    <div class="container">
+        <div class="row gy-4 gy-lg-0">
+            <div class="col-12 col-lg-4 col-xl-3">
+                <div class="row gy-4">
+                    <div class="col-12">
+                        <div class="card widget-card border-light shadow-sm">
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    @if (string.IsNullOrEmpty(Model.ProfileImageUrl))
+                                    {
+                                        <img src="~/media/profile.jpg" class="img-fluid" alt="Default Team Image">
+                                    }
+                                    else
+                                    {
+                                        <img src="@Model.ProfileImageUrl" class="img-fluid" alt="Team Image">
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            }
+            </div>
+            <div class="col-12 col-lg-8 col-xl-9">
+                <div class="card widget-card border-light shadow-sm">
+                    <div class="card-body p-4">
+                        <ul class="nav nav-tabs" id="profileTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-tab-pane" type="button" role="tab" aria-controls="overview-tab-pane" aria-selected="true">Πληροφορίες</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos-tab-pane" type="button" role="tab" aria-controls="photos-tab-pane" aria-selected="true">Υλικό</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-4" id="profileTabContent">
+                            <div class="tab-pane show active" id="overview-tab-pane" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
+                                <p class="lead mb-3">details</p>
+                            </div>
+                            <div class="tab-pane" id="photos-tab-pane" role="tabpanel" aria-labelledby="photos-tab" tabindex="0">
+                                <p class="lead mb-3">photos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-
     </div>
-</div>
+
+</section>

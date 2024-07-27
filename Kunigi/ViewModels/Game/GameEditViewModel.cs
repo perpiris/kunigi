@@ -15,6 +15,6 @@ public class GameEditViewModel
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
     public string Description { get; set; }
     
-    [DisplayName("Φωτογραφία")]
-    public string ImageUrl { get; set; }
+    [DisplayName("Φωτογραφία Αφίσας")]
+    public string ProfileImageUrl { get; set; }
 }

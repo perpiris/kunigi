@@ -28,6 +28,7 @@ public class Team
     
     public string ProfileImageUrl { get; set; }
     
+    [Column(TypeName = "varchar(255)")]
     public string TeamFolderUrl { get; set; }
     
     public virtual ICollection<GameYear> HostedYears { get; set; }

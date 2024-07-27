@@ -25,12 +25,6 @@ public class TeamDetailsViewModel
     
     public string ProfileImageUrl { get; set; }
     
-    public IEnumerable<TeamManagerViewModel> ManagerList { get; set; }
-    
-    [DisplayName("Διαχειριστής")]
-    [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
-    public string ManagerId { get; set; }
-    
     public SelectList ManagerSelectList { get; set; }
 
     public List<GameYearDetailsViewModel> GamesWon { get; set; }
