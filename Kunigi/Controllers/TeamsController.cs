@@ -10,10 +10,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kunigi.Controllers;
 
-public class TeamsController(DataContext context, IWebHostEnvironment webHostEnvironment) : Controller
+public class TeamsController(DataContext context, IWebHostEnvironment webHostEnvironment, IConfiguration configuration) : Controller
 {
-    #region Create
-
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
     public IActionResult Create()
@@ -23,7 +21,7 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
 
     [HttpPost]
     [Authorize(Roles = "Admin,Moderator")]
-    public async Task<IActionResult> Create(TeamCreateOrEditViewModel viewModel)
+    public async Task<IActionResult> Create(TeamCreateOrEditViewModel viewModel, IFormFile profileImage)
     {
         if (!ModelState.IsValid) return View();
 
@@ -32,18 +30,11 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
         if (exists)
         {
             ModelState.AddModelError("Name", "Υπάρχει ήδη ομάδα με αυτό το όνομα.");
-            return View();
+            return View(viewModel);
         }
-
+        
         var slug = SlugGenerator.GenerateSlug(viewModel.Name);
-        var wwwRootPath = webHostEnvironment.WebRootPath;
-        var imagePath = Path.Combine(wwwRootPath, "media", "teams", slug);
-        if (!Directory.Exists(imagePath))
-        {
-            Directory.CreateDirectory(imagePath);
-        }
-
-        context.Teams.Add(new Team
+        var newTeam = new Team
         {
             Name = viewModel.Name,
             Description = viewModel.Description,
@@ -53,16 +44,31 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
             Instagram = viewModel.Instagram,
             Website = viewModel.Website,
             Slug = slug
-        });
+        };
+        
+        var basePath = configuration["ImageStoragePath"];
+        var teamFolderPath = Path.Combine(basePath!, "teams", slug);
+        Directory.CreateDirectory(teamFolderPath);
+        newTeam.TeamFolderUrl = teamFolderPath;
+        if (profileImage != null)
+        {
+            var fileName = "profile" + Path.GetExtension(profileImage.FileName);
+            var relativePath = Path.Combine("teams", slug, fileName);
+            var absolutePath = Path.Combine(basePath, relativePath);
+            Directory.CreateDirectory(Path.GetDirectoryName(absolutePath)!);
+            await using (var stream = new FileStream(absolutePath, FileMode.Create))
+            {
+                await profileImage.CopyToAsync(stream);
+            }
+            newTeam.ProfileImageUrl = $"/media/{relativePath.Replace("\\", "/")}";
+        }
+
+        context.Teams.Add(newTeam);
         await context.SaveChangesAsync();
 
         TempData["success"] = "Η ομάδα δημιουργήθηκε.";
         return RedirectToAction("Manage");
     }
-
-    #endregion
-
-    #region Edit
 
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
@@ -103,22 +109,23 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
 
         if (profileImage != null)
         {
-            var wwwRootPath = webHostEnvironment.WebRootPath;
+            var basePath = configuration["ImageStoragePath"];
+            var teamFolderPath = Path.Combine(basePath!, "teams", teamDetails.Slug);
             var fileName = "profile" + Path.GetExtension(profileImage.FileName);
-            var productPath = $"images/{teamDetails.Slug}/";
-            var finalPath = Path.Combine(wwwRootPath, productPath);
+            var filePath = Path.Combine(teamFolderPath, fileName);
+    
+            if (!Directory.Exists(teamFolderPath))
+            {
+                Directory.CreateDirectory(teamFolderPath);
+            }
 
-            if (!Directory.Exists(finalPath))
-                Directory.CreateDirectory(finalPath);
-
-            var filePath = Path.Combine(finalPath, fileName);
-
-            await using (var fileStream = new FileStream(filePath, FileMode.Create))
+            await using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 await profileImage.CopyToAsync(fileStream);
             }
-
-            teamDetails.ProfileImageUrl = Path.Combine(productPath, fileName);
+                
+            var relativePath = Path.Combine("teams", teamDetails.Slug, fileName).Replace("\\", "/");
+            teamDetails.ProfileImageUrl = $"/media/{relativePath}";
         }
 
         context.Teams.Update(teamDetails);
@@ -127,10 +134,6 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
         TempData["success"] = $"Η ομάδα {teamDetails.Name} επεξεργάστηκε επιτυχώς.";
         return RedirectToAction("Manage");
     }
-
-    #endregion
-
-    #region List
 
     [HttpGet]
     public async Task<IActionResult> List(int pageIndex = 1)
@@ -151,10 +154,6 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
         var viewModel = teamList.Select(GetMappedDetailsViewModel).ToList();
         return View(viewModel);
     }
-
-    #endregion
-
-    #region Details
 
     [HttpGet]
     public async Task<IActionResult> Details(int id)
@@ -180,10 +179,6 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
         return View(viewModel);
     }
 
-    #endregion
-
-    #region Manage
-
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
     public async Task<IActionResult> Manage(int pageIndex = 1)
@@ -203,10 +198,6 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
         var viewModel = teamList.Select(GetMappedDetailsViewModel).ToList();
         return View(viewModel);
     }
-
-    #endregion
-
-    #region Manage Team Managers
 
     [HttpGet]
     [Authorize(Roles = "Admin")]
@@ -310,7 +301,6 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
         return RedirectToAction("EditManagers", new { id = viewModel.Id });
     }
 
-
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RemoveManager(int teamId, string managerId)
@@ -340,14 +330,11 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
         return RedirectToAction("EditManagers", new { id = teamId });
     }
 
-    #endregion
-
-    #region Mappings
-
     private static TeamDetailsViewModel GetMappedDetailsViewModel(Team teamDetails)
     {
         var viewModel = new TeamDetailsViewModel
         {
+            Id = teamDetails.Id,
             Name = teamDetails.Name,
             Description = teamDetails.Description,
             ProfileImageUrl = teamDetails.ProfileImageUrl,
@@ -398,6 +385,4 @@ public class TeamsController(DataContext context, IWebHostEnvironment webHostEnv
 
         return viewModel;
     }
-
-    #endregion
 }
