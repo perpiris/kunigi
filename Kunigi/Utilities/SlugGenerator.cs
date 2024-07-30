@@ -31,7 +31,8 @@ public static class SlugGenerator
         {'φ', "f"}, {'Φ', "f"},
         {'χ', "ch"}, {'Χ', "ch"},
         {'ψ', "ps"}, {'Ψ', "ps"},
-        {'ω', "o"}, {'ώ', "o"}, {'Ω', "o"}, {'Ώ', "o"}
+        {'ω', "o"}, {'ώ', "o"}, {'Ω', "o"}, {'Ώ', "o"},
+        {'&', "kai"}
     };
 
     public static string GenerateSlug(string input)

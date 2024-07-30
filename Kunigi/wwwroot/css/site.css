@@ -1,21 +1,23 @@
-.card-img-top {
-  width: 100%;
-  height: 15vw;
-  object-fit: fill;
-}
-
 #options-container {
-  position: absolute;
-  background-color: white;
-  border: 1px solid #ccc;
-  z-index: 100;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    z-index: 100;
 }
 
 #options-container div {
-  padding: 5px 10px;
-  cursor: pointer;
+    padding: 5px 10px;
+    cursor: pointer;
 }
 
 #options-container div:hover {
-  background-color: #f0f0f0;
+    background-color: #f0f0f0;
 }
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+} 

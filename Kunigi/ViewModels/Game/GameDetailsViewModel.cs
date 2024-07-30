@@ -9,14 +9,14 @@ public class GameDetailsViewModel
     public short Order { get; set; }
     
     public string Title { get; set; }
+    
+    public int WinnerId { get; set; }
 
     public string Winner { get; set; }
-
-    public string Host { get; set; }
-
-    public string WinnerLink { get; set; }
     
-    public string HostLink { get; set; }
+    public int HostId { get; set; }
+    
+    public string Host { get; set; }
     
     public string ProfileImageUrl { get; set; }
     

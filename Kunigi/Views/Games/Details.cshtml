@@ -33,6 +33,22 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-12">
+                        <div class="card widget-card border-light shadow-sm">
+                            <div class="card-header text-bg-primary">Διοργάνωση</div>
+                            <div class="card-body">
+                                <a type="button" class="btn btn-link" asp-controller="Teams" asp-action="Details" asp-route-id="@Model.HostId">@Model.Host</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card widget-card border-light shadow-sm">
+                            <div class="card-header text-bg-primary">Νικητές</div>
+                            <div class="card-body">
+                                <a type="button" class="btn btn-link" asp-controller="Teams" asp-action="Details" asp-route-id="@Model.WinnerId">@Model.Winner</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-12 col-lg-8 col-xl-9">

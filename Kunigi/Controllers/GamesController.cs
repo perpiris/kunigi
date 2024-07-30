@@ -20,14 +20,20 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
 
-        var gameYearList = await context.GameYears
-            .Include(x => x.Host)
-            .Include(x => x.Winner)
-            .Skip(skip)
-            .Take(pageInfo.PageSize)
-            .ToListAsync();
+        var gameYearList =
+            await context.GameYears
+                .Include(x => x.Host)
+                .Include(x => x.Winner)
+                .Skip(skip)
+                .Take(pageInfo.PageSize)
+                .ToListAsync();
 
-        var viewModel = gameYearList.Select(GetMappedDetailsViewModel).ToList();
+        var viewModel =
+            gameYearList
+                .Select(GetMappedDetailsViewModel)
+                .OrderBy(x => x.Year)
+                .ToList();
+
         return View(viewModel);
     }
 
@@ -39,11 +45,11 @@ public class GamesController(DataContext context, IConfiguration configuration) 
             return RedirectToAction("List");
         }
 
-        var gameYearDetails = await context
-            .GameYears
-            .Include(x => x.Host)
-            .Include(x => x.Winner)
-            .FirstOrDefaultAsync(x => x.Id == id);
+        var gameYearDetails =
+            await context.GameYears
+                .Include(x => x.Host)
+                .Include(x => x.Winner)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
         if (gameYearDetails is null)
         {
@@ -54,7 +60,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         var viewModel = GetMappedDetailsViewModel(gameYearDetails);
         return View(viewModel);
     }
-    
+
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
     public async Task<IActionResult> Create()
@@ -64,8 +70,9 @@ public class GamesController(DataContext context, IConfiguration configuration) 
             Year = (short)DateTime.Now.Year,
             Order = 1
         };
+
         await PrepareViewModel(viewModel);
-        
+
         return View(viewModel);
     }
 
@@ -75,6 +82,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
     {
         ModelState.Remove("Title");
         ModelState.Remove("Description");
+
         if (!ModelState.IsValid)
         {
             await PrepareViewModel(viewModel);
@@ -82,7 +90,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         }
 
         var extraErrors = false;
-        
+
         var gameYearList = await context.GameYears.ToListAsync();
         var exists = gameYearList.Any(x => x.Year == viewModel.Year);
         if (exists)
@@ -94,7 +102,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         {
             ModelState.Remove("Year");
         }
-        
+
         exists = gameYearList.Any(x => x.Order == viewModel.Order);
         if (exists)
         {
@@ -155,7 +163,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
 
         context.GameYears.Add(newGameYear);
         await context.SaveChangesAsync();
-        
+
         var basePath = configuration["ImageStoragePath"];
         var teamFolderPath = Path.Combine(basePath!, "games", slug);
         Directory.CreateDirectory(teamFolderPath);
@@ -185,19 +193,19 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         {
             return RedirectToAction("List");
         }
-    
-        var gameYearDetails = await context
-            .GameYears
-            .Include(x => x.Host)
-            .Include(x => x.Winner)
-            .FirstOrDefaultAsync(x => x.Id == id);
+
+        var gameYearDetails =
+            await context.GameYears
+                .Include(x => x.Host)
+                .Include(x => x.Winner)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
         if (gameYearDetails is null)
         {
             TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
             return RedirectToAction("List");
         }
-    
+
         var viewModel = GetMappedCreateOrEditViewModel(gameYearDetails);
         return View(viewModel);
     }
@@ -211,33 +219,37 @@ public class GamesController(DataContext context, IConfiguration configuration) 
             return RedirectToAction("List");
         }
 
-        var selectedGameYear = await context.GameYears.SingleOrDefaultAsync(x => x.Id == viewModel.Id);
-        if (selectedGameYear == null)
+        var gameYearDetails = await context.GameYears.SingleOrDefaultAsync(x => x.Id == viewModel.Id);
+        if (gameYearDetails == null)
         {
             return RedirectToAction("List");
         }
 
-        selectedGameYear.Title = viewModel.Title;
-        selectedGameYear.Description = viewModel.Description;
+        gameYearDetails.Title = viewModel.Title;
+        gameYearDetails.Description = viewModel.Description;
 
-        // if (profileImage != null)
-        // {
-        //     var wwwRootPath = _webHostEnvironment.WebRootPath;
-        //     var fileName = "profile" + Path.GetExtension(profileImage.FileName);
-        //     var productPath = $@"images\teams\{selectedTeam.Name}\";
-        //     var finalPath = Path.Combine(wwwRootPath, productPath);
-        //
-        //     if (!Directory.Exists(finalPath))
-        //         Directory.CreateDirectory(finalPath);
-        //
-        //     await using (var fileStream = new FileStream(Path.Combine(finalPath, fileName), FileMode.Create)) {
-        //         await profileImage.CopyToAsync(fileStream);
-        //     }
-        //     
-        //     selectedTeam.ImageUrl = productPath + fileName;
-        // }
+        if (profileImage != null)
+        {
+            var basePath = configuration["ImageStoragePath"];
+            var teamFolderPath = Path.Combine(basePath!, "games", gameYearDetails.Slug);
+            var fileName = "profile" + Path.GetExtension(profileImage.FileName);
+            var filePath = Path.Combine(teamFolderPath, fileName);
 
-        context.GameYears.Update(selectedGameYear);
+            if (!Directory.Exists(teamFolderPath))
+            {
+                Directory.CreateDirectory(teamFolderPath);
+            }
+
+            await using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                await profileImage.CopyToAsync(fileStream);
+            }
+
+            var relativePath = Path.Combine("teams", gameYearDetails.Slug, fileName).Replace("\\", "/");
+            gameYearDetails.ProfileImageUrl = $"/media/{relativePath}";
+        }
+
+        context.GameYears.Update(gameYearDetails);
         await context.SaveChangesAsync();
 
         TempData["success"] = "Το παιχνίδι επεξεργάστηκε επιτυχώς.";
@@ -254,15 +266,28 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
 
-        var gameYearList = await context.GameYears
-            .Include(x => x.Host)
-            .Include(x => x.Winner)
-            .Skip(skip)
-            .Take(pageInfo.PageSize)
-            .ToListAsync();
+        var gameYearList =
+            await context.GameYears
+                .Include(x => x.Host)
+                .Include(x => x.Winner)
+                .Skip(skip)
+                .Take(pageInfo.PageSize)
+                .ToListAsync();
 
-        var viewModel = gameYearList.Select(GetMappedDetailsViewModel).ToList();
+        var viewModel =
+            gameYearList
+                .Select(GetMappedDetailsViewModel)
+                .OrderBy(x => x.Year)
+                .ToList();
+
         return View(viewModel);
+    }
+
+    [HttpGet]
+    [Authorize(Roles = "Manager")]
+    public async Task<IActionResult> ManagerDashboard()
+    {
+        return View();
     }
 
     private async Task PrepareViewModel(GameCreateOrUpdateViewModel viewModel)
@@ -273,10 +298,10 @@ public class GamesController(DataContext context, IConfiguration configuration) 
 
         viewModel.HostSelectList = new SelectList(teamList, "Id", "Name", 0);
         viewModel.WinnerSelectList = new SelectList(teamList, "Id", "Name", 0);
-        
+
         viewModel.GameTypes = gameTypes;
     }
-    
+
     private static GameDetailsViewModel GetMappedDetailsViewModel(GameYear gameDetails)
     {
         var viewModel = new GameDetailsViewModel
@@ -286,12 +311,14 @@ public class GamesController(DataContext context, IConfiguration configuration) 
             Order = gameDetails.Order,
             ProfileImageUrl = gameDetails.ProfileImageUrl,
             Winner = gameDetails.Winner.Name,
-            Host = gameDetails.Host.Name
+            WinnerId = gameDetails.WinnerId,
+            Host = gameDetails.Host.Name,
+            HostId = gameDetails.HostId
         };
 
         return viewModel;
     }
-    
+
     private static GameCreateOrUpdateViewModel GetMappedCreateOrEditViewModel(GameYear gameDetails)
     {
         var viewModel = new GameCreateOrUpdateViewModel

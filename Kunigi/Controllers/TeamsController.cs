@@ -22,14 +22,20 @@ public class TeamsController(DataContext context, IConfiguration configuration)
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
 
-        var teamList = await context.Teams
-            .Include(t => t.WonYears)
-            .Include(t => t.HostedYears)
-            .Skip(skip)
-            .Take(pageInfo.PageSize)
-            .ToListAsync();
+        var teamList =
+            await context.Teams
+                .Include(t => t.WonYears)
+                .Include(t => t.HostedYears)
+                .Skip(skip)
+                .Take(pageInfo.PageSize)
+                .ToListAsync();
 
-        var viewModel = teamList.Select(GetMappedDetailsViewModel).ToList();
+        var viewModel =
+            teamList
+                .Select(GetMappedDetailsViewModel)
+                .OrderBy(x => x.Name)
+                .ToList();
+
         return View(viewModel);
     }
 
@@ -56,7 +62,7 @@ public class TeamsController(DataContext context, IConfiguration configuration)
         var viewModel = GetMappedDetailsViewModel(teamDetails);
         return View(viewModel);
     }
-    
+
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
     public IActionResult Create()
@@ -181,7 +187,6 @@ public class TeamsController(DataContext context, IConfiguration configuration)
         return RedirectToAction("Manage");
     }
 
-    
 
     [HttpGet]
     [Authorize(Roles = "Admin,Moderator")]
@@ -333,7 +338,7 @@ public class TeamsController(DataContext context, IConfiguration configuration)
         {
             team.Managers.Remove(managerToRemove);
             await context.SaveChangesAsync();
-            
+
             TempData["success"] = "Ο διαχειριστής αφαιρέθηκε επιτυχώς.";
         }
         else

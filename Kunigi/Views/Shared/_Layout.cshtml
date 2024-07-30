@@ -52,36 +52,35 @@
                     </li>
                     @if (User.Identity is { IsAuthenticated: true } && (User.IsInRole("Admin") || User.IsInRole("Moderator")))
                     {
-                        <li class="nav-item">
-                            <a class="nav-link @(GetActive("Teams", "Manage"))"
-                               asp-controller="Teams" asp-action="Manage">
-                                Διαχείρηση Ομάδων
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(GetActive("Games", "Manage"))"
-                               asp-controller="Games" asp-action="Manage">
-                                Διαχείρηση Παιχνιδιών
-                            </a>
-                        </li>
-                    }
-                    @if (User.Identity is { IsAuthenticated: true } && User.IsInRole("Admin"))
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link @(GetActive("Account", "Manage"))"
-                               asp-controller="Account" asp-action="Manage">
-                                Διαχείρηση Χρηστών
-                            </a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">Διαχείρηση</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item @(GetActive("Teams", "Manage"))"
+                                   asp-controller="Teams" asp-action="Manage">
+                                    Διαχείρηση Ομάδων
+                                </a>
+                                <a class="dropdown-item @(GetActive("Games", "Manage"))"
+                                   asp-controller="Games" asp-action="Manage">
+                                    Διαχείρηση Παιχνιδιών
+                                </a>
+                                @if (User.Identity is { IsAuthenticated: true } && User.IsInRole("Admin"))
+                                {
+                                    <a class="dropdown-item @(GetActive("Account", "Manage"))"
+                                       asp-controller="Account" asp-action="Manage">
+                                        Διαχείρηση Χρηστών
+                                    </a>
+                                }
+                            </div>
                         </li>
                     }
                     @if (User.Identity is { IsAuthenticated: true } && User.IsInRole("Manager"))
                     {
-                    <li class="nav-item">
-                        <a class="nav-link @(GetActive("Home", "Dashboard"))"
-                           asp-controller="Home" asp-action="Dashboard">
-                            Διαχείρηση
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(GetActive("Games", "ManagerDashboard"))"
+                               asp-controller="Games" asp-action="ManagerDashboard">
+                                Διαχείρηση
+                            </a>
+                        </li>
                     }
                 </ul>
                 <ul class="navbar-nav">
