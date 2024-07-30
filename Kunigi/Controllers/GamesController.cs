@@ -1,4 +1,5 @@
-﻿using Kunigi.Data;
+﻿using System.Security.Claims;
+using Kunigi.Data;
 using Kunigi.Entities;
 using Kunigi.Utilities;
 using Kunigi.ViewModels.Game;
@@ -284,9 +285,25 @@ public class GamesController(DataContext context, IConfiguration configuration) 
     }
 
     [HttpGet]
-    [Authorize(Roles = "Manager")]
     public async Task<IActionResult> ManagerDashboard()
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var managedGames = await context.Teams
+            .Where(t => t.Managers.Any(m => m.Id == userId))
+            .SelectMany(t => t.HostedYears.SelectMany(gy => gy.Games))
+            .Select(g => new ManagerViewModel
+            {
+                Id = g.Id,
+                Description = g.Description,
+                GameTypeName = g.GameType.Description,
+                GameYearTitle = g.GameYear.Title,
+                HostTeamName = g.GameYear.Host.Name
+            })
+            .ToListAsync();
+
+        return View(managedGames);
+        
         return View();
     }
 

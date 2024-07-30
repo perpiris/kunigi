@@ -1,1 +1,38 @@
-﻿
+﻿@model List<ManagerViewModel>
+
+<h2>Games You Manage</h2>
+
+@if (Model.Any())
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Game Type</th>
+            <th>Game Year</th>
+            <th>Host Team</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var game in Model)
+        {
+            <tr>
+                <td>@game.Id</td>
+                <td>@game.Description</td>
+                <td>@game.GameTypeName</td>
+                <td>@game.GameYearTitle</td>
+                <td>@game.HostTeamName</td>
+                <td>
+                    <a asp-controller="Puzzles" asp-action="List" asp-route-gameId="@game.Id" class="btn btn-primary">Manage Puzzles</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>You are not managing any games at the moment.</p>
+}
