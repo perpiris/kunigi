@@ -13,7 +13,7 @@ namespace Kunigi.Controllers;
 public class GamesController(DataContext context, IConfiguration configuration) : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> List(int pageIndex = 1)
+    public async Task<IActionResult> Index(int pageIndex = 1)
     {
         var resultCount = context.GameYears.Count();
 
@@ -43,7 +43,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
     {
         if (id <= 0)
         {
-            return RedirectToAction("List");
+            return RedirectToAction("Index");
         }
 
         var gameYearDetails =
@@ -55,7 +55,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         if (gameYearDetails is null)
         {
             TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
-            return RedirectToAction("List");
+            return RedirectToAction("Index");
         }
 
         var viewModel = GetMappedDetailsViewModel(gameYearDetails);
@@ -184,7 +184,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         }
 
         TempData["success"] = "Το παιχνίδι δημιουργήθηκε.";
-        return RedirectToAction("List");
+        return RedirectToAction("Index");
     }
 
     [HttpGet]
@@ -192,7 +192,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
     {
         if (id <= 0)
         {
-            return RedirectToAction("List");
+            return RedirectToAction("Index");
         }
 
         var gameYearDetails =
@@ -204,7 +204,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         if (gameYearDetails is null)
         {
             TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
-            return RedirectToAction("List");
+            return RedirectToAction("Index");
         }
 
         var viewModel = GetMappedCreateOrEditViewModel(gameYearDetails);
@@ -217,13 +217,13 @@ public class GamesController(DataContext context, IConfiguration configuration) 
     {
         if (viewModel.Id <= 0)
         {
-            return RedirectToAction("List");
+            return RedirectToAction("Index");
         }
 
         var gameYearDetails = await context.GameYears.SingleOrDefaultAsync(x => x.Id == viewModel.Id);
         if (gameYearDetails == null)
         {
-            return RedirectToAction("List");
+            return RedirectToAction("Index");
         }
 
         gameYearDetails.Title = viewModel.Title;
@@ -254,7 +254,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         await context.SaveChangesAsync();
 
         TempData["success"] = "Το παιχνίδι επεξεργάστηκε επιτυχώς.";
-        return RedirectToAction("List");
+        return RedirectToAction("Index");
     }
 
     [HttpGet]
@@ -303,8 +303,6 @@ public class GamesController(DataContext context, IConfiguration configuration) 
             .ToListAsync();
 
         return View(managedGames);
-        
-        return View();
     }
 
     private async Task PrepareViewModel(GameCreateOrUpdateViewModel viewModel)

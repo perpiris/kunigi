@@ -14,7 +14,7 @@ public class TeamsController(DataContext context, IConfiguration configuration)
     : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> List(int pageIndex = 1)
+    public async Task<IActionResult> Index(int pageIndex = 1)
     {
         var resultCount = await context.Teams.CountAsync();
 
@@ -44,7 +44,7 @@ public class TeamsController(DataContext context, IConfiguration configuration)
     {
         if (id <= 0)
         {
-            return RedirectToAction("List");
+            return RedirectToAction("Index");
         }
 
         var teamDetails = await context
@@ -56,7 +56,7 @@ public class TeamsController(DataContext context, IConfiguration configuration)
         if (teamDetails is null)
         {
             TempData["error"] = "Η ομάδα δεν υπάρχει.";
-            return RedirectToAction("List");
+            return RedirectToAction("Index");
         }
 
         var viewModel = GetMappedDetailsViewModel(teamDetails);
@@ -214,7 +214,7 @@ public class TeamsController(DataContext context, IConfiguration configuration)
     {
         if (id <= 0)
         {
-            return RedirectToAction("List");
+            return RedirectToAction("Index");
         }
 
         var team = await context.Teams

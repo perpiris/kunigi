@@ -1,1 +1,45 @@
-﻿
+﻿@model ManageUserViewModel
+
+@{
+    ViewData["Title"] = "Διαχείριση Χρηστών";
+}
+
+<div class="d-flex flex-wrap align-items-center mb-4">
+    <h2 class="mb-0 me-3 display-5 flex-grow-1">Διαχείριση Χρηστών</h2>
+</div>
+
+@if (Model == null || Model.UserList.Count == 0)
+{
+    <h2 class="mb-4 display-5 text-center">Δεν βρέθηκαν δεδομένα.</h2>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>email</th>
+            <th>Ενέργειες</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var user in Model.UserList)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>
+                    
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <ul class="pagination justify-content-center mt-5">
+        @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
+        {
+            <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
+                <a class="page-link" asp-controller="Teams" asp-action="Index" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
+            </li>
+        }
+    </ul>
+}
