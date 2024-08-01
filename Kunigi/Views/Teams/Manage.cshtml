@@ -33,9 +33,9 @@ else
             <tr>
                 <td>@team.Name</td>
                 <td>
-                    <a href="@Url.Action("Details", "Teams", new { id = team.Id })" class="btn btn-info">Προβολή</a>
-                    <a href="@Url.Action("Edit", "Teams", new { id = team.Id })" class="btn btn-primary">Επεξεργασία</a>
-                    <a href="@Url.Action("EditManagers", "Teams", new { id = team.Id })" class="btn btn-primary">Επεξεργασία Διαχειριστών</a>
+                    <a href="@Url.Action("Details", "Teams", new { teamSlug = team.Slug })" class="btn btn-info">Προβολή</a>
+                    <a href="@Url.Action("Edit", "Teams", new { teamSlug = team.Slug })" class="btn btn-primary">Επεξεργασία</a>
+                    <a href="@Url.Action("EditManagers", "Teams", new { teamSlug = team.Slug })" class="btn btn-primary">Επεξεργασία Διαχειριστών</a>
                 </td>
             </tr>
         }

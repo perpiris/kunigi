@@ -16,7 +16,6 @@ public class GamesController(DataContext context, IConfiguration configuration) 
     public async Task<IActionResult> Index(int pageIndex = 1)
     {
         var resultCount = context.GameYears.Count();
-
         var pageInfo = new PageInfo(resultCount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
@@ -38,10 +37,10 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         return View(viewModel);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Details(int id)
+    [HttpGet("Games/Details/{year}")]
+    public async Task<IActionResult> Details(string year)
     {
-        if (id <= 0)
+        if (string.IsNullOrEmpty(year))
         {
             return RedirectToAction("Index");
         }
@@ -50,7 +49,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
             await context.GameYears
                 .Include(x => x.Host)
                 .Include(x => x.Winner)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Slug == year.Trim());
 
         if (gameYearDetails is null)
         {
@@ -187,10 +186,11 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         return RedirectToAction("Index");
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Edit(int id)
+    [HttpGet("Games/Edit/{year}")]
+    [Authorize(Roles = "Admin,Moderator,Manager")]
+    public async Task<IActionResult> Edit(string year)
     {
-        if (id <= 0)
+        if (string.IsNullOrEmpty(year))
         {
             return RedirectToAction("Index");
         }
@@ -199,12 +199,27 @@ public class GamesController(DataContext context, IConfiguration configuration) 
             await context.GameYears
                 .Include(x => x.Host)
                 .Include(x => x.Winner)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Slug == year.Trim());
 
         if (gameYearDetails is null)
         {
             TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
             return RedirectToAction("Index");
+        }
+
+        if (User.IsInRole("Manager"))
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var team =
+                await context.Teams
+                    .Include(t => t.Managers)
+                    .FirstOrDefaultAsync(t => t.Managers.Any(m => m.Id == userId));
+
+            if (team == null || team.Id != gameYearDetails.Host.Id)
+            {
+                TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού.";
+                return RedirectToAction("Index");
+            }
         }
 
         var viewModel = GetMappedCreateOrEditViewModel(gameYearDetails);
@@ -220,10 +235,29 @@ public class GamesController(DataContext context, IConfiguration configuration) 
             return RedirectToAction("Index");
         }
 
-        var gameYearDetails = await context.GameYears.SingleOrDefaultAsync(x => x.Id == viewModel.Id);
-        if (gameYearDetails == null)
+        var gameYearDetails =
+            await context.GameYears
+                .Include(gameYear => gameYear.Host)
+                .SingleOrDefaultAsync(x => x.Id == viewModel.Id);
+
+        if (gameYearDetails is null)
         {
+            TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
             return RedirectToAction("Index");
+        }
+
+        if (User.IsInRole("Manager"))
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var team = await context.Teams
+                .Include(t => t.Managers)
+                .FirstOrDefaultAsync(t => t.Managers.Any(m => m.Id == userId));
+
+            if (team == null || team.Id != gameYearDetails.Host.Id)
+            {
+                TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού.";
+                return RedirectToAction("Index");
+            }
         }
 
         gameYearDetails.Title = viewModel.Title;
@@ -246,7 +280,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
                 await profileImage.CopyToAsync(fileStream);
             }
 
-            var relativePath = Path.Combine("teams", gameYearDetails.Slug, fileName).Replace("\\", "/");
+            var relativePath = Path.Combine("games", gameYearDetails.Slug, fileName).Replace("\\", "/");
             gameYearDetails.ProfileImageUrl = $"/media/{relativePath}";
         }
 
@@ -257,12 +291,11 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         return RedirectToAction("Index");
     }
 
-    [HttpGet]
+    [HttpGet("Games/Manage")]
     [Authorize(Roles = "Admin,Moderator")]
     public async Task<IActionResult> Manage(int pageIndex = 1)
     {
         var resultCount = context.GameYears.Count();
-
         var pageInfo = new PageInfo(resultCount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
@@ -323,6 +356,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         {
             Id = gameDetails.Id,
             Title = gameDetails.Title,
+            Year = gameDetails.Year,
             Order = gameDetails.Order,
             ProfileImageUrl = gameDetails.ProfileImageUrl,
             Winner = gameDetails.Winner.Name,

@@ -17,7 +17,7 @@ else
     <table class="table">
         <thead>
         <tr>
-            <th>email</th>
+            <th>Email</th>
             <th>Ενέργειες</th>
         </tr>
         </thead>
@@ -27,7 +27,7 @@ else
             <tr>
                 <td>@user.Email</td>
                 <td>
-                    
+                    <a href="@Url.Action("EditRoles", "Account", new { userId = user.Id })" class="btn btn-primary">Επεξεργασία Ρόλων</a>
                 </td>
             </tr>
         }
@@ -38,7 +38,7 @@ else
         @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
         {
             <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
-                <a class="page-link" asp-controller="Teams" asp-action="Index" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
+                <a class="page-link" asp-controller="Account" asp-action="Manage" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
             </li>
         }
     </ul>

@@ -24,7 +24,7 @@
                         <div class="row gy-4 gy-xl-5 p-4 p-xl-5">
                             <div class="col-12 col-md-6">
                                 <label asp-for="Name" class="form-label mt-4"></label>
-                                <input asp-for="Name" class="form-control @(ViewData.ModelState["Name"] != null ? "is-invalid" : "")"/>
+                                <input asp-for="Name" class="form-control @(ViewData.ModelState["Name"] != null ? "is-invalid" : "")" readonly="readonly"/>
                                 <span asp-validation-for="Name" class="text-danger"></span>
                             </div>
                             <div class="col-12 col-md-6">
@@ -59,7 +59,7 @@
                             <div class="col-12">
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-primary">Αποθήκευση</button>
-                                    <a asp-controller="Teams" asp-action="List" class="btn btn-secondary">Πίσω</a>
+                                    <a asp-controller="Teams" asp-action="Index" class="btn btn-secondary">Πίσω</a>
                                 </div>
                             </div>
                         </div>

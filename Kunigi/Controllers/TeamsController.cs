@@ -1,23 +1,24 @@
-﻿using Kunigi.Data;
+﻿using System.Security.Claims;
+using Kunigi.Data;
 using Kunigi.Entities;
 using Kunigi.Utilities;
 using Kunigi.ViewModels.GameYear;
 using Kunigi.ViewModels.Team;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kunigi.Controllers;
 
-public class TeamsController(DataContext context, IConfiguration configuration)
+public class TeamsController(DataContext context, IConfiguration configuration, UserManager<AppUser> userManager)
     : Controller
 {
-    [HttpGet]
+    [HttpGet("Teams/List")]
     public async Task<IActionResult> Index(int pageIndex = 1)
     {
         var resultCount = await context.Teams.CountAsync();
-
         var pageInfo = new PageInfo(resultCount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
@@ -39,10 +40,10 @@ public class TeamsController(DataContext context, IConfiguration configuration)
         return View(viewModel);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Details(int id)
+    [HttpGet("Teams/Detals/{teamSlug}")]
+    public async Task<IActionResult> Details(string teamSlug)
     {
-        if (id <= 0)
+        if (string.IsNullOrEmpty(teamSlug))
         {
             return RedirectToAction("Index");
         }
@@ -51,7 +52,7 @@ public class TeamsController(DataContext context, IConfiguration configuration)
             .Teams
             .Include(x => x.HostedYears.OrderBy(y => y.Year))
             .Include(x => x.WonYears.OrderBy(y => y.Year))
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Slug == teamSlug.Trim());
 
         if (teamDetails is null)
         {
@@ -122,16 +123,32 @@ public class TeamsController(DataContext context, IConfiguration configuration)
         return RedirectToAction("Manage");
     }
 
-    [HttpGet]
-    [Authorize(Roles = "Admin,Moderator")]
-    public async Task<IActionResult> Edit(int id)
+    [HttpGet("Teams/Edit/{teamSlug}")]
+    [Authorize(Roles = "Admin,Moderator,Manager")]
+    public async Task<IActionResult> Edit(string teamSlug)
     {
-        if (id <= 0)
+        if (string.IsNullOrEmpty(teamSlug))
         {
             return RedirectToAction("Manage");
         }
+        
+        var teamDetails = 
+            await context.Teams
+                .Include(team => team.Managers)
+                .SingleOrDefaultAsync(x => x.Slug == teamSlug.Trim());
+        
+        if (User.IsInRole("Manager"))
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        var teamDetails = await context.Teams.SingleOrDefaultAsync(x => x.Id == id);
+            if (teamDetails.Managers.All(x => x.Id != userId))
+            {
+                TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        
         var viewModel = GetMappedCreateOrEditViewModel(teamDetails);
         if (viewModel != null) return View(viewModel);
 
@@ -139,7 +156,7 @@ public class TeamsController(DataContext context, IConfiguration configuration)
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Moderator")]
+    [Authorize(Roles = "Admin,Moderator,Manager")]
     public async Task<IActionResult> Edit(TeamCreateOrEditViewModel updatedTeamDetails, IFormFile profileImage)
     {
         if (updatedTeamDetails.Id <= 0)
@@ -188,15 +205,15 @@ public class TeamsController(DataContext context, IConfiguration configuration)
     }
 
 
-    [HttpGet]
+    [HttpGet("Teams/Manage")]
     [Authorize(Roles = "Admin,Moderator")]
     public async Task<IActionResult> Manage(int pageIndex = 1)
     {
         var resultcount = context.Teams.Count();
-
         var pageInfo = new PageInfo(resultcount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
+
         var teamList = await context.Teams
             .Include(t => t.WonYears)
             .Include(t => t.HostedYears)
@@ -208,18 +225,18 @@ public class TeamsController(DataContext context, IConfiguration configuration)
         return View(viewModel);
     }
 
-    [HttpGet]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> EditManagers(int id)
+    [HttpGet("Teams/EditManagers/{teamSlug}")]
+    [Authorize(Roles = "Admin,Moderator")]
+    public async Task<IActionResult> EditManagers(string teamSlug)
     {
-        if (id <= 0)
+        if (string.IsNullOrEmpty(teamSlug))
         {
             return RedirectToAction("Index");
         }
 
         var team = await context.Teams
             .Include(t => t.Managers)
-            .SingleOrDefaultAsync(t => t.Id == id);
+            .SingleOrDefaultAsync(t => t.Slug == teamSlug.Trim());
 
         if (team == null)
         {
@@ -277,6 +294,18 @@ public class TeamsController(DataContext context, IConfiguration configuration)
 
         if (selectedManager != null)
         {
+            var isInManagerRole = await userManager.IsInRoleAsync(selectedManager, "Manager");
+
+            if (!isInManagerRole)
+            {
+                var result = await userManager.AddToRoleAsync(selectedManager, "Manager");
+                if (!result.Succeeded)
+                {
+                    TempData["error"] = "Αποτυχία προσθήκης του χρήστη στο ρόλο του Διαχειριστή.";
+                    return RedirectToAction("EditManagers", new { id = viewModel.TeamId });
+                }
+            }
+
             if (teamToUpdate.Managers.All(m => m.Id != selectedManager.Id))
             {
                 teamToUpdate.Managers.Add(selectedManager);
@@ -355,6 +384,7 @@ public class TeamsController(DataContext context, IConfiguration configuration)
         {
             Id = teamDetails.Id,
             Name = teamDetails.Name,
+            Slug = teamDetails.Slug,
             Description = teamDetails.Description,
             ProfileImageUrl = teamDetails.ProfileImageUrl,
             Facebook = teamDetails.Facebook,

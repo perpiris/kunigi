@@ -88,27 +88,78 @@ public class AccountController(UserManager<AppUser> userManager, SignInManager<A
                 .Skip(skip)
                 .Take(pageInfo.PageSize)
                 .ToListAsync();
-        var userList = new List<UserDetailsViewModel>();
+        var userList = new List<UserDetailsUpdateViewModel>();
 
         foreach (var user in users)
         {
             var userRoles = await userManager.GetRolesAsync(user);
-            userList.Add(new UserDetailsViewModel
+            userList.Add(new UserDetailsUpdateViewModel
             {
                 Id = user.Id,
                 Email = user.Email,
-                Roles = userRoles.ToList()
+                UserRoles = userRoles.ToList()
             });
         }
 
-        var roleList = await roleManager.Roles.Select(r => r.Name).ToListAsync();
-
         var viewModel = new ManageUserViewModel
         {
-            UserList = userList,
-            RolesList = roleList
+            UserList = userList
         };
 
         return View(viewModel);
+    }
+    
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> EditRoles(string userId)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            TempData["error"] = "User not found";
+            return RedirectToAction("Manage");
+        }
+
+        var userRoles = await userManager.GetRolesAsync(user);
+        var roleList = await roleManager.Roles.Select(r => r.Name).ToListAsync();
+        var viewModel = new UserDetailsUpdateViewModel
+        {
+            Id = userId,
+            Email = user.Email,
+            UserRoles = userRoles.ToList(),
+            RoleList = roleList
+        };
+
+        return View(viewModel);
+    }
+    
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> EditRoles(UserDetailsUpdateViewModel userDetailsViewModel, List<string> selectedRoles)
+    {
+        var user = await userManager.FindByIdAsync(userDetailsViewModel.Id);
+        if (user == null)
+        {
+            TempData["error"] = "User not found";
+            return RedirectToAction("Manage");
+        }
+
+        var userRoles = await userManager.GetRolesAsync(user);
+        
+        foreach (var role in userRoles)
+        {
+            if (!selectedRoles.Contains(role))
+            {
+                await userManager.RemoveFromRoleAsync(user, role);
+            }
+        }
+        
+        foreach (var role in selectedRoles.Where(role => !userRoles.Contains(role)))
+        {
+            await userManager.AddToRoleAsync(user, role);
+        }
+
+        TempData["success"] = "Roles updated successfully";
+        return RedirectToAction("Manage");
     }
 }

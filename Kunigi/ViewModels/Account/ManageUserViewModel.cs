@@ -2,7 +2,5 @@
 
 public class ManageUserViewModel
 {
-    public List<UserDetailsViewModel> UserList { get; set; }
-
-    public List<string> RolesList { get; set; }
+    public List<UserDetailsUpdateViewModel> UserList { get; set; }
 }

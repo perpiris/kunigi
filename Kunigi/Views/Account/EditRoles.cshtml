@@ -1,0 +1,32 @@
+﻿@model UserDetailsUpdateViewModel
+
+@{
+    ViewData["Title"] = "Επεξεργασία Ρόλων";
+}
+
+<form asp-action="EditRoles" asp-controller="Account" method="post">
+    <input type="hidden" asp-for="Id"/>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Ρόλοι @Model.Email</h5>
+        </div>
+        <div class="card-body">
+            @for (var i = 0; i < Model.RoleList.Count; i++)
+            {
+                <div class="form-check form-check-inline mb-2 mr-3">
+                    <input class="form-check-input" type="checkbox" name="SelectedRoles" value="@Model.RoleList[i]"
+                           id="role-@i" @(Model.UserRoles.Contains(Model.RoleList[i]) ? "checked" : "")>
+                    <label class="form-check-label" for="role-@i">
+                        @Model.RoleList[i]
+                    </label>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+        <a asp-action="Manage" class="btn btn-secondary">Πίσω</a>
+    </div>
+</form>

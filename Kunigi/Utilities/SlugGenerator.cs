@@ -5,7 +5,7 @@ namespace Kunigi.Utilities;
 
 public static class SlugGenerator
 {
-    private static readonly HashSet<char> ValidChars = new(new[] { '-', '_' });
+    private static readonly HashSet<char> ValidChars = [..new[] { '-', '_' }];
     private static readonly Dictionary<char, string> TransliterationMap = new()
     {
         {'α', "a"}, {'ά', "a"}, {'Α', "a"}, {'Ά', "a"},
@@ -40,11 +40,11 @@ public static class SlugGenerator
         if (string.IsNullOrWhiteSpace(input))
             return string.Empty;
 
+        input = input.Replace(' ', '-');
         input = input.Normalize(NormalizationForm.FormD);
         input = TransliterateGreekToLatin(input);
         input = RemoveDiacritics(input).ToLowerInvariant();
         input = RemoveInvalidCharacters(input);
-        input = input.Replace(' ', '-');
         input = input.Replace("--", "-", StringComparison.Ordinal);
         input = input.Trim('-');
 
@@ -69,11 +69,9 @@ public static class SlugGenerator
         var normalizedString = input.Normalize(NormalizationForm.FormD);
         var stringBuilder = new StringBuilder(capacity: normalizedString.Length);
 
-        for (int i = 0; i < normalizedString.Length; i++)
+        foreach (var c in normalizedString.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark))
         {
-            char c = normalizedString[i];
-            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
-                stringBuilder.Append(c);
+            stringBuilder.Append(c);
         }
 
         return stringBuilder.ToString().Normalize(NormalizationForm.FormC);

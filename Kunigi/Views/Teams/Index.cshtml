@@ -34,30 +34,28 @@
 
     @if (Model == null || !Model.Any())
     {
-        <div class="alert alert-info" role="alert">
-            <i class="fas fa-info-circle me-2"></i>Δεν βρέθηκαν ομάδες.
-        </div>
+        <h2 class="mb-4 display-5 text-center">Δεν βρέθηκαν δεδομένα.</h2>
     }
     else
     {
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-2">
-            @foreach (var item in Model)
+            @foreach (var team in Model)
             {
                 <div class="col px-1">
-                    <a asp-controller="Teams" asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">
+                    <a asp-controller="Teams" asp-action="Details" asp-route-teamSlug="@team.Slug" class="text-decoration-none">
                         <div class="card h-100 shadow team-card">
                             <div class="card-img-top-wrapper">
-                                @if (string.IsNullOrEmpty(item.ProfileImageUrl))
+                                @if (string.IsNullOrEmpty(team.ProfileImageUrl))
                                 {
                                     <img src="~/media/profile.jpg" class="card-img-top" alt="Default Team Image">
                                 }
                                 else
                                 {
-                                    <img src="@item.ProfileImageUrl" class="card-img-top" alt="@item.Name">
+                                    <img src="@team.ProfileImageUrl" class="card-img-top" alt="@team.Name">
                                 }
                             </div>
                             <div class="card-body">
-                                <h5 class="card-title text-center">@item.Name</h5>
+                                <h5 class="card-title text-center">@team.Name</h5>
                             </div>
                         </div>
                     </a>
@@ -70,7 +68,7 @@
                 @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
                 {
                     <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
-                        <a class="page-link" asp-controller="Teams" asp-action="List" asp-route-pageIndex="@pageIndex">@pageIndex</a>
+                        <a class="page-link" asp-controller="Teams" asp-action="Index" asp-route-pageIndex="@pageIndex">@pageIndex</a>
                     </li>
                 }
             </ul>
