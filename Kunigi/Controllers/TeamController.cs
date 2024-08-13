@@ -12,11 +12,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kunigi.Controllers;
 
-public class TeamsController(DataContext context, IConfiguration configuration, UserManager<AppUser> userManager)
+[Route("teams")]
+public class TeamController(DataContext context, IConfiguration configuration, UserManager<AppUser> userManager)
     : Controller
 {
-    [HttpGet("Teams/List")]
-    public async Task<IActionResult> Index(int pageIndex = 1)
+    [HttpGet("list")]
+    public async Task<IActionResult> TeamList(int pageIndex = 1)
     {
         var resultCount = await context.Teams.CountAsync();
         var pageInfo = new PageInfo(resultCount, pageIndex);
@@ -40,12 +41,12 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
         return View(viewModel);
     }
 
-    [HttpGet("Teams/Detals/{teamSlug}")]
-    public async Task<IActionResult> Details(string teamSlug)
+    [HttpGet("{teamSlug}")]
+    public async Task<IActionResult> TeamDetails(string teamSlug)
     {
         if (string.IsNullOrEmpty(teamSlug))
         {
-            return RedirectToAction("Index");
+            return RedirectToAction("TeamList");
         }
 
         var teamDetails = await context
@@ -57,23 +58,23 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
         if (teamDetails is null)
         {
             TempData["error"] = "Η ομάδα δεν υπάρχει.";
-            return RedirectToAction("Index");
+            return RedirectToAction("TeamList");
         }
 
         var viewModel = GetMappedDetailsViewModel(teamDetails);
         return View(viewModel);
     }
 
-    [HttpGet]
-    [Authorize(Roles = "Admin,Moderator")]
-    public IActionResult Create()
+    [HttpGet("create")]
+    [Authorize(Roles = "Admin")]
+    public IActionResult CreateTeam()
     {
         return View();
     }
 
-    [HttpPost]
-    [Authorize(Roles = "Admin,Moderator")]
-    public async Task<IActionResult> Create(TeamCreateOrEditViewModel viewModel, IFormFile profileImage)
+    [HttpPost("create")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateTeam(TeamCreateOrEditViewModel viewModel, IFormFile profileImage)
     {
         if (!ModelState.IsValid) return View();
 
@@ -120,54 +121,73 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
         await context.SaveChangesAsync();
 
         TempData["success"] = "Η ομάδα δημιουργήθηκε.";
-        return RedirectToAction("Manage");
+        return RedirectToAction("TeamManagement");
     }
 
-    [HttpGet("Teams/Edit/{teamSlug}")]
-    [Authorize(Roles = "Admin,Moderator,Manager")]
-    public async Task<IActionResult> Edit(string teamSlug)
+    [HttpGet("{teamSlug}/edit")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> EditTeam(string teamSlug)
     {
         if (string.IsNullOrEmpty(teamSlug))
         {
-            return RedirectToAction("Manage");
+            return RedirectToAction("TeamManagement");
         }
-        
-        var teamDetails = 
+
+        var teamDetails =
             await context.Teams
                 .Include(team => team.Managers)
                 .SingleOrDefaultAsync(x => x.Slug == teamSlug.Trim());
         
-        if (User.IsInRole("Manager"))
+        if (teamDetails == null)
+        {
+            return RedirectToAction("TeamManagement");
+        }
+
+        if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (teamDetails.Managers.All(x => x.Id != userId))
             {
                 TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού.";
-                return RedirectToAction("Index");
+                return RedirectToAction("TeamList");
             }
         }
 
-        
         var viewModel = GetMappedCreateOrEditViewModel(teamDetails);
         if (viewModel != null) return View(viewModel);
 
-        return RedirectToAction("Manage");
+        return RedirectToAction("TeamManagement");
     }
 
-    [HttpPost]
-    [Authorize(Roles = "Admin,Moderator,Manager")]
-    public async Task<IActionResult> Edit(TeamCreateOrEditViewModel updatedTeamDetails, IFormFile profileImage)
+    [HttpPost("{teamSlug}/edit")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> EditTeam(string teamSlug, TeamCreateOrEditViewModel updatedTeamDetails, IFormFile profileImage)
     {
-        if (updatedTeamDetails.Id <= 0)
+        if (string.IsNullOrEmpty(teamSlug))
         {
-            return RedirectToAction("Manage");
+            return RedirectToAction("TeamManagement");
         }
 
-        var teamDetails = await context.Teams.SingleOrDefaultAsync(x => x.Id == updatedTeamDetails.Id);
+        var teamDetails =
+            await context.Teams
+                .Include(team => team.Managers)
+                .SingleOrDefaultAsync(x => x.Slug == teamSlug.Trim());
+        
         if (teamDetails == null)
         {
-            return RedirectToAction("Manage");
+            return RedirectToAction("TeamManagement");
+        }
+        
+        if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (teamDetails.Managers.All(x => x.Id != userId))
+            {
+                TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού.";
+                return RedirectToAction("TeamList");
+            }
         }
 
         teamDetails.Description = updatedTeamDetails.Description;
@@ -201,13 +221,13 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
         await context.SaveChangesAsync();
 
         TempData["success"] = $"Η ομάδα {teamDetails.Name} επεξεργάστηκε επιτυχώς.";
-        return RedirectToAction("Manage");
+        return RedirectToAction("TeamManagement");
     }
 
 
-    [HttpGet("Teams/Manage")]
-    [Authorize(Roles = "Admin,Moderator")]
-    public async Task<IActionResult> Manage(int pageIndex = 1)
+    [HttpGet("manage")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> TeamManagement(int pageIndex = 1)
     {
         var resultcount = context.Teams.Count();
         var pageInfo = new PageInfo(resultcount, pageIndex);
@@ -225,22 +245,22 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
         return View(viewModel);
     }
 
-    [HttpGet("Teams/EditManagers/{teamSlug}")]
-    [Authorize(Roles = "Admin,Moderator")]
-    public async Task<IActionResult> EditManagers(string teamSlug)
+    [HttpGet("{teamSlug}/edit-managers")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> EditTeamManagers(string teamSlug)
     {
         if (string.IsNullOrEmpty(teamSlug))
         {
-            return RedirectToAction("Index");
+            return RedirectToAction("TeamList");
         }
 
-        var team = await context.Teams
+        var teamToUpdate = await context.Teams
             .Include(t => t.Managers)
             .SingleOrDefaultAsync(t => t.Slug == teamSlug.Trim());
 
-        if (team == null)
+        if (teamToUpdate == null)
         {
-            return RedirectToAction("Manage");
+            return RedirectToAction("TeamManagement");
         }
 
         var users = await context.AppUsers.ToListAsync();
@@ -257,10 +277,10 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
 
         var viewModel = new TeamManagerUpdateViewModel
         {
-            TeamId = team.Id,
-            TeamName = team.Name,
+            Slug = teamToUpdate.Slug,
+            TeamName = teamToUpdate.Name,
             ManagerSelectList = new SelectList(managerSelectList, "Value", "Text"),
-            ManagerList = team.Managers.Select(m => new TeamManagerDetailsViewModel
+            ManagerList = teamToUpdate.Managers.Select(m => new TeamManagerDetailsViewModel
             {
                 Id = m.Id,
                 Email = m.Email
@@ -270,10 +290,15 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
         return View(viewModel);
     }
 
-    [HttpPost]
+    [HttpPost("{teamSlug}/edit-managers")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> EditManagers(TeamManagerUpdateViewModel viewModel)
+    public async Task<IActionResult> EditTeamManagers(string teamSlug, TeamManagerUpdateViewModel viewModel)
     {
+        if (string.IsNullOrEmpty(teamSlug))
+        {
+            return RedirectToAction("TeamList");
+        }
+        
         if (!ModelState.IsValid)
         {
             await PopulateUpdateManagerViewModel(viewModel);
@@ -282,11 +307,11 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
 
         var teamToUpdate = await context.Teams
             .Include(t => t.Managers)
-            .SingleOrDefaultAsync(t => t.Id == viewModel.TeamId);
+            .SingleOrDefaultAsync(t => t.Slug == teamSlug.Trim());
 
         if (teamToUpdate == null)
         {
-            return RedirectToAction("Manage");
+            return RedirectToAction("TeamManagement");
         }
 
         var selectedManager = await context.AppUsers
@@ -302,14 +327,23 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
                 if (!result.Succeeded)
                 {
                     TempData["error"] = "Αποτυχία προσθήκης του χρήστη στο ρόλο του Διαχειριστή.";
-                    return RedirectToAction("EditManagers", new { id = viewModel.TeamId });
+                    return RedirectToAction("EditTeamManagers", new { id = viewModel.Slug });
                 }
             }
 
             if (teamToUpdate.Managers.All(m => m.Id != selectedManager.Id))
             {
                 teamToUpdate.Managers.Add(selectedManager);
+                
+                var teamManager = new TeamManager
+                {
+                    TeamId = teamToUpdate.Id,
+                    AppUserId = selectedManager.Id
+                };
+                
+                context.TeamManagers.Add(teamManager);
                 await context.SaveChangesAsync();
+                
                 TempData["success"] = "Ο διαχειριστής προστέθηκε επιτυχώς.";
             }
             else
@@ -322,50 +356,38 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
             TempData["error"] = "Δεν βρέθηκε ο επιλεγμένος διαχειριστής.";
         }
 
-        return RedirectToAction("EditManagers", new { id = viewModel.TeamId });
+        return RedirectToAction("EditTeamManagers", new { id = viewModel.Slug });
     }
 
-    private async Task PopulateUpdateManagerViewModel(TeamManagerUpdateViewModel viewModel)
-    {
-        var team = await context.Teams
-            .Include(t => t.Managers)
-            .SingleOrDefaultAsync(t => t.Id == viewModel.TeamId);
-
-        if (team != null)
-        {
-            var users = await context.AppUsers.ToListAsync();
-            viewModel.TeamName = team.Name;
-            viewModel.ManagerSelectList = new SelectList(users.Select(u => new SelectListItem
-            {
-                Value = u.Id.ToString(),
-                Text = u.Email
-            }), "Value", "Text");
-
-            viewModel.ManagerList = team.Managers.Select(m => new TeamManagerDetailsViewModel
-            {
-                Id = m.Id,
-                Email = m.Email
-            }).ToList();
-        }
-    }
-
-    [HttpPost]
+    [HttpPost("{teamSlug}/remove-manager")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> RemoveManager(int teamId, string managerId)
+    public async Task<IActionResult> RemoveManager(string teamSlug, string managerId)
     {
-        var team = await context.Teams
-            .Include(t => t.Managers)
-            .SingleOrDefaultAsync(t => t.Id == teamId);
-
-        if (team == null)
+        if (string.IsNullOrEmpty(teamSlug))
         {
-            return RedirectToAction("Manage");
+            return RedirectToAction("TeamList");
         }
 
-        var managerToRemove = team.Managers.SingleOrDefault(m => m.Id == managerId);
+        var teamToUpdate = await context.Teams
+            .Include(t => t.Managers)
+            .SingleOrDefaultAsync(t => t.Slug == teamSlug.Trim());
+
+        if (teamToUpdate == null)
+        {
+            return RedirectToAction("TeamManagement");
+        }
+
+        var managerToRemove = teamToUpdate.Managers.SingleOrDefault(m => m.Id == managerId);
         if (managerToRemove != null)
         {
-            team.Managers.Remove(managerToRemove);
+            teamToUpdate.Managers.Remove(managerToRemove);
+            var teamManager = await context.TeamManagers
+                .SingleOrDefaultAsync(tm => tm.TeamId == teamToUpdate.Id && tm.AppUserId == managerId);
+            if (teamManager != null)
+            {
+                context.TeamManagers.Remove(teamManager);
+            }
+
             await context.SaveChangesAsync();
 
             TempData["success"] = "Ο διαχειριστής αφαιρέθηκε επιτυχώς.";
@@ -375,7 +397,7 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
             TempData["error"] = "Δεν βρέθηκε ο επιλεγμένος διαχειριστής.";
         }
 
-        return RedirectToAction("EditManagers", new { id = teamId });
+        return RedirectToAction("EditTeamManagers", new { teamSlug });
     }
 
     private static TeamDetailsViewModel GetMappedDetailsViewModel(Team teamDetails)
@@ -433,5 +455,29 @@ public class TeamsController(DataContext context, IConfiguration configuration, 
         };
 
         return viewModel;
+    }
+    
+    private async Task PopulateUpdateManagerViewModel(TeamManagerUpdateViewModel viewModel)
+    {
+        var team = await context.Teams
+            .Include(t => t.Managers)
+            .SingleOrDefaultAsync(t => t.Slug == viewModel.Slug);
+
+        if (team != null)
+        {
+            var users = await context.AppUsers.ToListAsync();
+            viewModel.TeamName = team.Name;
+            viewModel.ManagerSelectList = new SelectList(users.Select(u => new SelectListItem
+            {
+                Value = u.Id.ToString(),
+                Text = u.Email
+            }), "Value", "Text");
+
+            viewModel.ManagerList = team.Managers.Select(m => new TeamManagerDetailsViewModel
+            {
+                Id = m.Id,
+                Email = m.Email
+            }).ToList();
+        }
     }
 }

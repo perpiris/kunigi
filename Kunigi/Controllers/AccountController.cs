@@ -162,4 +162,11 @@ public class AccountController(UserManager<AppUser> userManager, SignInManager<A
         TempData["success"] = "Roles updated successfully";
         return RedirectToAction("Manage");
     }
+    
+    [HttpGet("dashboard")]
+    [Authorize(Roles = "Manager")]
+    public async Task<IActionResult> Dashboard()
+    {
+        return View();
+    }
 }

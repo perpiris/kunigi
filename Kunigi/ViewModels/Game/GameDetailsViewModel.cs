@@ -10,11 +10,11 @@ public class GameDetailsViewModel
     
     public string Title { get; set; }
     
-    public int WinnerId { get; set; }
+    public string WinnerSlug { get; set; }
 
     public string Winner { get; set; }
     
-    public int HostId { get; set; }
+    public string HostSlug { get; set; }
     
     public string Host { get; set; }
     

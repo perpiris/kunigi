@@ -39,45 +39,22 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @(GetActive("Teams", "Index"))"
-                           asp-area="" asp-controller="Teams" asp-action="Index">
+                        <a class="nav-link @(GetActive("Teams", "TeamList"))"
+                           asp-area="" asp-controller="Team" asp-action="TeamList">
                             Ομάδες
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(GetActive("Games", "Index"))"
-                           asp-area="" asp-controller="Games" asp-action="Index">
+                           asp-area="" asp-controller="GameYear" asp-action="GameYearList">
                             Παιχνίδια
                         </a>
                     </li>
-                    @if (User.Identity is { IsAuthenticated: true } && (User.IsInRole("Admin") || User.IsInRole("Moderator")))
-                    {
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">Διαχείρηση</a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item @(GetActive("Teams", "Manage"))"
-                                   asp-controller="Teams" asp-action="Manage">
-                                    Διαχείρηση Ομάδων
-                                </a>
-                                <a class="dropdown-item @(GetActive("Games", "Manage"))"
-                                   asp-controller="Games" asp-action="Manage">
-                                    Διαχείρηση Παιχνιδιών
-                                </a>
-                                @if (User.Identity is { IsAuthenticated: true } && User.IsInRole("Admin"))
-                                {
-                                    <a class="dropdown-item @(GetActive("Account", "Manage"))"
-                                       asp-controller="Account" asp-action="Manage">
-                                        Διαχείρηση Χρηστών
-                                    </a>
-                                }
-                            </div>
-                        </li>
-                    }
                     @if (User.Identity is { IsAuthenticated: true } && User.IsInRole("Manager"))
                     {
                         <li class="nav-item">
-                            <a class="nav-link @(GetActive("Games", "ManagerDashboard"))"
-                               asp-controller="Games" asp-action="ManagerDashboard">
+                            <a class="nav-link @(GetActive("Account", "Dashboard"))"
+                               asp-controller="Account" asp-action="Dashboard">
                                 Διαχείρηση
                             </a>
                         </li>
@@ -111,6 +88,43 @@
             </div>
         </div>
     </nav>
+
+    @if (User.Identity is { IsAuthenticated: true } && (User.IsInRole("Admin") || User.IsInRole("Moderator")))
+    {
+        <nav class="navbar navbar-expand-lg bg-secondary" data-bs-theme="light">
+            <div class="container">
+                <span class="navbar-brand">Διαχείριση</span>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarManagement">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarManagement">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link @(GetActive("Teams", "Manage"))"
+                               asp-controller="Team" asp-action="TeamManagement">
+                                Διαχείριση Ομάδων
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(GetActive("Games", "Manage"))"
+                               asp-controller="GameYear" asp-action="GameYearManagement">
+                                Διαχείριση Παιχνιδιών
+                            </a>
+                        </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(GetActive("Account", "Manage"))"
+                                   asp-controller="Account" asp-action="Manage">
+                                    Διαχείριση Χρηστών
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    }
 </header>
 
 <div class="container mt-4">

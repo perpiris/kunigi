@@ -21,6 +21,9 @@
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="wwwroot\images\test2\profile.jpg" />
+      <_ContentIncludedByDefault Remove="Views\Puzzles\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Puzzles\Edit.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Puzzles\List.cshtml" />
     </ItemGroup>
 
 </Project>

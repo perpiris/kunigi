@@ -22,9 +22,9 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Προσθήκη Διαχειριστή</h5>
-                    @using (Html.BeginForm("EditManagers", "Teams", FormMethod.Post))
+                    @using (Html.BeginForm("EditTeamManagers", "Team", FormMethod.Post))
                     {
-                        @Html.HiddenFor(x => x.TeamId)
+                        @Html.HiddenFor(x => x.Slug)
                         <div class="mb-3">
                             <input type="text" id="filterInput" placeholder="Φίλτρο" class="form-control mb-2"/>
                             <select asp-for="SelectedManagerId" asp-items="Model.ManagerSelectList" class="form-select" id="managerSelect">
@@ -33,7 +33,7 @@
                         </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Προσθήκη Διαχειριστή</button>
-                            <a asp-controller="Teams" asp-action="Manage" class="btn btn-secondary">Επιστροφή</a>
+                            <a asp-controller="Team" asp-action="TeamManagement" class="btn btn-secondary">Επιστροφή</a>
                         </div>
                     }
                 </div>
@@ -52,9 +52,8 @@
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     @item.Email
-                                    @using (Html.BeginForm("RemoveManager", "Teams", FormMethod.Post, new { @class = "d-inline" }))
+                                    @using (Html.BeginForm("RemoveManager", "Team", new { teamSlug = Model.Slug }, FormMethod.Post, false, new { @class = "d-inline" }))
                                     {
-                                        <input type="hidden" name="teamId" value="@Model.TeamId"/>
                                         <input type="hidden" name="managerId" value="@item.Id"/>
                                         <button type="submit" class="btn btn-danger btn-sm">Αφαίρεση</button>
                                     }

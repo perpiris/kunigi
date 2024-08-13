@@ -8,8 +8,8 @@
     <h2 class="mb-0 me-3 display-5 flex-grow-1">Διαχείριση Ομάδων</h2>
     <div>
         <a class="btn btn-primary"
-           asp-controller="Teams" asp-action="Create">
-            Δημιουργία νέας ομάδες
+           asp-controller="Team" asp-action="CreateNewTeam">
+            Δημιουργία
         </a>
     </div>
 </div>
@@ -33,9 +33,9 @@ else
             <tr>
                 <td>@team.Name</td>
                 <td>
-                    <a href="@Url.Action("Details", "Teams", new { teamSlug = team.Slug })" class="btn btn-info">Προβολή</a>
-                    <a href="@Url.Action("Edit", "Teams", new { teamSlug = team.Slug })" class="btn btn-primary">Επεξεργασία</a>
-                    <a href="@Url.Action("EditManagers", "Teams", new { teamSlug = team.Slug })" class="btn btn-primary">Επεξεργασία Διαχειριστών</a>
+                    <a href="@Url.Action("TeamDetails", "Team", new { teamSlug = team.Slug })" class="btn btn-info">Προβολή</a>
+                    <a href="@Url.Action("EditTeam", "Team", new { teamSlug = team.Slug })" class="btn btn-primary">Επεξεργασία</a>
+                    <a href="@Url.Action("EditTeamManagers", "Team", new { teamSlug = team.Slug })" class="btn btn-primary">Επεξεργασία Διαχειριστών</a>
                 </td>
             </tr>
         }
@@ -46,7 +46,7 @@ else
         @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
         {
             <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
-                <a class="page-link" asp-controller="Teams" asp-action="Index" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
+                <a class="page-link" asp-controller="Team" asp-action="TeamList" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
             </li>
         }
     </ul>

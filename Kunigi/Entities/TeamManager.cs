@@ -6,7 +6,7 @@ public class TeamManager
 
     public int TeamId { get; set; }
 
-    public int AppUserId { get; set; }
+    public string AppUserId { get; set; }
     
     public virtual Team Team { get; set; }
     

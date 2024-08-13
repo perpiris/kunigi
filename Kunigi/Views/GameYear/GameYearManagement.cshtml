@@ -8,8 +8,8 @@
     <h2 class="mb-0 me-3 display-5 flex-grow-1">Διαχείριση Παιχνιδιών</h2>
     <div>
         <a class="btn btn-primary"
-           asp-controller="Games" asp-action="Create">
-            Δημιουργία νέου παιχνιδιού
+           asp-controller="GameYear" asp-action="CreateGameYear">
+            Δημιουργία
         </a>
     </div>
 </div>
@@ -33,8 +33,8 @@ else
             <tr>
                 <td>@game.Title</td>
                 <td>
-                    <a href="@Url.Action("Details", "Games", new { year = game.Year })" class="btn btn-info">Προβολή</a>
-                    <a href="@Url.Action("Edit", "Games", new { year = game.Year })" class="btn btn-primary">Επεξεργασία</a>
+                    <a href="@Url.Action("GameYearDetails", "GameYear", new { year = game.Year })" class="btn btn-info">Προβολή</a>
+                    <a href="@Url.Action("EditGameYear", "GameYear", new { year = game.Year })" class="btn btn-primary">Επεξεργασία</a>
                 </td>
             </tr>
         }
@@ -45,7 +45,7 @@ else
         @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
         {
             <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
-                <a class="page-link" asp-controller="Games" asp-action="Index" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
+                <a class="page-link" asp-controller="GameYear" asp-action="GameYearList" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
             </li>
         }
     </ul>

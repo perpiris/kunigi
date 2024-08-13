@@ -10,10 +10,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kunigi.Controllers;
 
-public class GamesController(DataContext context, IConfiguration configuration) : Controller
+[Route("game-year")]
+public class GameYearController(DataContext context, IConfiguration configuration) : Controller
 {
-    [HttpGet]
-    public async Task<IActionResult> Index(int pageIndex = 1)
+    [HttpGet("list")]
+    public async Task<IActionResult> GameYearList(int pageIndex = 1)
     {
         var resultCount = context.GameYears.Count();
         var pageInfo = new PageInfo(resultCount, pageIndex);
@@ -37,12 +38,12 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         return View(viewModel);
     }
 
-    [HttpGet("Games/Details/{year}")]
-    public async Task<IActionResult> Details(string year)
+    [HttpGet("{year}")]
+    public async Task<IActionResult> GameYearDetails(string year)
     {
         if (string.IsNullOrEmpty(year))
         {
-            return RedirectToAction("Index");
+            return RedirectToAction("GameYearList");
         }
 
         var gameYearDetails =
@@ -54,16 +55,16 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         if (gameYearDetails is null)
         {
             TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
-            return RedirectToAction("Index");
+            return RedirectToAction("GameYearList");
         }
 
         var viewModel = GetMappedDetailsViewModel(gameYearDetails);
         return View(viewModel);
     }
 
-    [HttpGet]
-    [Authorize(Roles = "Admin,Moderator")]
-    public async Task<IActionResult> Create()
+    [HttpGet("create")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateGameYear()
     {
         var viewModel = new GameCreateOrUpdateViewModel
         {
@@ -76,9 +77,9 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         return View(viewModel);
     }
 
-    [HttpPost]
-    [Authorize(Roles = "Admin,Moderator")]
-    public async Task<IActionResult> Create(GameCreateOrUpdateViewModel viewModel, IFormFile profileImage)
+    [HttpPost("create")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateGameYear(GameCreateOrUpdateViewModel viewModel, IFormFile profileImage)
     {
         ModelState.Remove("Title");
         ModelState.Remove("Description");
@@ -165,13 +166,13 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         await context.SaveChangesAsync();
 
         var basePath = configuration["ImageStoragePath"];
-        var teamFolderPath = Path.Combine(basePath!, "games", slug);
+        var teamFolderPath = Path.Combine(basePath!, "years", slug);
         Directory.CreateDirectory(teamFolderPath);
         newGameYear.TeamFolderUrl = teamFolderPath;
         if (profileImage != null)
         {
             var fileName = "profile" + Path.GetExtension(profileImage.FileName);
-            var relativePath = Path.Combine("games", slug, fileName);
+            var relativePath = Path.Combine("years", slug, fileName);
             var absolutePath = Path.Combine(basePath, relativePath);
             Directory.CreateDirectory(Path.GetDirectoryName(absolutePath)!);
             await using (var stream = new FileStream(absolutePath, FileMode.Create))
@@ -183,16 +184,16 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         }
 
         TempData["success"] = "Το παιχνίδι δημιουργήθηκε.";
-        return RedirectToAction("Index");
+        return RedirectToAction("GameYearList");
     }
 
-    [HttpGet("Games/Edit/{year}")]
-    [Authorize(Roles = "Admin,Moderator,Manager")]
-    public async Task<IActionResult> Edit(string year)
+    [HttpGet("{year}/edit")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> EditGameYear(string year)
     {
         if (string.IsNullOrEmpty(year))
         {
-            return RedirectToAction("Index");
+            return RedirectToAction("GameYearList");
         }
 
         var gameYearDetails =
@@ -204,10 +205,10 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         if (gameYearDetails is null)
         {
             TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
-            return RedirectToAction("Index");
+            return RedirectToAction("GameYearList");
         }
 
-        if (User.IsInRole("Manager"))
+        if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var team =
@@ -218,7 +219,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
             if (team == null || team.Id != gameYearDetails.Host.Id)
             {
                 TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού.";
-                return RedirectToAction("Index");
+                return RedirectToAction("GameYearList");
             }
         }
 
@@ -226,13 +227,13 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         return View(viewModel);
     }
 
-    [HttpPost]
-    [Authorize(Roles = "Admin,Moderator,Manager")]
-    public async Task<IActionResult> Edit(GameCreateOrUpdateViewModel viewModel, IFormFile profileImage)
+    [HttpPost("{year}/edit")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> EditGameYear(string year, GameCreateOrUpdateViewModel viewModel, IFormFile profileImage)
     {
         if (viewModel.Id <= 0)
         {
-            return RedirectToAction("Index");
+            return RedirectToAction("GameYearList");
         }
 
         var gameYearDetails =
@@ -243,10 +244,10 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         if (gameYearDetails is null)
         {
             TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
-            return RedirectToAction("Index");
+            return RedirectToAction("GameYearList");
         }
 
-        if (User.IsInRole("Manager"))
+        if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var team = await context.Teams
@@ -256,12 +257,13 @@ public class GamesController(DataContext context, IConfiguration configuration) 
             if (team == null || team.Id != gameYearDetails.Host.Id)
             {
                 TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού.";
-                return RedirectToAction("Index");
+                return RedirectToAction("GameYearList");
             }
         }
 
         gameYearDetails.Title = viewModel.Title;
         gameYearDetails.Description = viewModel.Description;
+        gameYearDetails.Slug = SlugGenerator.GenerateSlug(viewModel.Title);
 
         if (profileImage != null)
         {
@@ -288,12 +290,12 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         await context.SaveChangesAsync();
 
         TempData["success"] = "Το παιχνίδι επεξεργάστηκε επιτυχώς.";
-        return RedirectToAction("Index");
+        return RedirectToAction("GameYearList");
     }
 
-    [HttpGet("Games/Manage")]
-    [Authorize(Roles = "Admin,Moderator")]
-    public async Task<IActionResult> Manage(int pageIndex = 1)
+    [HttpGet("manage")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GameYearManagement(int pageIndex = 1)
     {
         var resultCount = context.GameYears.Count();
         var pageInfo = new PageInfo(resultCount, pageIndex);
@@ -317,27 +319,6 @@ public class GamesController(DataContext context, IConfiguration configuration) 
         return View(viewModel);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> ManagerDashboard()
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        var managedGames = await context.Teams
-            .Where(t => t.Managers.Any(m => m.Id == userId))
-            .SelectMany(t => t.HostedYears.SelectMany(gy => gy.Games))
-            .Select(g => new ManagerViewModel
-            {
-                Id = g.Id,
-                Description = g.Description,
-                GameTypeName = g.GameType.Description,
-                GameYearTitle = g.GameYear.Title,
-                HostTeamName = g.GameYear.Host.Name
-            })
-            .ToListAsync();
-
-        return View(managedGames);
-    }
-
     private async Task PrepareViewModel(GameCreateOrUpdateViewModel viewModel)
     {
         var teamList = await context.Teams.ToListAsync();
@@ -349,7 +330,7 @@ public class GamesController(DataContext context, IConfiguration configuration) 
 
         viewModel.GameTypes = gameTypes;
     }
-
+    
     private static GameDetailsViewModel GetMappedDetailsViewModel(GameYear gameDetails)
     {
         var viewModel = new GameDetailsViewModel
@@ -360,9 +341,9 @@ public class GamesController(DataContext context, IConfiguration configuration) 
             Order = gameDetails.Order,
             ProfileImageUrl = gameDetails.ProfileImageUrl,
             Winner = gameDetails.Winner.Name,
-            WinnerId = gameDetails.WinnerId,
+            WinnerSlug = gameDetails.Winner.Slug,
             Host = gameDetails.Host.Name,
-            HostId = gameDetails.HostId
+            HostSlug = gameDetails.Host.Slug
         };
 
         return viewModel;

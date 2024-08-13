@@ -9,4 +9,6 @@ public class Puzzle
     public string Answer { get; set; }
 
     public int GameId { get; set; }
+    
+    public virtual Game Game { get; set; }
 }
