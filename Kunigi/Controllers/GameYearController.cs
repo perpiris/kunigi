@@ -38,10 +38,10 @@ public class GameYearController(DataContext context, IConfiguration configuratio
         return View(viewModel);
     }
 
-    [HttpGet("{year}")]
-    public async Task<IActionResult> GameYearDetails(string year)
+    [HttpGet("{gameYear}")]
+    public async Task<IActionResult> GameYearDetails(string gameYear)
     {
-        if (string.IsNullOrEmpty(year))
+        if (string.IsNullOrEmpty(gameYear))
         {
             return RedirectToAction("GameYearList");
         }
@@ -50,7 +50,7 @@ public class GameYearController(DataContext context, IConfiguration configuratio
             await context.GameYears
                 .Include(x => x.Host)
                 .Include(x => x.Winner)
-                .FirstOrDefaultAsync(x => x.Slug == year.Trim());
+                .FirstOrDefaultAsync(x => x.Slug == gameYear.Trim());
 
         if (gameYearDetails is null)
         {
@@ -187,11 +187,11 @@ public class GameYearController(DataContext context, IConfiguration configuratio
         return RedirectToAction("GameYearList");
     }
 
-    [HttpGet("{year}/edit")]
+    [HttpGet("{gameYear}/edit")]
     [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> EditGameYear(string year)
+    public async Task<IActionResult> EditGameYear(string gameYear)
     {
-        if (string.IsNullOrEmpty(year))
+        if (string.IsNullOrEmpty(gameYear))
         {
             return RedirectToAction("GameYearList");
         }
@@ -200,7 +200,7 @@ public class GameYearController(DataContext context, IConfiguration configuratio
             await context.GameYears
                 .Include(x => x.Host)
                 .Include(x => x.Winner)
-                .FirstOrDefaultAsync(x => x.Slug == year.Trim());
+                .FirstOrDefaultAsync(x => x.Slug == gameYear.Trim());
 
         if (gameYearDetails is null)
         {
@@ -227,18 +227,18 @@ public class GameYearController(DataContext context, IConfiguration configuratio
         return View(viewModel);
     }
 
-    [HttpPost("{year}/edit")]
+    [HttpPost("{gameYear}/edit")]
     [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> EditGameYear(string year, GameCreateOrUpdateViewModel viewModel, IFormFile profileImage)
+    public async Task<IActionResult> EditGameYear(string gameYear, GameCreateOrUpdateViewModel viewModel, IFormFile profileImage)
     {
-        if (viewModel.Id <= 0)
+        if (string.IsNullOrEmpty(gameYear))
         {
             return RedirectToAction("GameYearList");
         }
 
         var gameYearDetails =
             await context.GameYears
-                .Include(gameYear => gameYear.Host)
+                .Include(x => x.Host)
                 .SingleOrDefaultAsync(x => x.Id == viewModel.Id);
 
         if (gameYearDetails is null)
@@ -268,7 +268,7 @@ public class GameYearController(DataContext context, IConfiguration configuratio
         if (profileImage != null)
         {
             var basePath = configuration["ImageStoragePath"];
-            var teamFolderPath = Path.Combine(basePath!, "games", gameYearDetails.Slug);
+            var teamFolderPath = Path.Combine(basePath!, "years", gameYearDetails.Slug);
             var fileName = "profile" + Path.GetExtension(profileImage.FileName);
             var filePath = Path.Combine(teamFolderPath, fileName);
 
@@ -282,7 +282,7 @@ public class GameYearController(DataContext context, IConfiguration configuratio
                 await profileImage.CopyToAsync(fileStream);
             }
 
-            var relativePath = Path.Combine("games", gameYearDetails.Slug, fileName).Replace("\\", "/");
+            var relativePath = Path.Combine("years", gameYearDetails.Slug, fileName).Replace("\\", "/");
             gameYearDetails.ProfileImageUrl = $"/media/{relativePath}";
         }
 

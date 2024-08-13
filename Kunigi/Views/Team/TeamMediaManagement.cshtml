@@ -1,0 +1,59 @@
+﻿@model TeamMediaViewModel
+
+<h2>Διαχείρηση Υλικού</h2>
+
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["success"]
+    </div>
+}
+
+<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#uploadModal">
+    Upload
+</button>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Όνομα Αρχείου</th>
+            <th>Ενέργειες</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var file in Model.MediaFiles)
+        {
+            <tr>
+                <td>@file.FileName</td>
+                <td>
+                    <form asp-action="DeleteMedia" asp-route-teamSlug="@Model.TeamSlug" asp-route-mediaId="@file.Id" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">Διαγραφή</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="UploadMedia" asp-route-teamSlug="@Model.TeamSlug" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadModalLabel">Upload Media Files</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="NewMediaFiles" class="form-label">Select files to upload:</label>
+                        <input type="file" class="form-control" id="NewMediaFiles" name="NewMediaFiles" multiple required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Πίσω</button>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

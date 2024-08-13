@@ -2,6 +2,7 @@
 using Kunigi.Data;
 using Kunigi.Entities;
 using Kunigi.Utilities;
+using Kunigi.ViewModels;
 using Kunigi.ViewModels.GameYear;
 using Kunigi.ViewModels.Team;
 using Microsoft.AspNetCore.Authorization;
@@ -26,15 +27,13 @@ public class TeamController(DataContext context, IConfiguration configuration, U
 
         var teamList =
             await context.Teams
-                .Include(t => t.WonYears)
-                .Include(t => t.HostedYears)
                 .Skip(skip)
                 .Take(pageInfo.PageSize)
                 .ToListAsync();
 
         var viewModel =
             teamList
-                .Select(GetMappedDetailsViewModel)
+                .Select(GetBaseMappedDetailsViewModel)
                 .OrderBy(x => x.Name)
                 .ToList();
 
@@ -49,10 +48,12 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             return RedirectToAction("TeamList");
         }
 
-        var teamDetails = await context
-            .Teams
+        var teamDetails = 
+            await context.Teams
             .Include(x => x.HostedYears.OrderBy(y => y.Year))
             .Include(x => x.WonYears.OrderBy(y => y.Year))
+            .Include(x => x.MediaFiles)
+            .ThenInclude(tm => tm.MediaFile)
             .FirstOrDefaultAsync(x => x.Slug == teamSlug.Trim());
 
         if (teamDetails is null)
@@ -61,7 +62,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             return RedirectToAction("TeamList");
         }
 
-        var viewModel = GetMappedDetailsViewModel(teamDetails);
+        var viewModel = GetFullMappedDetailsViewModel(teamDetails);
         return View(viewModel);
     }
 
@@ -137,7 +138,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             await context.Teams
                 .Include(team => team.Managers)
                 .SingleOrDefaultAsync(x => x.Slug == teamSlug.Trim());
-        
+
         if (teamDetails == null)
         {
             return RedirectToAction("TeamManagement");
@@ -162,7 +163,8 @@ public class TeamController(DataContext context, IConfiguration configuration, U
 
     [HttpPost("{teamSlug}/edit")]
     [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> EditTeam(string teamSlug, TeamCreateOrEditViewModel updatedTeamDetails, IFormFile profileImage)
+    public async Task<IActionResult> EditTeam(string teamSlug, TeamCreateOrEditViewModel updatedTeamDetails,
+        IFormFile profileImage)
     {
         if (string.IsNullOrEmpty(teamSlug))
         {
@@ -173,12 +175,12 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             await context.Teams
                 .Include(team => team.Managers)
                 .SingleOrDefaultAsync(x => x.Slug == teamSlug.Trim());
-        
+
         if (teamDetails == null)
         {
             return RedirectToAction("TeamManagement");
         }
-        
+
         if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -234,14 +236,19 @@ public class TeamController(DataContext context, IConfiguration configuration, U
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
 
-        var teamList = await context.Teams
+        var teamList = 
+            await context.Teams
             .Include(t => t.WonYears)
             .Include(t => t.HostedYears)
             .Skip(skip)
             .Take(pageInfo.PageSize)
             .ToListAsync();
 
-        var viewModel = teamList.Select(GetMappedDetailsViewModel).ToList();
+        var viewModel = 
+            teamList
+                .Select(GetBaseMappedDetailsViewModel)
+                .ToList();
+        
         return View(viewModel);
     }
 
@@ -298,7 +305,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
         {
             return RedirectToAction("TeamList");
         }
-        
+
         if (!ModelState.IsValid)
         {
             await PopulateUpdateManagerViewModel(viewModel);
@@ -334,16 +341,16 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             if (teamToUpdate.Managers.All(m => m.Id != selectedManager.Id))
             {
                 teamToUpdate.Managers.Add(selectedManager);
-                
+
                 var teamManager = new TeamManager
                 {
                     TeamId = teamToUpdate.Id,
                     AppUserId = selectedManager.Id
                 };
-                
+
                 context.TeamManagers.Add(teamManager);
                 await context.SaveChangesAsync();
-                
+
                 TempData["success"] = "Ο διαχειριστής προστέθηκε επιτυχώς.";
             }
             else
@@ -400,11 +407,140 @@ public class TeamController(DataContext context, IConfiguration configuration, U
         return RedirectToAction("EditTeamManagers", new { teamSlug });
     }
 
-    private static TeamDetailsViewModel GetMappedDetailsViewModel(Team teamDetails)
+    [HttpGet("{teamSlug}/media")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> TeamMediaManagement(string teamSlug)
+    {
+        if (string.IsNullOrEmpty(teamSlug))
+        {
+            return RedirectToAction("TeamManagement");
+        }
+
+        var teamDetails = await context.Teams
+            .Include(team => team.Managers)
+            .Include(t => t.MediaFiles)
+            .ThenInclude(tm => tm.MediaFile)
+            .SingleOrDefaultAsync(x => x.Slug == teamSlug.Trim());
+
+        if (teamDetails == null)
+        {
+            return RedirectToAction("TeamManagement");
+        }
+
+        if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (teamDetails.Managers.All(x => x.Id != userId))
+            {
+                TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+                return RedirectToAction("TeamList");
+            }
+        }
+
+        var viewModel = new TeamMediaViewModel
+        {
+            TeamSlug = teamDetails.Slug,
+            MediaFiles = teamDetails.MediaFiles.Select(tm => new MediaFileViewModel
+            {
+                Id = tm.MediaFile.Id,
+                FileName = Path.GetFileName(tm.MediaFile.Path),
+                Path = tm.MediaFile.Path
+            }).ToList()
+        };
+
+        return View(viewModel);
+    }
+
+    [HttpPost("{teamSlug}/upload-media")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> UploadMedia(string teamSlug, TeamMediaViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return RedirectToAction(nameof(TeamMediaManagement), new { teamSlug });
+        }
+
+        var teamDetails = await context.Teams
+            .FirstOrDefaultAsync(t => t.Slug == teamSlug);
+
+        if (teamDetails == null)
+        {
+            return RedirectToAction(nameof(TeamMediaManagement), new { teamSlug });
+        }
+
+        var uploadPath = Path.Combine(configuration["ImageStoragePath"]!, "teams", teamDetails.Slug);
+        Directory.CreateDirectory(uploadPath);
+
+        foreach (var file in model.NewMediaFiles)
+        {
+            var fileName = GetUniqueFileName(file.FileName);
+            var filePath = Path.Combine(uploadPath, fileName);
+
+            await using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var mediaFile = new MediaFile
+            {
+                Path = $"/media/teams/{teamDetails.Slug}/{fileName}"
+            };
+
+            context.MediaFiles.Add(mediaFile);
+            await context.SaveChangesAsync();
+
+            var teamMedia = new TeamMedia
+            {
+                TeamId = teamDetails.Id,
+                MediaFileId = mediaFile.Id
+            };
+
+            context.TeamMediaFiles.Add(teamMedia);
+        }
+
+        await context.SaveChangesAsync();
+
+        TempData["success"] = "Media files uploaded successfully.";
+        return RedirectToAction("TeamMediaManagement", new { teamSlug });
+    }
+
+    private static string GetUniqueFileName(string fileName)
+    {
+        fileName = Path.GetFileName(fileName);
+        return Path.GetFileNameWithoutExtension(fileName)
+               + "_"
+               + Guid.NewGuid().ToString().Substring(0, 4)
+               + Path.GetExtension(fileName);
+    }
+
+    [HttpPost("{teamSlug}/delete-media")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> DeleteMedia(string teamSlug, int mediaId)
+    {
+        var media = await context.MediaFiles.FindAsync(mediaId);
+        if (media == null)
+        {
+            return RedirectToAction(nameof(TeamMediaManagement), new { teamSlug });
+        }
+
+        var filePath = Path.Combine(configuration["ImageStoragePath"]!, media.Path.TrimStart('/'));
+        if (System.IO.File.Exists(filePath))
+        {
+            System.IO.File.Delete(filePath);
+        }
+
+        context.MediaFiles.Remove(media);
+        await context.SaveChangesAsync();
+
+        TempData["success"] = "Media file deleted successfully.";
+        return RedirectToAction("TeamMediaManagement", new { teamSlug });
+    }
+
+    private static TeamDetailsViewModel GetBaseMappedDetailsViewModel(Team teamDetails)
     {
         var viewModel = new TeamDetailsViewModel
         {
-            Id = teamDetails.Id,
             Name = teamDetails.Name,
             Slug = teamDetails.Slug,
             Description = teamDetails.Description,
@@ -414,7 +550,28 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             Instagram = teamDetails.Instagram,
             Website = teamDetails.Website,
             GamesWon = [],
-            GamesHosted = []
+            GamesHosted = [],
+            MediaFiles = []
+        };
+
+        return viewModel;
+    }
+
+    private static TeamDetailsViewModel GetFullMappedDetailsViewModel(Team teamDetails)
+    {
+        var viewModel = new TeamDetailsViewModel
+        {
+            Name = teamDetails.Name,
+            Slug = teamDetails.Slug,
+            Description = teamDetails.Description,
+            ProfileImageUrl = teamDetails.ProfileImageUrl,
+            Facebook = teamDetails.Facebook,
+            Youtube = teamDetails.Youtube,
+            Instagram = teamDetails.Instagram,
+            Website = teamDetails.Website,
+            GamesWon = [],
+            GamesHosted = [],
+            MediaFiles = []
         };
 
         foreach (var year in teamDetails.WonYears)
@@ -436,6 +593,16 @@ public class TeamController(DataContext context, IConfiguration configuration, U
                 Year = year.Year
             });
         }
+        
+        foreach (var teamMedia in teamDetails.MediaFiles)
+        {
+            viewModel.MediaFiles.Add(new MediaFileViewModel
+            {
+                Id = teamMedia.MediaFile.Id,
+                FileName = Path.GetFileName(teamMedia.MediaFile.Path),
+                Path = teamMedia.MediaFile.Path
+            });
+        }
 
         return viewModel;
     }
@@ -444,7 +611,6 @@ public class TeamController(DataContext context, IConfiguration configuration, U
     {
         var viewModel = new TeamCreateOrEditViewModel
         {
-            Id = teamDetails.Id,
             Name = teamDetails.Name,
             Description = teamDetails.Description,
             ProfileImageUrl = teamDetails.ProfileImageUrl,
@@ -456,7 +622,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
 
         return viewModel;
     }
-    
+
     private async Task PopulateUpdateManagerViewModel(TeamManagerUpdateViewModel viewModel)
     {
         var team = await context.Teams

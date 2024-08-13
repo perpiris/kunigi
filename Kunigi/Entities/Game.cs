@@ -15,4 +15,6 @@ public class Game
     public virtual GameYear GameYear { get; set; }
     
     public virtual ICollection<Puzzle> Puzzles { get; set; }
+    
+    public virtual ICollection<MediaFile> MediaFiles { get; set; }
 }

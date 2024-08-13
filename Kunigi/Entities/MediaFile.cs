@@ -10,4 +10,9 @@ public class MediaFile
     public string Path { get; set; }
     
     public int ParentId { get; set; }
+    
+    [Column(TypeName = "varchar(50)")]
+    public string ParentType { get; set; }
+    
+    public virtual ICollection<TeamMedia> TeamMediaFiles { get; set; }
 }

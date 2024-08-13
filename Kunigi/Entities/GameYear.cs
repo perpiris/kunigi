@@ -33,4 +33,6 @@ public class GameYear
     public virtual Team Winner { get; set; }
     
     public virtual ICollection<Game> Games { get; set; }
+    
+    public virtual ICollection<MediaFile> MediaFiles { get; set; }
 }

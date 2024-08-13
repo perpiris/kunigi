@@ -43,7 +43,7 @@
             @foreach (var item in Model)
             {
                 <div class="col px-1">
-                    <a asp-controller="GameYear" asp-action="GameYearDetails" asp-route-year="@item.Year" class="text-decoration-none">
+                    <a asp-controller="GameYear" asp-action="GameYearDetails" asp-route-gameYear="@item.Year" class="text-decoration-none">
                         <div class="card h-100 shadow game-card">
                             <div class="card-img-top-wrapper">
                                 @if (string.IsNullOrEmpty(item.ProfileImageUrl))

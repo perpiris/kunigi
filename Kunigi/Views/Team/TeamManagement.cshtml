@@ -8,7 +8,7 @@
     <h2 class="mb-0 me-3 display-5 flex-grow-1">Διαχείριση Ομάδων</h2>
     <div>
         <a class="btn btn-primary"
-           asp-controller="Team" asp-action="CreateNewTeam">
+           asp-controller="Team" asp-action="CreateTeam">
             Δημιουργία
         </a>
     </div>
@@ -35,7 +35,8 @@ else
                 <td>
                     <a href="@Url.Action("TeamDetails", "Team", new { teamSlug = team.Slug })" class="btn btn-info">Προβολή</a>
                     <a href="@Url.Action("EditTeam", "Team", new { teamSlug = team.Slug })" class="btn btn-primary">Επεξεργασία</a>
-                    <a href="@Url.Action("EditTeamManagers", "Team", new { teamSlug = team.Slug })" class="btn btn-primary">Επεξεργασία Διαχειριστών</a>
+                    <a href="@Url.Action("EditTeamManagers", "Team", new { teamSlug = team.Slug })" class="btn btn-primary">Διαχείρηση Διαχειριστών</a>
+                    <a href="@Url.Action("TeamMediaManagement", "Team", new { teamSlug = team.Slug })" class="btn btn-primary">Διαχείρηση Υλικού</a>
                 </td>
             </tr>
         }

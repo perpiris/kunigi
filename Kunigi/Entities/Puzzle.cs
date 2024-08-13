@@ -11,4 +11,6 @@ public class Puzzle
     public int GameId { get; set; }
     
     public virtual Game Game { get; set; }
+    
+    public virtual ICollection<MediaFile> MediaFiles { get; set; }
 }

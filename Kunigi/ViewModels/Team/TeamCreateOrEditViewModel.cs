@@ -5,8 +5,6 @@ namespace Kunigi.ViewModels.Team;
 
 public class TeamCreateOrEditViewModel
 {
-    public int Id { get; set; }
-    
     [DisplayName("Όνομα Ομάδας")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
     public string Name { get; set; }

@@ -3,6 +3,7 @@ using System;
 using Kunigi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kunigi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240813224549_base media files")]
+    partial class basemediafiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
@@ -182,9 +185,6 @@ namespace Kunigi.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("GameId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int?>("GameYearId")
                         .HasColumnType("INTEGER");
 
@@ -202,11 +202,11 @@ namespace Kunigi.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GameId");
-
                     b.HasIndex("GameYearId");
 
                     b.HasIndex("PuzzleId");
+
+                    b.HasIndex("ParentId", "ParentType");
 
                     b.ToTable("MediaFiles");
                 });
@@ -290,28 +290,6 @@ namespace Kunigi.Data.Migrations
                     b.HasIndex("TeamId");
 
                     b.ToTable("TeamManagers");
-                });
-
-            modelBuilder.Entity("Kunigi.Entities.TeamMedia", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MediaFileId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TeamId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MediaFileId");
-
-                    b.HasIndex("TeamId", "MediaFileId")
-                        .IsUnique();
-
-                    b.ToTable("TeamMediaFiles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -497,13 +475,23 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.MediaFile", b =>
                 {
-                    b.HasOne("Kunigi.Entities.Game", null)
-                        .WithMany("MediaFiles")
-                        .HasForeignKey("GameId");
-
                     b.HasOne("Kunigi.Entities.GameYear", null)
                         .WithMany("MediaFiles")
                         .HasForeignKey("GameYearId");
+
+                    b.HasOne("Kunigi.Entities.Game", null)
+                        .WithMany("MediaFiles")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_MediaFiles_Games");
+
+                    b.HasOne("Kunigi.Entities.Team", null)
+                        .WithMany("MediaFiles")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_MediaFiles_Teams");
 
                     b.HasOne("Kunigi.Entities.Puzzle", null)
                         .WithMany("MediaFiles")
@@ -536,25 +524,6 @@ namespace Kunigi.Data.Migrations
                     b.Navigation("Team");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Kunigi.Entities.TeamMedia", b =>
-                {
-                    b.HasOne("Kunigi.Entities.MediaFile", "MediaFile")
-                        .WithMany("TeamMediaFiles")
-                        .HasForeignKey("MediaFileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kunigi.Entities.Team", "Team")
-                        .WithMany("MediaFiles")
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MediaFile");
-
-                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -620,11 +589,6 @@ namespace Kunigi.Data.Migrations
                     b.Navigation("Games");
 
                     b.Navigation("MediaFiles");
-                });
-
-            modelBuilder.Entity("Kunigi.Entities.MediaFile", b =>
-                {
-                    b.Navigation("TeamMediaFiles");
                 });
 
             modelBuilder.Entity("Kunigi.Entities.Puzzle", b =>

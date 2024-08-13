@@ -99,7 +99,7 @@
                                                     @foreach (var game in Model.GamesWon)
                                                     {
                                                         <li>
-                                                            <a type="button" class="btn btn-link" asp-controller="GameYear" asp-action="GameYearDetails" asp-route-year="@game.Year">@game.GetFullTitle()</a>
+                                                            <a type="button" class="btn btn-link" asp-controller="GameYear" asp-action="GameYearDetails" asp-route-gameYear="@game.Year">@game.GetFullTitle()</a>
                                                         </li>
                                                     }
                                                 </ul>
@@ -122,7 +122,7 @@
                                                     @foreach (var game in Model.GamesHosted)
                                                     {
                                                         <li>
-                                                            <a type="button" class="btn btn-link" asp-controller="GameYear" asp-action="GameYearDetails" asp-route-year="@game.Year">@game.GetFullTitle()</a>
+                                                            <a type="button" class="btn btn-link" asp-controller="GameYear" asp-action="GameYearDetails" asp-route-gameYear="@game.Year">@game.GetFullTitle()</a>
                                                         </li>
                                                     }
                                                 </ul>
@@ -136,7 +136,25 @@
                                 </div>
                             </div>
                             <div class="tab-pane" id="photos-tab-pane" role="tabpanel" aria-labelledby="photos-tab" tabindex="0">
-                                <p class="lead mb-3">photos</p>
+                                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                                    @foreach (var media in Model.MediaFiles)
+                                    {
+                                        <div class="col">
+                                            <div class="card h-100">
+                                                @if (IsImage(media.Path))
+                                                {
+                                                    <img src="@media.Path" class="card-img-top img-fluid" alt="@media.FileName" style="height: 200px; object-fit: cover;" data-bs-toggle="modal" data-bs-target="#mediaModal" data-media-src="@media.Path" data-media-type="image">
+                                                }
+                                                else if (IsVideo(media.Path))
+                                                {
+                                                    <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;" data-bs-toggle="modal" data-bs-target="#mediaModal" data-media-src="@media.Path" data-media-type="video">
+                                                        <i class="bi bi-play-circle" style="font-size: 3rem;"></i>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -146,3 +164,64 @@
     </div>
 
 </section>
+
+<div class="modal" id="mediaModal" tabindex="-1" aria-labelledby="mediaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="mediaContainer" class="text-center">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var mediaModal = document.getElementById('mediaModal');
+            var mediaContainer = document.getElementById('mediaContainer');
+
+            mediaModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var mediaType = button.getAttribute('data-media-type');
+                var mediaSrc = button.getAttribute('data-media-src');
+                
+                mediaContainer.innerHTML = '';
+                
+                if (mediaType === 'image') {
+                    mediaContainer.innerHTML = '<img src="' + mediaSrc + '" class="img-fluid" alt="Media Preview">';
+                } else if (mediaType === 'video') {
+                    mediaContainer.innerHTML = '<video src="' + mediaSrc + '" controls class="img-fluid">Your browser does not support the video tag.</video>';
+                }
+            });
+        });
+    </script>
+}
+
+@functions {
+
+    static bool IsImage(string path)
+    {
+        var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+        return imageExtensions.Any(ext => path.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
+
+    static bool IsVideo(string path)
+    {
+        var videoExtensions = new[] { ".mp4", ".webm", ".ogg" };
+        return videoExtensions.Any(ext => path.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
+
+    static string TruncateFileName(string fileName, int maxLength)
+    {
+        if (fileName.Length <= maxLength)
+            return fileName;
+
+        return fileName.Substring(0, maxLength - 3) + "...";
+    }
+}

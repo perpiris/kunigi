@@ -13,7 +13,8 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
     public DbSet<GameType> GameTypes { get; set; }
     public DbSet<Puzzle> Puzzles { get; set; }
     public DbSet<TeamManager> TeamManagers { get; set; }
-    public DbSet<MediaFile> Files { get; set; }
+    public DbSet<MediaFile> MediaFiles { get; set; }
+    public DbSet<TeamMedia> TeamMediaFiles { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,5 +31,22 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
             .WithMany(t => t.WonYears)
             .HasForeignKey(g => g.WinnerId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<TeamMedia>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(d => d.Team)
+                .WithMany(p => p.MediaFiles)
+                .HasForeignKey(d => d.TeamId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(d => d.MediaFile)
+                .WithMany(p => p.TeamMediaFiles)
+                .HasForeignKey(d => d.MediaFileId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => new { e.TeamId, e.MediaFileId }).IsUnique();
+        });
     }
 }
