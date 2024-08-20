@@ -2,7 +2,7 @@
 
 namespace Kunigi.Entities;
 
-public class GameYear
+public class ParentGame
 {
     public int Id { get; set; }
 
@@ -28,11 +28,13 @@ public class GameYear
     
     public int WinnerId { get; set; }
     
+    [ForeignKey("HostId")]
     public virtual Team Host { get; set; }
     
+    [ForeignKey("WinnerId")]
     public virtual Team Winner { get; set; }
     
     public virtual ICollection<Game> Games { get; set; }
     
-    public virtual ICollection<MediaFile> MediaFiles { get; set; }
+    public virtual ICollection<ParentGameMedia> MediaFiles { get; set; }
 }

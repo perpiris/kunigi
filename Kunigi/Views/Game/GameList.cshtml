@@ -1,4 +1,4 @@
-﻿@model List<GameDetailsViewModel>
+﻿@model List<ParentGameDetailsViewModel>
 
 @{
     ViewData["Title"] = "Όλα τα Παιχνίδια";
@@ -43,7 +43,7 @@
             @foreach (var item in Model)
             {
                 <div class="col px-1">
-                    <a asp-controller="GameYear" asp-action="GameYearDetails" asp-route-gameYear="@item.Year" class="text-decoration-none">
+                    <a asp-controller="Game" asp-action="GameDetails" asp-route-gameYear="@item.Year" class="text-decoration-none">
                         <div class="card h-100 shadow game-card">
                             <div class="card-img-top-wrapper">
                                 @if (string.IsNullOrEmpty(item.ProfileImageUrl))
@@ -69,7 +69,7 @@
                 @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
                 {
                     <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
-                        <a class="page-link" asp-controller="GameYear" asp-action="GameYearList"
+                        <a class="page-link" asp-controller="Game" asp-action="GameList"
                            asp-route-pageIndex="@pageIndex">
                             @pageIndex
                         </a>

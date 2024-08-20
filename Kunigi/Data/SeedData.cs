@@ -1,4 +1,5 @@
 ﻿using Kunigi.Entities;
+using Kunigi.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,7 +28,7 @@ public abstract class SeedData
     public static async Task SeedMainAdmin(IServiceProvider serviceProvider)
     {
         var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
-        
+
         var user = new AppUser { UserName = "iperpirakis@gmail.com", Email = "iperpirakis@gmail.com" };
         var result = await userManager.CreateAsync(user, "0123456789");
 
@@ -36,20 +37,20 @@ public abstract class SeedData
             await userManager.AddToRoleAsync(user, "Admin");
         }
     }
-    
+
     public static async Task SeedGameTypes(IServiceProvider serviceProvider)
     {
         var context = serviceProvider.GetRequiredService<DataContext>();
         if (await context.GameTypes.AnyAsync()) return;
-        
+
         var gameTypes = new List<GameType>
         {
-            new() { Description = "Χωρός" },
-            new() { Description = "Σάββατο" },
-            new() { Description = "Κυριακή" },
-            new() { Description = "Διαδικτυακό" },
-            new() { Description = "Παιδικό" },
-            new() { Description = "Εφηβικό" }
+            new() { Description = "Χωρός", Slug = SlugGenerator.GenerateSlug("Χωρός") },
+            new() { Description = "Σάββατο", Slug = SlugGenerator.GenerateSlug("Σάββατο") },
+            new() { Description = "Κυριακή", Slug = SlugGenerator.GenerateSlug("Κυριακή") },
+            new() { Description = "Διαδικτυακό", Slug = SlugGenerator.GenerateSlug("Διαδικτυακό") },
+            new() { Description = "Παιδικό", Slug = SlugGenerator.GenerateSlug("Παιδικό") },
+            new() { Description = "Εφηβικό", Slug = SlugGenerator.GenerateSlug("Εφηβικό") }
         };
 
         foreach (var gameType in gameTypes)

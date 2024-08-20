@@ -15,4 +15,8 @@ public class MediaFile
     public string ParentType { get; set; }
     
     public virtual ICollection<TeamMedia> TeamMediaFiles { get; set; }
+    
+    public virtual ICollection<ParentGameMedia> GameYearMediaFiles { get; set; }
+    
+    public virtual ICollection<PuzzleMedia> PuzzleMediaFiles { get; set; }
 }

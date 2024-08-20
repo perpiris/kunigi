@@ -8,25 +8,27 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
 {
     public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<Team> Teams { get; set; }
-    public DbSet<GameYear> GameYears { get; set; }
+    public DbSet<ParentGame> GameYears { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<GameType> GameTypes { get; set; }
     public DbSet<Puzzle> Puzzles { get; set; }
     public DbSet<TeamManager> TeamManagers { get; set; }
     public DbSet<MediaFile> MediaFiles { get; set; }
     public DbSet<TeamMedia> TeamMediaFiles { get; set; }
+    public DbSet<ParentGameMedia> GameYearMediaFiles { get; set; }
+    public DbSet<PuzzleMedia> PuzzleMediaFiles { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         
-        modelBuilder.Entity<GameYear>()
+        modelBuilder.Entity<ParentGame>()
             .HasOne(g => g.Host)
             .WithMany(t => t.HostedYears)
             .HasForeignKey(g => g.HostId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        modelBuilder.Entity<GameYear>()
+        modelBuilder.Entity<ParentGame>()
             .HasOne(g => g.Winner)
             .WithMany(t => t.WonYears)
             .HasForeignKey(g => g.WinnerId)
@@ -47,6 +49,40 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(e => new { e.TeamId, e.MediaFileId }).IsUnique();
+        });
+        
+        modelBuilder.Entity<ParentGameMedia>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(d => d.ParentGame)
+                .WithMany(p => p.MediaFiles)
+                .HasForeignKey(d => d.GameYearId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(d => d.MediaFile)
+                .WithMany(p => p.GameYearMediaFiles)
+                .HasForeignKey(d => d.MediaFileId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => new { e.GameYearId, e.MediaFileId }).IsUnique();
+        });
+        
+        modelBuilder.Entity<PuzzleMedia>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(d => d.Puzzle)
+                .WithMany(p => p.MediaFiles)
+                .HasForeignKey(d => d.PuzzleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(d => d.MediaFile)
+                .WithMany(p => p.PuzzleMediaFiles)
+                .HasForeignKey(d => d.MediaFileId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => new { e.PuzzleId, e.MediaFileId }).IsUnique();
         });
     }
 }

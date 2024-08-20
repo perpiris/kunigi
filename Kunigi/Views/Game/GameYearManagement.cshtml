@@ -1,4 +1,4 @@
-﻿@model List<GameDetailsViewModel>
+﻿@model List<ParentGameDetailsViewModel>
 
 @{
     ViewData["Title"] = "Διαχείρηση Παιχνιδιών";
@@ -8,7 +8,7 @@
     <h2 class="mb-0 me-3 display-5 flex-grow-1">Διαχείριση Παιχνιδιών</h2>
     <div>
         <a class="btn btn-primary"
-           asp-controller="GameYear" asp-action="CreateGameYear">
+           asp-controller="Game" asp-action="CreateParentGame">
             Δημιουργία
         </a>
     </div>
@@ -24,6 +24,7 @@ else
         <thead>
         <tr>
             <th>Τίτλος</th>
+            <th>Διοργανωτής</th>
             <th>Ενέργειες</th>
         </tr>
         </thead>
@@ -32,9 +33,10 @@ else
         {
             <tr>
                 <td>@game.Title</td>
+                <td>@game.Host</td>
                 <td>
-                    <a href="@Url.Action("GameYearDetails", "GameYear", new { year = game.Year })" class="btn btn-info">Προβολή</a>
-                    <a href="@Url.Action("EditGameYear", "GameYear", new { year = game.Year })" class="btn btn-primary">Επεξεργασία</a>
+                    <a href="@Url.Action("GameDetails", "Game", new { gameYear = game.Year })" class="btn btn-info">Προβολή</a>
+                    <a href="@Url.Action("EditParentGame", "Game", new { gameYear = game.Year })" class="btn btn-primary">Επεξεργασία</a>
                 </td>
             </tr>
         }
@@ -45,7 +47,7 @@ else
         @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
         {
             <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
-                <a class="page-link" asp-controller="GameYear" asp-action="GameYearList" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
+                <a class="page-link" asp-controller="Game" asp-action="GameList" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
             </li>
         }
     </ul>

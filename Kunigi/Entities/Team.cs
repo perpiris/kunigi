@@ -31,9 +31,9 @@ public class Team
     [Column(TypeName = "varchar(255)")]
     public string TeamFolderUrl { get; set; }
     
-    public virtual ICollection<GameYear> HostedYears { get; set; }
+    public virtual ICollection<ParentGame> HostedYears { get; set; }
     
-    public virtual ICollection<GameYear> WonYears { get; set; }
+    public virtual ICollection<ParentGame> WonYears { get; set; }
     
     public virtual ICollection<AppUser> Managers { get; set; }
     

@@ -1,4 +1,4 @@
-﻿using Kunigi.ViewModels.GameYear;
+﻿using Kunigi.ViewModels.Game;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Kunigi.ViewModels.Team;
@@ -23,9 +23,9 @@ public class TeamDetailsViewModel
     
     public SelectList ManagerSelectList { get; set; }
 
-    public List<GameYearDetailsViewModel> GamesWon { get; set; }
+    public List<ParentGameDetailsViewModel> GamesWon { get; set; }
     
-    public List<GameYearDetailsViewModel> GamesHosted { get; set; }
+    public List<ParentGameDetailsViewModel> GamesHosted { get; set; }
     
     public List<MediaFileViewModel> MediaFiles { get; set; } = [];
 }

@@ -3,7 +3,7 @@ using Kunigi.Data;
 using Kunigi.Entities;
 using Kunigi.Utilities;
 using Kunigi.ViewModels;
-using Kunigi.ViewModels.GameYear;
+using Kunigi.ViewModels.Game;
 using Kunigi.ViewModels.Team;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,19 +14,32 @@ using Microsoft.EntityFrameworkCore;
 namespace Kunigi.Controllers;
 
 [Route("teams")]
-public class TeamController(DataContext context, IConfiguration configuration, UserManager<AppUser> userManager)
-    : Controller
+public class TeamController : Controller
 {
+    private readonly DataContext _context;
+    private readonly IConfiguration _configuration;
+    private readonly UserManager<AppUser> _userManager;
+
+    public TeamController(
+        DataContext context, 
+        IConfiguration configuration, 
+        UserManager<AppUser> userManager)
+    {
+        _context = context;
+        _configuration = configuration;
+        _userManager = userManager;
+    }
+
     [HttpGet("list")]
     public async Task<IActionResult> TeamList(int pageIndex = 1)
     {
-        var resultCount = await context.Teams.CountAsync();
+        var resultCount = await _context.Teams.CountAsync();
         var pageInfo = new PageInfo(resultCount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
 
         var teamList =
-            await context.Teams
+            await _context.Teams
                 .Skip(skip)
                 .Take(pageInfo.PageSize)
                 .ToListAsync();
@@ -48,13 +61,13 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             return RedirectToAction("TeamList");
         }
 
-        var teamDetails = 
-            await context.Teams
-            .Include(x => x.HostedYears.OrderBy(y => y.Year))
-            .Include(x => x.WonYears.OrderBy(y => y.Year))
-            .Include(x => x.MediaFiles)
-            .ThenInclude(tm => tm.MediaFile)
-            .FirstOrDefaultAsync(x => x.Slug == teamSlug.Trim());
+        var teamDetails =
+            await _context.Teams
+                .Include(x => x.HostedYears.OrderBy(y => y.Year))
+                .Include(x => x.WonYears.OrderBy(y => y.Year))
+                .Include(x => x.MediaFiles)
+                .ThenInclude(x => x.MediaFile)
+                .FirstOrDefaultAsync(x => x.Slug == teamSlug.Trim());
 
         if (teamDetails is null)
         {
@@ -79,7 +92,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
     {
         if (!ModelState.IsValid) return View();
 
-        var teamList = await context.Teams.ToListAsync();
+        var teamList = await _context.Teams.ToListAsync();
         var exists = teamList.Any(x => x.Name.Equals(viewModel.Name, StringComparison.OrdinalIgnoreCase));
         if (exists)
         {
@@ -100,7 +113,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             Slug = slug
         };
 
-        var basePath = configuration["ImageStoragePath"];
+        var basePath = _configuration["ImageStoragePath"];
         var teamFolderPath = Path.Combine(basePath!, "teams", slug);
         Directory.CreateDirectory(teamFolderPath);
         newTeam.TeamFolderUrl = teamFolderPath;
@@ -118,8 +131,8 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             newTeam.ProfileImageUrl = $"/media/{relativePath.Replace("\\", "/")}";
         }
 
-        context.Teams.Add(newTeam);
-        await context.SaveChangesAsync();
+        _context.Teams.Add(newTeam);
+        await _context.SaveChangesAsync();
 
         TempData["success"] = "Η ομάδα δημιουργήθηκε.";
         return RedirectToAction("TeamManagement");
@@ -135,7 +148,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
         }
 
         var teamDetails =
-            await context.Teams
+            await _context.Teams
                 .Include(team => team.Managers)
                 .SingleOrDefaultAsync(x => x.Slug == teamSlug.Trim());
 
@@ -172,7 +185,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
         }
 
         var teamDetails =
-            await context.Teams
+            await _context.Teams
                 .Include(team => team.Managers)
                 .SingleOrDefaultAsync(x => x.Slug == teamSlug.Trim());
 
@@ -200,7 +213,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
 
         if (profileImage != null)
         {
-            var basePath = configuration["ImageStoragePath"];
+            var basePath = _configuration["ImageStoragePath"];
             var teamFolderPath = Path.Combine(basePath!, "teams", teamDetails.Slug);
             var fileName = "profile" + Path.GetExtension(profileImage.FileName);
             var filePath = Path.Combine(teamFolderPath, fileName);
@@ -219,8 +232,8 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             teamDetails.ProfileImageUrl = $"/media/{relativePath}";
         }
 
-        context.Teams.Update(teamDetails);
-        await context.SaveChangesAsync();
+        _context.Teams.Update(teamDetails);
+        await _context.SaveChangesAsync();
 
         TempData["success"] = $"Η ομάδα {teamDetails.Name} επεξεργάστηκε επιτυχώς.";
         return RedirectToAction("TeamManagement");
@@ -231,24 +244,24 @@ public class TeamController(DataContext context, IConfiguration configuration, U
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> TeamManagement(int pageIndex = 1)
     {
-        var resultcount = context.Teams.Count();
+        var resultcount = _context.Teams.Count();
         var pageInfo = new PageInfo(resultcount, pageIndex);
         var skip = (pageIndex - 1) * pageInfo.PageSize;
         ViewBag.PageInfo = pageInfo;
 
-        var teamList = 
-            await context.Teams
-            .Include(t => t.WonYears)
-            .Include(t => t.HostedYears)
-            .Skip(skip)
-            .Take(pageInfo.PageSize)
-            .ToListAsync();
+        var teamList =
+            await _context.Teams
+                .Include(t => t.WonYears)
+                .Include(t => t.HostedYears)
+                .Skip(skip)
+                .Take(pageInfo.PageSize)
+                .ToListAsync();
 
-        var viewModel = 
+        var viewModel =
             teamList
                 .Select(GetBaseMappedDetailsViewModel)
                 .ToList();
-        
+
         return View(viewModel);
     }
 
@@ -261,7 +274,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             return RedirectToAction("TeamList");
         }
 
-        var teamToUpdate = await context.Teams
+        var teamToUpdate = await _context.Teams
             .Include(t => t.Managers)
             .SingleOrDefaultAsync(t => t.Slug == teamSlug.Trim());
 
@@ -270,7 +283,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             return RedirectToAction("TeamManagement");
         }
 
-        var users = await context.AppUsers.ToListAsync();
+        var users = await _context.AppUsers.ToListAsync();
         var managerSelectList = new List<SelectListItem>
         {
             new() { Value = "", Text = "Επιλέξτε" }
@@ -312,7 +325,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             return View(viewModel);
         }
 
-        var teamToUpdate = await context.Teams
+        var teamToUpdate = await _context.Teams
             .Include(t => t.Managers)
             .SingleOrDefaultAsync(t => t.Slug == teamSlug.Trim());
 
@@ -321,16 +334,16 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             return RedirectToAction("TeamManagement");
         }
 
-        var selectedManager = await context.AppUsers
+        var selectedManager = await _context.AppUsers
             .SingleOrDefaultAsync(u => u.Id == viewModel.SelectedManagerId);
 
         if (selectedManager != null)
         {
-            var isInManagerRole = await userManager.IsInRoleAsync(selectedManager, "Manager");
+            var isInManagerRole = await _userManager.IsInRoleAsync(selectedManager, "Manager");
 
             if (!isInManagerRole)
             {
-                var result = await userManager.AddToRoleAsync(selectedManager, "Manager");
+                var result = await _userManager.AddToRoleAsync(selectedManager, "Manager");
                 if (!result.Succeeded)
                 {
                     TempData["error"] = "Αποτυχία προσθήκης του χρήστη στο ρόλο του Διαχειριστή.";
@@ -348,8 +361,8 @@ public class TeamController(DataContext context, IConfiguration configuration, U
                     AppUserId = selectedManager.Id
                 };
 
-                context.TeamManagers.Add(teamManager);
-                await context.SaveChangesAsync();
+                _context.TeamManagers.Add(teamManager);
+                await _context.SaveChangesAsync();
 
                 TempData["success"] = "Ο διαχειριστής προστέθηκε επιτυχώς.";
             }
@@ -375,7 +388,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             return RedirectToAction("TeamList");
         }
 
-        var teamToUpdate = await context.Teams
+        var teamToUpdate = await _context.Teams
             .Include(t => t.Managers)
             .SingleOrDefaultAsync(t => t.Slug == teamSlug.Trim());
 
@@ -388,14 +401,14 @@ public class TeamController(DataContext context, IConfiguration configuration, U
         if (managerToRemove != null)
         {
             teamToUpdate.Managers.Remove(managerToRemove);
-            var teamManager = await context.TeamManagers
+            var teamManager = await _context.TeamManagers
                 .SingleOrDefaultAsync(tm => tm.TeamId == teamToUpdate.Id && tm.AppUserId == managerId);
             if (teamManager != null)
             {
-                context.TeamManagers.Remove(teamManager);
+                _context.TeamManagers.Remove(teamManager);
             }
 
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             TempData["success"] = "Ο διαχειριστής αφαιρέθηκε επιτυχώς.";
         }
@@ -416,7 +429,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             return RedirectToAction("TeamManagement");
         }
 
-        var teamDetails = await context.Teams
+        var teamDetails = await _context.Teams
             .Include(team => team.Managers)
             .Include(t => t.MediaFiles)
             .ThenInclude(tm => tm.MediaFile)
@@ -461,7 +474,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             return RedirectToAction(nameof(TeamMediaManagement), new { teamSlug });
         }
 
-        var teamDetails = await context.Teams
+        var teamDetails = await _context.Teams
             .FirstOrDefaultAsync(t => t.Slug == teamSlug);
 
         if (teamDetails == null)
@@ -469,7 +482,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
             return RedirectToAction(nameof(TeamMediaManagement), new { teamSlug });
         }
 
-        var uploadPath = Path.Combine(configuration["ImageStoragePath"]!, "teams", teamDetails.Slug);
+        var uploadPath = Path.Combine(_configuration["ImageStoragePath"]!, "teams", teamDetails.Slug);
         Directory.CreateDirectory(uploadPath);
 
         foreach (var file in model.NewMediaFiles)
@@ -484,11 +497,11 @@ public class TeamController(DataContext context, IConfiguration configuration, U
 
             var mediaFile = new MediaFile
             {
-                Path = $"/media/teams/{teamDetails.Slug}/{fileName}"
+                Path = $"/{teamDetails.TeamFolderUrl}/{fileName}"
             };
 
-            context.MediaFiles.Add(mediaFile);
-            await context.SaveChangesAsync();
+            _context.MediaFiles.Add(mediaFile);
+            await _context.SaveChangesAsync();
 
             var teamMedia = new TeamMedia
             {
@@ -496,10 +509,10 @@ public class TeamController(DataContext context, IConfiguration configuration, U
                 MediaFileId = mediaFile.Id
             };
 
-            context.TeamMediaFiles.Add(teamMedia);
+            _context.TeamMediaFiles.Add(teamMedia);
         }
 
-        await context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         TempData["success"] = "Media files uploaded successfully.";
         return RedirectToAction("TeamMediaManagement", new { teamSlug });
@@ -518,20 +531,20 @@ public class TeamController(DataContext context, IConfiguration configuration, U
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> DeleteMedia(string teamSlug, int mediaId)
     {
-        var media = await context.MediaFiles.FindAsync(mediaId);
+        var media = await _context.MediaFiles.FindAsync(mediaId);
         if (media == null)
         {
             return RedirectToAction(nameof(TeamMediaManagement), new { teamSlug });
         }
 
-        var filePath = Path.Combine(configuration["ImageStoragePath"]!, media.Path.TrimStart('/'));
+        var filePath = Path.Combine(_configuration["ImageStoragePath"]!, media.Path.TrimStart('/'));
         if (System.IO.File.Exists(filePath))
         {
             System.IO.File.Delete(filePath);
         }
 
-        context.MediaFiles.Remove(media);
-        await context.SaveChangesAsync();
+        _context.MediaFiles.Remove(media);
+        await _context.SaveChangesAsync();
 
         TempData["success"] = "Media file deleted successfully.";
         return RedirectToAction("TeamMediaManagement", new { teamSlug });
@@ -576,7 +589,7 @@ public class TeamController(DataContext context, IConfiguration configuration, U
 
         foreach (var year in teamDetails.WonYears)
         {
-            viewModel.GamesWon.Add(new GameYearDetailsViewModel
+            viewModel.GamesWon.Add(new ParentGameDetailsViewModel
             {
                 Id = year.Id,
                 Title = year.Title,
@@ -586,14 +599,14 @@ public class TeamController(DataContext context, IConfiguration configuration, U
 
         foreach (var year in teamDetails.HostedYears)
         {
-            viewModel.GamesHosted.Add(new GameYearDetailsViewModel
+            viewModel.GamesHosted.Add(new ParentGameDetailsViewModel
             {
                 Id = year.Id,
                 Title = year.Title,
                 Year = year.Year
             });
         }
-        
+
         foreach (var teamMedia in teamDetails.MediaFiles)
         {
             viewModel.MediaFiles.Add(new MediaFileViewModel
@@ -625,13 +638,13 @@ public class TeamController(DataContext context, IConfiguration configuration, U
 
     private async Task PopulateUpdateManagerViewModel(TeamManagerUpdateViewModel viewModel)
     {
-        var team = await context.Teams
+        var team = await _context.Teams
             .Include(t => t.Managers)
             .SingleOrDefaultAsync(t => t.Slug == viewModel.Slug);
 
         if (team != null)
         {
-            var users = await context.AppUsers.ToListAsync();
+            var users = await _context.AppUsers.ToListAsync();
             viewModel.TeamName = team.Name;
             viewModel.ManagerSelectList = new SelectList(users.Select(u => new SelectListItem
             {

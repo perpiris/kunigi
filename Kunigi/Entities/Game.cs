@@ -12,7 +12,7 @@ public class Game
     
     public virtual GameType GameType { get; set; }
     
-    public virtual GameYear GameYear { get; set; }
+    public virtual ParentGame ParentGame { get; set; }
     
     public virtual ICollection<Puzzle> Puzzles { get; set; }
     

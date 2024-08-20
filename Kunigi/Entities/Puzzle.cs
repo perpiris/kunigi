@@ -12,5 +12,5 @@ public class Puzzle
     
     public virtual Game Game { get; set; }
     
-    public virtual ICollection<MediaFile> MediaFiles { get; set; }
+    public virtual ICollection<PuzzleMedia> MediaFiles { get; set; }
 }

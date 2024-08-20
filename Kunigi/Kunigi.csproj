@@ -7,9 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.7"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.7" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.7">
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -17,13 +17,6 @@
 
     <ItemGroup>
       <Folder Include="wwwroot\media\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\images\test2\profile.jpg" />
-      <_ContentIncludedByDefault Remove="Views\Puzzles\Create.cshtml" />
-      <_ContentIncludedByDefault Remove="Views\Puzzles\Edit.cshtml" />
-      <_ContentIncludedByDefault Remove="Views\Puzzles\List.cshtml" />
     </ItemGroup>
 
 </Project>

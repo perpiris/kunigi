@@ -1,17 +1,18 @@
 ﻿@model TeamMediaViewModel
 
-<h2>Διαχείρηση Υλικού</h2>
-
-@if (TempData["success"] != null)
-{
-    <div class="alert alert-success" role="alert">
-        @TempData["success"]
-    </div>
+@{
+    ViewData["Title"] = "Διαχείρηση Υλικού";
 }
 
-<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#uploadModal">
-    Upload
-</button>
+<div class="d-flex flex-wrap align-items-center mb-4">
+    <h2 class="mb-0 me-3 display-5 flex-grow-1">Διαχείρηση Υλικού</h2>
+    <div>
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#uploadModal">
+            Upload
+        </button>
+        <a asp-controller="Team" asp-action="TeamManagement" class="btn btn-secondary">Επιστροφή</a>
+    </div>
+</div>
 
 <table class="table">
     <thead>

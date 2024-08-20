@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Δημιουργία Παιχνιδιού";
-    @model GameCreateOrUpdateViewModel
+    @model ParentGameCreateOrUpdateViewModel
 }
 
 <section>
@@ -18,7 +18,7 @@
             <div class="col-12 col-lg-9">
                 <div class="bg-white border rounded shadow-sm overflow-hidden">
 
-                    @using (Html.BeginForm("CreateGameYear", "GameYear", FormMethod.Post))
+                    @using (Html.BeginForm("CreateParentGame", "Game", FormMethod.Post))
                     {
                         <div class="row gy-4 gy-xl-5 p-4 p-xl-5">
                             <div class="col-12 col-md-6">
@@ -58,7 +58,7 @@
                             <div class="col-12">
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-primary">Αποθήκευση</button>
-                                    <a asp-controller="GameYear" asp-action="GameYearManagement" class="btn btn-secondary">Πίσω</a>
+                                    <a asp-controller="Game" asp-action="GameYearManagement" class="btn btn-secondary">Πίσω</a>
                                 </div>
                             </div>
                         </div>
