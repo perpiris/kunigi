@@ -3,6 +3,7 @@ using System;
 using Kunigi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kunigi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240820221619_asdasd")]
+    partial class asdasd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -108,7 +111,10 @@ namespace Kunigi.Data.Migrations
                     b.Property<int>("GameTypeId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ParentGameId")
+                    b.Property<int>("GameYearId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ParentGameId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -146,6 +152,9 @@ namespace Kunigi.Data.Migrations
                     b.Property<int>("ParentId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ParentType")
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("Path")
                         .HasColumnType("varchar(255)");
 
@@ -169,13 +178,13 @@ namespace Kunigi.Data.Migrations
                     b.Property<short>("Order")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ParentGameFolderUrl")
-                        .HasColumnType("varchar(255)");
-
                     b.Property<string>("ProfileImageUrl")
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("Slug")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("TeamFolderUrl")
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("Title")
@@ -205,10 +214,10 @@ namespace Kunigi.Data.Migrations
                     b.Property<int?>("GameId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("MediaFileId")
+                    b.Property<int>("GameYearId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ParentGameId")
+                    b.Property<int>("MediaFileId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -217,7 +226,7 @@ namespace Kunigi.Data.Migrations
 
                     b.HasIndex("MediaFileId");
 
-                    b.HasIndex("ParentGameId", "MediaFileId")
+                    b.HasIndex("GameYearId", "MediaFileId")
                         .IsUnique();
 
                     b.ToTable("GameYearMediaFiles");
@@ -235,14 +244,8 @@ namespace Kunigi.Data.Migrations
                     b.Property<int>("GameId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Order")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Question")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -258,9 +261,6 @@ namespace Kunigi.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("MediaFileId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MediaType")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PuzzleId")
@@ -510,9 +510,7 @@ namespace Kunigi.Data.Migrations
 
                     b.HasOne("Kunigi.Entities.ParentGame", "ParentGame")
                         .WithMany("Games")
-                        .HasForeignKey("ParentGameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ParentGameId");
 
                     b.Navigation("GameType");
 
@@ -544,15 +542,15 @@ namespace Kunigi.Data.Migrations
                         .WithMany("MediaFiles")
                         .HasForeignKey("GameId");
 
-                    b.HasOne("Kunigi.Entities.MediaFile", "MediaFile")
-                        .WithMany("ParentGameMediaFiles")
-                        .HasForeignKey("MediaFileId")
+                    b.HasOne("Kunigi.Entities.ParentGame", "ParentGame")
+                        .WithMany("MediaFiles")
+                        .HasForeignKey("GameYearId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Kunigi.Entities.ParentGame", "ParentGame")
-                        .WithMany("MediaFiles")
-                        .HasForeignKey("ParentGameId")
+                    b.HasOne("Kunigi.Entities.MediaFile", "MediaFile")
+                        .WithMany("GameYearMediaFiles")
+                        .HasForeignKey("MediaFileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -687,7 +685,7 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.MediaFile", b =>
                 {
-                    b.Navigation("ParentGameMediaFiles");
+                    b.Navigation("GameYearMediaFiles");
 
                     b.Navigation("PuzzleMediaFiles");
 

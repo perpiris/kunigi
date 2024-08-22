@@ -8,7 +8,7 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
 {
     public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<Team> Teams { get; set; }
-    public DbSet<ParentGame> GameYears { get; set; }
+    public DbSet<ParentGame> ParentGames { get; set; }
     public DbSet<Game> Games { get; set; }
     public DbSet<GameType> GameTypes { get; set; }
     public DbSet<Puzzle> Puzzles { get; set; }
@@ -57,25 +57,25 @@ public class DataContext(DbContextOptions<DataContext> options) : IdentityDbCont
 
             entity.HasOne(d => d.ParentGame)
                 .WithMany(p => p.MediaFiles)
-                .HasForeignKey(d => d.GameYearId)
+                .HasForeignKey(d => d.ParentGameId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(d => d.MediaFile)
-                .WithMany(p => p.GameYearMediaFiles)
+                .WithMany(p => p.ParentGameMediaFiles)
                 .HasForeignKey(d => d.MediaFileId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasIndex(e => new { e.GameYearId, e.MediaFileId }).IsUnique();
+            entity.HasIndex(e => new { GameYearId = e.ParentGameId, e.MediaFileId }).IsUnique();
         });
         
         modelBuilder.Entity<PuzzleMedia>(entity =>
         {
             entity.HasKey(e => e.Id);
 
-            entity.HasOne(d => d.Puzzle)
-                .WithMany(p => p.MediaFiles)
-                .HasForeignKey(d => d.PuzzleId)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Puzzle>()
+                .HasMany(p => p.MediaFiles)
+                .WithOne(pm => pm.Puzzle)
+                .HasForeignKey(pm => pm.PuzzleId);
 
             entity.HasOne(d => d.MediaFile)
                 .WithMany(p => p.PuzzleMediaFiles)

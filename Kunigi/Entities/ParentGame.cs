@@ -22,7 +22,7 @@ public class ParentGame
     public string ProfileImageUrl { get; set; }
     
     [Column(TypeName = "varchar(255)")]
-    public string TeamFolderUrl { get; set; }
+    public string ParentGameFolderUrl { get; set; }
     
     public int HostId { get; set; }
     

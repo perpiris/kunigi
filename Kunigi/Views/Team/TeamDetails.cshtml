@@ -33,42 +33,48 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12">
-                        <div class="card widget-card border-light shadow-sm">
-                            <div class="card-header text-bg-primary">Σύνδεσμοι</div>
-                            <div class="card-body">
 
-                                @if (!string.IsNullOrEmpty(Model.Website))
-                                {
-                                    <a href="@Model.Website" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
-                                        <i class="bi bi-globe"></i>
-                                    </a>
-                                }
+                    @if (!string.IsNullOrEmpty(Model.Website) || !string.IsNullOrEmpty(Model.Facebook) || 
+                         !string.IsNullOrEmpty(Model.Youtube) || !string.IsNullOrEmpty(Model.Instagram))
+                    {
+                        <div class="col-12">
+                            <div class="card widget-card border-light shadow-sm">
+                                <div class="card-header text-bg-primary">Σύνδεσμοι</div>
+                                <div class="card-body">
 
-                                @if (!string.IsNullOrEmpty(Model.Facebook))
-                                {
-                                    <a href="@Model.Facebook" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
-                                        <i class="bi bi-facebook"></i>
-                                    </a>
-                                }
+                                    @if (!string.IsNullOrEmpty(Model.Website))
+                                    {
+                                        <a href="@Model.Website" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                            <i class="bi bi-globe"></i>
+                                        </a>
+                                    }
 
-                                @if (!string.IsNullOrEmpty(Model.Youtube))
-                                {
-                                    <a href="@Model.Youtube" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
-                                        <i class="bi bi-youtube"></i>
-                                    </a>
-                                }
+                                    @if (!string.IsNullOrEmpty(Model.Facebook))
+                                    {
+                                        <a href="@Model.Facebook" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                            <i class="bi bi-facebook"></i>
+                                        </a>
+                                    }
 
-                                @if (!string.IsNullOrEmpty(Model.Instagram))
-                                {
-                                    <a href="@Model.Instagram" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
-                                        <i class="bi bi-instagram"></i>
-                                    </a>
-                                }
+                                    @if (!string.IsNullOrEmpty(Model.Youtube))
+                                    {
+                                        <a href="@Model.Youtube" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                            <i class="bi bi-youtube"></i>
+                                        </a>
+                                    }
 
+                                    @if (!string.IsNullOrEmpty(Model.Instagram))
+                                    {
+                                        <a href="@Model.Instagram" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                            <i class="bi bi-instagram"></i>
+                                        </a>
+                                    }
+
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    }
+
                 </div>
             </div>
             <div class="col-12 col-lg-8 col-xl-9">
@@ -173,7 +179,7 @@
             </div>
             <div class="modal-body">
                 <div id="mediaContainer" class="text-center">
-                    
+
                 </div>
             </div>
         </div>
@@ -215,13 +221,5 @@
     {
         var videoExtensions = new[] { ".mp4", ".webm", ".ogg" };
         return videoExtensions.Any(ext => path.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
-    }
-
-    static string TruncateFileName(string fileName, int maxLength)
-    {
-        if (fileName.Length <= maxLength)
-            return fileName;
-
-        return fileName.Substring(0, maxLength - 3) + "...";
     }
 }

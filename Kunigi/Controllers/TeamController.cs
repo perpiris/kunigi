@@ -104,26 +104,22 @@ public class TeamController : Controller
         var newTeam = new Team
         {
             Name = viewModel.Name,
-            Description = viewModel.Description,
-            ProfileImageUrl = viewModel.ProfileImageUrl,
-            Facebook = viewModel.Facebook,
-            Youtube = viewModel.Youtube,
-            Instagram = viewModel.Instagram,
-            Website = viewModel.Website,
             Slug = slug
         };
 
-        var basePath = _configuration["ImageStoragePath"];
-        var teamFolderPath = Path.Combine(basePath!, "teams", slug);
-        Directory.CreateDirectory(teamFolderPath);
-        newTeam.TeamFolderUrl = teamFolderPath;
+        var basePathFromConfig = _configuration["ImageStoragePath"];
+        var teamFolderPath = CrossPlatformPathUtility.CombineAndNormalize("teams", slug);
+        var fullTeamFolderPath = CrossPlatformPathUtility.CombineAndNormalize(basePathFromConfig, teamFolderPath);
+        Directory.CreateDirectory(fullTeamFolderPath);
+        newTeam.TeamFolderUrl = fullTeamFolderPath;
+        
         if (profileImage != null)
         {
             var fileName = "profile" + Path.GetExtension(profileImage.FileName);
-            var relativePath = Path.Combine("teams", slug, fileName);
-            var absolutePath = Path.Combine(basePath, relativePath);
-            Directory.CreateDirectory(Path.GetDirectoryName(absolutePath)!);
-            await using (var stream = new FileStream(absolutePath, FileMode.Create))
+            var relativePath = CrossPlatformPathUtility.CombineAndNormalize(teamFolderPath, fileName);
+            var fullPath = CrossPlatformPathUtility.CombineAndNormalize(basePathFromConfig, relativePath);
+
+            await using (var stream = new FileStream(fullPath, FileMode.Create))
             {
                 await profileImage.CopyToAsync(stream);
             }
@@ -213,23 +209,17 @@ public class TeamController : Controller
 
         if (profileImage != null)
         {
-            var basePath = _configuration["ImageStoragePath"];
-            var teamFolderPath = Path.Combine(basePath!, "teams", teamDetails.Slug);
+            var basePathFromConfig = _configuration["ImageStoragePath"];
             var fileName = "profile" + Path.GetExtension(profileImage.FileName);
-            var filePath = Path.Combine(teamFolderPath, fileName);
+            var relativePath = CrossPlatformPathUtility.CombineAndNormalize(teamDetails.TeamFolderUrl, fileName);
+            var fullPath = CrossPlatformPathUtility.CombineAndNormalize(basePathFromConfig, relativePath);
 
-            if (!Directory.Exists(teamFolderPath))
+            await using (var stream = new FileStream(fullPath, FileMode.Create))
             {
-                Directory.CreateDirectory(teamFolderPath);
+                await profileImage.CopyToAsync(stream);
             }
 
-            await using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                await profileImage.CopyToAsync(fileStream);
-            }
-
-            var relativePath = Path.Combine("teams", teamDetails.Slug, fileName).Replace("\\", "/");
-            teamDetails.ProfileImageUrl = $"/media/{relativePath}";
+            teamDetails.ProfileImageUrl = $"/media/{relativePath.Replace("\\", "/")}";
         }
 
         _context.Teams.Update(teamDetails);
@@ -295,7 +285,7 @@ public class TeamController : Controller
             Text = u.Email
         }));
 
-        var viewModel = new TeamManagerUpdateViewModel
+        var viewModel = new TeamManagerEditViewModel
         {
             Slug = teamToUpdate.Slug,
             TeamName = teamToUpdate.Name,
@@ -312,7 +302,7 @@ public class TeamController : Controller
 
     [HttpPost("{teamSlug}/edit-managers")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> EditTeamManagers(string teamSlug, TeamManagerUpdateViewModel viewModel)
+    public async Task<IActionResult> EditTeamManagers(string teamSlug, TeamManagerEditViewModel viewModel)
     {
         if (string.IsNullOrEmpty(teamSlug))
         {
@@ -482,22 +472,19 @@ public class TeamController : Controller
             return RedirectToAction(nameof(TeamMediaManagement), new { teamSlug });
         }
 
-        var uploadPath = Path.Combine(_configuration["ImageStoragePath"]!, "teams", teamDetails.Slug);
-        Directory.CreateDirectory(uploadPath);
-
         foreach (var file in model.NewMediaFiles)
         {
-            var fileName = GetUniqueFileName(file.FileName);
-            var filePath = Path.Combine(uploadPath, fileName);
+            var fileName = FileNameGenerator.GetUniqueFileName(file.FileName);
+            var fullFilePath = CrossPlatformPathUtility.CombineAndNormalize(teamDetails.TeamFolderUrl, fileName);
 
-            await using (var stream = new FileStream(filePath, FileMode.Create))
+            await using (var stream = new FileStream(fullFilePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
-
+            
             var mediaFile = new MediaFile
             {
-                Path = $"/{teamDetails.TeamFolderUrl}/{fileName}"
+                Path = CrossPlatformPathUtility.CombineAndNormalize(teamDetails.TeamFolderUrl, fileName)
             };
 
             _context.MediaFiles.Add(mediaFile);
@@ -516,15 +503,6 @@ public class TeamController : Controller
 
         TempData["success"] = "Media files uploaded successfully.";
         return RedirectToAction("TeamMediaManagement", new { teamSlug });
-    }
-
-    private static string GetUniqueFileName(string fileName)
-    {
-        fileName = Path.GetFileName(fileName);
-        return Path.GetFileNameWithoutExtension(fileName)
-               + "_"
-               + Guid.NewGuid().ToString().Substring(0, 4)
-               + Path.GetExtension(fileName);
     }
 
     [HttpPost("{teamSlug}/delete-media")]
@@ -636,7 +614,7 @@ public class TeamController : Controller
         return viewModel;
     }
 
-    private async Task PopulateUpdateManagerViewModel(TeamManagerUpdateViewModel viewModel)
+    private async Task PopulateUpdateManagerViewModel(TeamManagerEditViewModel viewModel)
     {
         var team = await _context.Teams
             .Include(t => t.Managers)

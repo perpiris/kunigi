@@ -2,7 +2,7 @@
 
 namespace Kunigi.ViewModels.Team;
 
-public class TeamManagerUpdateViewModel
+public class TeamManagerEditViewModel
 {
     public string Slug { get; set; }
     

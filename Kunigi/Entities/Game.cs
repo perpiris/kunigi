@@ -8,7 +8,7 @@ public class Game
 
     public int GameTypeId { get; set; }
     
-    public int GameYearId { get; set; }
+    public int ParentGameId { get; set; }
     
     public virtual GameType GameType { get; set; }
     
@@ -16,5 +16,5 @@ public class Game
     
     public virtual ICollection<Puzzle> Puzzles { get; set; }
     
-    public virtual ICollection<MediaFile> MediaFiles { get; set; }
+    public virtual ICollection<ParentGameMedia> MediaFiles { get; set; }
 }

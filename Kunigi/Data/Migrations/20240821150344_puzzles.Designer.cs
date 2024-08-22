@@ -3,6 +3,7 @@ using System;
 using Kunigi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kunigi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240821150344_puzzles")]
+    partial class puzzles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -146,6 +149,9 @@ namespace Kunigi.Data.Migrations
                     b.Property<int>("ParentId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ParentType")
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("Path")
                         .HasColumnType("varchar(255)");
 
@@ -169,13 +175,13 @@ namespace Kunigi.Data.Migrations
                     b.Property<short>("Order")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ParentGameFolderUrl")
-                        .HasColumnType("varchar(255)");
-
                     b.Property<string>("ProfileImageUrl")
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("Slug")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("TeamFolderUrl")
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("Title")

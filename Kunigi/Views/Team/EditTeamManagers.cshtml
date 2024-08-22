@@ -1,4 +1,4 @@
-﻿@model TeamManagerUpdateViewModel
+﻿@model TeamManagerEditViewModel
 
 @{
     ViewData["Title"] = $"Διαχειριστές {Model.TeamName}";
@@ -13,7 +13,7 @@
     }
 </style>
 
-<h2 class="mb-4 display-5 text-center">Διαχειριστές @Model.TeamName</h2>
+<h2 class="mb-4 display-5 text-center">@ViewData["Title"]</h2>
 
 <div class="container">
     <div class="row">

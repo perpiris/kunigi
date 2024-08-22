@@ -37,6 +37,7 @@ else
                 <td>
                     <a href="@Url.Action("GameDetails", "Game", new { gameYear = game.Year })" class="btn btn-info">Προβολή</a>
                     <a href="@Url.Action("EditParentGame", "Game", new { gameYear = game.Year })" class="btn btn-primary">Επεξεργασία</a>
+                    <a href="@Url.Action("GameList", "Game", new { gameYear = game.Year })" class="btn btn-primary">Επεξεργασία Γρίφων</a>
                 </td>
             </tr>
         }
@@ -47,7 +48,7 @@ else
         @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
         {
             <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
-                <a class="page-link" asp-controller="Game" asp-action="GameList" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
+                <a class="page-link" asp-controller="Game" asp-action="ParentGameList" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
             </li>
         }
     </ul>

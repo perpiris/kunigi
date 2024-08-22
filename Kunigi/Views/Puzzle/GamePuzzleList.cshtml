@@ -1,0 +1,87 @@
+﻿@model PuzzleListViewModel
+
+@{
+    ViewData["Title"] = "Λίστα Γρίφων";
+}
+
+<div class="container mt-4">
+    <h1 class="display-4 text-center mb-5">Λίστα Γρίφων - @Model.GameType (@Model.ParentGameYear)</h1>
+
+    <div class="mb-3">
+        <a class="btn btn-primary"
+           asp-controller="Puzzle" asp-action="CreatePuzzle" asp-route-gameId="@Model.GameId">
+            Δημιουργία νέου Γρίφου
+        </a>
+    </div>
+
+    <div class="mb-3">
+        <div class="btn-group" role="group" aria-label="Φίλτρο Γρίφων">
+            <input type="radio" class="btn-check" name="puzzleFilter" id="all" autocomplete="off" checked>
+            <label class="btn btn-outline-primary" for="all">Όλοι</label>
+
+            <input type="radio" class="btn-check" name="puzzleFilter" id="main" autocomplete="off">
+            <label class="btn btn-outline-primary" for="main">Κύριοι</label>
+
+            <input type="radio" class="btn-check" name="puzzleFilter" id="parallel" autocomplete="off">
+            <label class="btn btn-outline-primary" for="parallel">Παράλληλοι</label>
+        </div>
+    </div>
+
+    @if (Model.Puzzles.Count == 0)
+    {
+        <p class="text-center">Δεν υπάρχουν γρίφοι για αυτό το παιχνίδι.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped" id="puzzleTable">
+                <thead>
+                <tr>
+                    <th>Σειρά</th>
+                    <th>Τύπος</th>
+                    <th>Αρχεία Ερώτησης</th>
+                    <th>Αρχεία Απάντησης</th>
+                    <th>Ενέργειες</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var puzzle in Model.Puzzles.OrderBy(p => p.Order))
+                {
+                    <tr class="puzzle-row" data-type="@puzzle.Type.ToLower()">
+                        <td>@puzzle.Order</td>
+                        <td>@puzzle.Type</td>
+                        <td>@puzzle.QuestionMediaFilesCount</td>
+                        <td>@puzzle.AnswerMediaFilesCount</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@puzzle.Id" class="btn btn-sm btn-primary">Επεξεργασία</a>
+                            <form asp-action="Delete" asp-route-id="@puzzle.Id" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτόν τον γρίφο;')">Διαγραφή</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterButtons = document.querySelectorAll('input[name="puzzleFilter"]');
+        const puzzleRows = document.querySelectorAll('.puzzle-row');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('change', function() {
+                const filter = this.id;
+                puzzleRows.forEach(row => {
+                    if (filter === 'all' || row.dataset.type === filter) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>

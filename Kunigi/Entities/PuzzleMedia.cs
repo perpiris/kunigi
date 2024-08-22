@@ -1,4 +1,6 @@
-﻿namespace Kunigi.Entities;
+﻿using Kunigi.Enums;
+
+namespace Kunigi.Entities;
 
 public class PuzzleMedia
 {
@@ -7,6 +9,8 @@ public class PuzzleMedia
     public int PuzzleId { get; set; }
     
     public int MediaFileId { get; set; }
+    
+    public PuzzleMediaType MediaType { get; set; }
     
     public virtual Puzzle Puzzle { get; set; }
     

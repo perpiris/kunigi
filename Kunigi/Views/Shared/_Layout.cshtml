@@ -46,7 +46,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(GetActive("Games", "Index"))"
-                           asp-area="" asp-controller="Game" asp-action="GameList">
+                           asp-area="" asp-controller="Game" asp-action="ParentGameList">
                             Παιχνίδια
                         </a>
                     </li>
@@ -64,7 +64,7 @@
                     @if (User.Identity is { IsAuthenticated: true })
                     {
                         <li class="nav-item">
-                            <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
+                            <form id="logoutForm" asp-controller="Authentication" asp-action="Logout" method="post" class="form-inline">
                                 <button type="submit" class="btn btn-link nav-link">Αποσύνδεση</button>
                             </form>
                         </li>
@@ -73,13 +73,13 @@
                     {
                         <li class="nav-item">
                             <a class="nav-link @(GetActive("Home", "Login"))"
-                               asp-controller="Account" asp-action="Login">
+                               asp-controller="Authentication" asp-action="Login">
                                 Σύνδεση
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(GetActive("Home", "Register"))"
-                               asp-controller="Account" asp-action="Register">
+                               asp-controller="Authentication" asp-action="Register">
                                 Εγγραφή
                             </a>
                         </li>
@@ -107,7 +107,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(GetActive("Games", "Manage"))"
-                               asp-controller="Game" asp-action="GameYearManagement">
+                               asp-controller="Game" asp-action="ParentGameManagement">
                                 Διαχείριση Παιχνιδιών
                             </a>
                         </li>
@@ -115,7 +115,7 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link @(GetActive("Account", "Manage"))"
-                                   asp-controller="Account" asp-action="Manage">
+                                   asp-controller="Authentication" asp-action="Manage">
                                     Διαχείριση Χρηστών
                                 </a>
                             </li>
