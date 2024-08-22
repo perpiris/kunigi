@@ -4,8 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kunigi.Data;
 
-public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext<AppUser>(options)
+public class DataContext : IdentityDbContext<AppUser>
 {
+    public DataContext(DbContextOptions<DataContext> options) : base(options)
+    {
+    }
+
     public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<ParentGame> ParentGames { get; set; }

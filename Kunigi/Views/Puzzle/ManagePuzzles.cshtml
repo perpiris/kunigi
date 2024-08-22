@@ -39,8 +39,6 @@
                 <tr>
                     <th>Σειρά</th>
                     <th>Τύπος</th>
-                    <th>Αρχεία Ερώτησης</th>
-                    <th>Αρχεία Απάντησης</th>
                     <th>Ενέργειες</th>
                 </tr>
                 </thead>
@@ -50,8 +48,6 @@
                     <tr class="puzzle-row" data-type="@puzzle.Type.ToLower()">
                         <td>@puzzle.Order</td>
                         <td>@puzzle.Type</td>
-                        <td>@puzzle.QuestionMediaFilesCount</td>
-                        <td>@puzzle.AnswerMediaFilesCount</td>
                         <td>
                             <a asp-action="Edit" asp-route-id="@puzzle.Id" class="btn btn-sm btn-primary">Επεξεργασία</a>
                             <form asp-action="Delete" asp-route-id="@puzzle.Id" method="post" style="display: inline;">

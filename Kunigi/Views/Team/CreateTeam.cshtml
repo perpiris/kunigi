@@ -19,15 +19,15 @@
             <div class="col-12 col-lg-9">
                 <div class="bg-white border rounded shadow-sm overflow-hidden">
 
-                    @using (Html.BeginForm("CreateTeam", "Team", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    @using (Html.BeginForm("CreateTeam", "Team", FormMethod.Post))
                     {
-                        <div class="row gy-4 gy-xl-5 p-4 p-xl-5">
+                        <div class="row gy-4 p-4">
                             <div class="col-12">
-                                <label asp-for="Name" class="form-label mt-4"></label>
+                                <label asp-for="Name" class="form-label"></label>
                                 <input asp-for="Name" class="form-control @(ViewData.ModelState["Name"] != null ? "is-invalid" : "")"/>
                                 <span asp-validation-for="Name" class="text-danger"></span>
                             </div>
-                            <div class="d-grid gap-2">
+                            <div>
                                 <button type="submit" class="btn btn-primary">Αποθήκευση</button>
                                 <a asp-controller="Team" asp-action="TeamManagement" class="btn btn-secondary">Πίσω</a>
                             </div>

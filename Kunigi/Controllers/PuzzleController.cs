@@ -22,8 +22,50 @@ public class PuzzleController : Controller
         _configuration = configuration;
     }
 
-    [HttpGet("list/{gameId:int}")]
-    public async Task<IActionResult> GamePuzzleList(int gameId)
+    [HttpGet("{gameYear}/{gameSlug}")]
+    public async Task<IActionResult> PuzzleList(string gameYear, string gameSlug)
+    {
+        var game = await _context.Games
+            .Include(g => g.GameType)
+            .Include(g => g.Puzzles)
+            .ThenInclude(p => p.MediaFiles)
+            .ThenInclude(pm => pm.MediaFile)
+            .FirstOrDefaultAsync(g =>
+                g.ParentGame.Year.ToString() == gameYear && g.GameType.Slug == gameSlug.Trim());
+
+        if (game == null)
+        {
+            TempData["error"] = "Το παιχνίδι δεν βρέθηκε.";
+            return RedirectToAction("GameDetails", "Game");
+        }
+
+        var viewModel = new GamePuzzlesViewModel
+        {
+            GameId = game.Id,
+            GameType = game.GameType.Description,
+            Puzzles = game.Puzzles.Select(p => new PuzzleDetailsViewModel
+            {
+                Id = p.Id,
+                Question = p.Question,
+                Answer = p.Answer,
+                Type = p.Type.ToString(),
+                Order = p.Order,
+                QuestionMedia = p.MediaFiles
+                    .Where(m => m.MediaType == PuzzleMediaType.Question)
+                    .Select(m => m.MediaFile.Path)
+                    .ToList(),
+                AnswerMedia = p.MediaFiles
+                    .Where(m => m.MediaType == PuzzleMediaType.Answer)
+                    .Select(m => m.MediaFile.Path)
+                    .ToList()
+            }).OrderBy(p => p.Order).ToList()
+        };
+
+        return View(viewModel);
+    }
+
+    [HttpGet("manage/{gameId:int}")]
+    public async Task<IActionResult> ManagePuzzles(int gameId)
     {
         var game = await _context.Games
             .Include(g => g.ParentGame)
@@ -48,10 +90,6 @@ public class PuzzleController : Controller
                 Id = p.Id,
                 Question = p.Question,
                 Answer = p.Answer,
-                QuestionMediaFilesCount = p.MediaFiles.Count(m =>
-                    m.MediaType == PuzzleMediaType.Question),
-                AnswerMediaFilesCount = p.MediaFiles.Count(m =>
-                    m.MediaType == PuzzleMediaType.Answer),
                 Type = p.Type.ToString(),
                 Order = p.Order
             }).ToList()
@@ -115,40 +153,42 @@ public class PuzzleController : Controller
             MediaFiles = new List<PuzzleMedia>()
         };
 
-        if (model.QuestionMediaFiles != null && model.QuestionMediaFiles.Count > 0)
+        if (model.QuestionMediaFiles is { Count: > 0 })
         {
             foreach (var mediaFile in model.QuestionMediaFiles)
             {
-                puzzle.MediaFiles.Add(await CreatePuzzleMedia(game, mediaFile, PuzzleMediaType.Question));
+                puzzle.MediaFiles.Add(await CreatePuzzleMedia(game, mediaFile,
+                    PuzzleMediaType.Question));
             }
         }
 
-        if (model.AnswerMediaFiles != null && model.AnswerMediaFiles.Count > 0)
+        if (model.AnswerMediaFiles is { Count: > 0 })
         {
             foreach (var mediaFile in model.AnswerMediaFiles)
             {
-                puzzle.MediaFiles.Add(await CreatePuzzleMedia(game, mediaFile, PuzzleMediaType.Answer));
+                puzzle.MediaFiles.Add(await CreatePuzzleMedia(game, mediaFile,
+                    PuzzleMediaType.Answer));
             }
         }
 
         _context.Puzzles.Add(puzzle);
         await _context.SaveChangesAsync();
 
-        return RedirectToAction(nameof(GamePuzzleList), new { gameId = model.GameId });
+        return RedirectToAction(nameof(ManagePuzzles), new { gameId = model.GameId });
     }
 
     private async Task<PuzzleMedia> CreatePuzzleMedia(Game game, IFormFile mediaFile,
         PuzzleMediaType mediaType)
     {
         var basePath = _configuration["ImageStoragePath"];
-        var gameFolderPath = Path.Combine(basePath!, "games", game.ParentGame.Slug, game.GameType.Slug);
+        var gameFolderPath = CrossPlatformPathUtility.CombineAndNormalize(basePath, "games",
+            game.ParentGame.Slug, game.GameType.Slug);
         Directory.CreateDirectory(gameFolderPath);
 
-        var fileName = FileNameGenerator.GetUniqueFileName(mediaFile.FileName) +
-                       Path.GetExtension(mediaFile.FileName);
-        var filePath = Path.Combine(gameFolderPath, fileName);
+        var fileName = FileNameGenerator.GetUniqueFileName(mediaFile.FileName);
+        var fullFilePath = CrossPlatformPathUtility.CombineAndNormalize(gameFolderPath, fileName);
 
-        await using (var stream = new FileStream(filePath, FileMode.Create))
+        await using (var stream = new FileStream(fullFilePath, FileMode.Create))
         {
             await mediaFile.CopyToAsync(stream);
         }
@@ -157,8 +197,7 @@ public class PuzzleController : Controller
         {
             MediaFile = new MediaFile
             {
-                Path = Path.Combine("games", game.ParentGame.Slug, game.GameType.Slug, fileName)
-                    .Replace("\\", "/"),
+                Path = CrossPlatformPathUtility.GetRelativePath(basePath, fullFilePath)
             },
             MediaType = mediaType
         };

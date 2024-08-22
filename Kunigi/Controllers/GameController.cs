@@ -61,6 +61,8 @@ public class GameController : Controller
             await _context.ParentGames
                 .Include(x => x.Host)
                 .Include(x => x.Winner)
+                .Include(x => x.Games)
+                .ThenInclude(x => x.GameType)
                 .FirstOrDefaultAsync(x => x.Slug == gameYear.Trim());
 
         if (parentGameDetails is null)
@@ -69,7 +71,7 @@ public class GameController : Controller
             return RedirectToAction("ParentGameList");
         }
 
-        var viewModel = GetMappedParentDetailsViewModel(parentGameDetails);
+        var viewModel = GetFullMappedParentDetailsViewModel(parentGameDetails);
         return View(viewModel);
     }
 
@@ -197,7 +199,7 @@ public class GameController : Controller
         return RedirectToAction("ParentGameList");
     }
 
-    [HttpGet("{gameYear}/edit-parent-game")]
+    [HttpGet("edit-parent-game/{gameYear}")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> EditParentGame(string gameYear)
     {
@@ -239,7 +241,7 @@ public class GameController : Controller
         return View(viewModel);
     }
 
-    [HttpPost("{gameYear}/edit-parent-game")]
+    [HttpPost("edit-parent-game/{gameYear}")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> EditParentGame(string gameYear,
         ParentGameCreateOrUpdateViewModel viewModel, IFormFile profileImage)
@@ -252,7 +254,7 @@ public class GameController : Controller
         var parentGameDetails =
             await _context.ParentGames
                 .Include(x => x.Host)
-                .SingleOrDefaultAsync(x => x.Id == viewModel.Id);
+                .SingleOrDefaultAsync(x => x.Slug == gameYear.Trim());
 
         if (parentGameDetails is null)
         {
@@ -277,7 +279,6 @@ public class GameController : Controller
 
         parentGameDetails.Title = viewModel.Title;
         parentGameDetails.Description = viewModel.Description;
-        parentGameDetails.Slug = SlugGenerator.GenerateSlug(viewModel.Title);
 
         if (profileImage != null)
         {
@@ -337,7 +338,7 @@ public class GameController : Controller
         return View(viewModel);
     }
 
-    [HttpGet("{gameYear}/games")]
+    [HttpGet("list/{gameYear}")]
     public async Task<IActionResult> GameList(string gameYear)
     {
         if (string.IsNullOrEmpty(gameYear))
@@ -395,6 +396,37 @@ public class GameController : Controller
             Host = parentGameDetails.Host.Name,
             HostSlug = parentGameDetails.Host.Slug
         };
+
+        return viewModel;
+    }
+    
+    private static ParentGameDetailsViewModel GetFullMappedParentDetailsViewModel(
+        ParentGame parentGameDetails)
+    {
+        var viewModel = new ParentGameDetailsViewModel
+        {
+            Id = parentGameDetails.Id,
+            Title = parentGameDetails.Title,
+            Year = parentGameDetails.Year,
+            Order = parentGameDetails.Order,
+            ProfileImageUrl = parentGameDetails.ProfileImageUrl,
+            Winner = parentGameDetails.Winner.Name,
+            WinnerSlug = parentGameDetails.Winner.Slug,
+            Host = parentGameDetails.Host.Name,
+            HostSlug = parentGameDetails.Host.Slug,
+            GameList = []
+        };
+        
+        foreach (var gameDetails in parentGameDetails.Games)
+        {
+            viewModel.GameList.Add(new GameDetailsViewModel
+            {
+                Id = gameDetails.Id,
+                GameType = gameDetails.GameType.Description,
+                Year = parentGameDetails.Year.ToString(),
+                Slug = gameDetails.GameType.Slug
+            });
+        }
 
         return viewModel;
     }

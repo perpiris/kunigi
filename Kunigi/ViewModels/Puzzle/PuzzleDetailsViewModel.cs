@@ -8,11 +8,11 @@ public class PuzzleDetailsViewModel
     
     public string Answer { get; set; }
     
-    public int QuestionMediaFilesCount { get; set; }
-    
-    public int AnswerMediaFilesCount { get; set; }
-    
     public string Type { get; set; }
     
     public int Order { get; set; }
+    
+    public List<string> QuestionMedia { get; set; }
+    
+    public List<string> AnswerMedia { get; set; }
 }

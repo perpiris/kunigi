@@ -5,13 +5,6 @@
 }
 
 <section>
-    <div class="container">
-        <div class="row justify-content-md-center">
-            <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
-                <h2 class="mb-4 display-5 text-center">@Model.Title</h2>
-            </div>
-        </div>
-    </div>
 
     <div class="container">
         <div class="row gy-4 gy-lg-0">
@@ -49,14 +42,36 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-12">
+                        <div class="card widget-card border-light shadow-sm">
+                            <div class="card-header text-bg-primary">Παιχνίδια</div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    @foreach (var game in Model.GameList)
+                                    {
+                                        <li class="list-group-item">
+                                            <a asp-controller="Puzzle" asp-action="PuzzleList" asp-route-gameYear="@game.Year" asp-route-gameSlug="@game.Slug">@game.GameType</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-12 col-lg-8 col-xl-9">
                 <div class="card widget-card border-light shadow-sm">
                     <div class="card-body p-4">
+                        <div class="container">
+                            <div class="row justify-content-md-center">
+                                <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
+                                    <h2 class="mb-4 display-5 text-center">@Model.Title</h2>
+                                </div>
+                            </div>
+                        </div>
                         <ul class="nav nav-tabs" id="profileTab" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-tab-pane" type="button" role="tab" aria-controls="overview-tab-pane" aria-selected="true">Πληροφορίες</button>
+                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-tab-pane" type="button" role="tab" aria-controls="overview-tab-pane" aria-selected="true">Περιγραφή</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos-tab-pane" type="button" role="tab" aria-controls="photos-tab-pane" aria-selected="true">Υλικό</button>

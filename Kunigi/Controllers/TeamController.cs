@@ -88,7 +88,7 @@ public class TeamController : Controller
 
     [HttpPost("create")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> CreateTeam(TeamCreateOrEditViewModel viewModel, IFormFile profileImage)
+    public async Task<IActionResult> CreateTeam(TeamCreateOrEditViewModel viewModel)
     {
         if (!ModelState.IsValid) return View();
 
@@ -108,24 +108,9 @@ public class TeamController : Controller
         };
 
         var basePathFromConfig = _configuration["ImageStoragePath"];
-        var teamFolderPath = CrossPlatformPathUtility.CombineAndNormalize("teams", slug);
-        var fullTeamFolderPath = CrossPlatformPathUtility.CombineAndNormalize(basePathFromConfig, teamFolderPath);
-        Directory.CreateDirectory(fullTeamFolderPath);
-        newTeam.TeamFolderUrl = fullTeamFolderPath;
-        
-        if (profileImage != null)
-        {
-            var fileName = "profile" + Path.GetExtension(profileImage.FileName);
-            var relativePath = CrossPlatformPathUtility.CombineAndNormalize(teamFolderPath, fileName);
-            var fullPath = CrossPlatformPathUtility.CombineAndNormalize(basePathFromConfig, relativePath);
-
-            await using (var stream = new FileStream(fullPath, FileMode.Create))
-            {
-                await profileImage.CopyToAsync(stream);
-            }
-
-            newTeam.ProfileImageUrl = $"/media/{relativePath.Replace("\\", "/")}";
-        }
+        var teamFolderPath = Path.Combine(basePathFromConfig!, "teams", slug);
+        Directory.CreateDirectory(teamFolderPath);
+        newTeam.TeamFolderUrl = teamFolderPath;
 
         _context.Teams.Add(newTeam);
         await _context.SaveChangesAsync();
@@ -134,7 +119,7 @@ public class TeamController : Controller
         return RedirectToAction("TeamManagement");
     }
 
-    [HttpGet("{teamSlug}/edit")]
+    [HttpGet("edit/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> EditTeam(string teamSlug)
     {
@@ -170,7 +155,7 @@ public class TeamController : Controller
         return RedirectToAction("TeamManagement");
     }
 
-    [HttpPost("{teamSlug}/edit")]
+    [HttpPost("edit/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> EditTeam(string teamSlug, TeamCreateOrEditViewModel updatedTeamDetails,
         IFormFile profileImage)
@@ -210,16 +195,22 @@ public class TeamController : Controller
         if (profileImage != null)
         {
             var basePathFromConfig = _configuration["ImageStoragePath"];
+            var teamFolderPath = Path.Combine(basePathFromConfig!, "teams", teamDetails.Slug);
             var fileName = "profile" + Path.GetExtension(profileImage.FileName);
-            var relativePath = CrossPlatformPathUtility.CombineAndNormalize(teamDetails.TeamFolderUrl, fileName);
-            var fullPath = CrossPlatformPathUtility.CombineAndNormalize(basePathFromConfig, relativePath);
+            var filePath = Path.Combine(teamFolderPath, fileName);
 
-            await using (var stream = new FileStream(fullPath, FileMode.Create))
+            if (!Directory.Exists(teamFolderPath))
             {
-                await profileImage.CopyToAsync(stream);
+                Directory.CreateDirectory(teamFolderPath);
             }
 
-            teamDetails.ProfileImageUrl = $"/media/{relativePath.Replace("\\", "/")}";
+            await using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                await profileImage.CopyToAsync(fileStream);
+            }
+
+            var relativePath = Path.Combine("teams", teamDetails.Slug, fileName).Replace("\\", "/");
+            teamDetails.ProfileImageUrl = $"/media/{relativePath}";
         }
 
         _context.Teams.Update(teamDetails);
@@ -241,8 +232,6 @@ public class TeamController : Controller
 
         var teamList =
             await _context.Teams
-                .Include(t => t.WonYears)
-                .Include(t => t.HostedYears)
                 .Skip(skip)
                 .Take(pageInfo.PageSize)
                 .ToListAsync();
@@ -255,7 +244,7 @@ public class TeamController : Controller
         return View(viewModel);
     }
 
-    [HttpGet("{teamSlug}/edit-managers")]
+    [HttpGet("edit-managers/{teamSlug}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> EditTeamManagers(string teamSlug)
     {
@@ -300,7 +289,7 @@ public class TeamController : Controller
         return View(viewModel);
     }
 
-    [HttpPost("{teamSlug}/edit-managers")]
+    [HttpPost("edit-managers/{teamSlug}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> EditTeamManagers(string teamSlug, TeamManagerEditViewModel viewModel)
     {
@@ -369,7 +358,7 @@ public class TeamController : Controller
         return RedirectToAction("EditTeamManagers", new { id = viewModel.Slug });
     }
 
-    [HttpPost("{teamSlug}/remove-manager")]
+    [HttpPost("remove-manager/{teamSlug}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RemoveManager(string teamSlug, string managerId)
     {
@@ -410,7 +399,7 @@ public class TeamController : Controller
         return RedirectToAction("EditTeamManagers", new { teamSlug });
     }
 
-    [HttpGet("{teamSlug}/media")]
+    [HttpGet("manage-media/{teamSlug}/")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> TeamMediaManagement(string teamSlug)
     {
@@ -441,6 +430,7 @@ public class TeamController : Controller
             }
         }
 
+        var basePath = _configuration["ImageStoragePath"];
         var viewModel = new TeamMediaViewModel
         {
             TeamSlug = teamDetails.Slug,
@@ -448,14 +438,14 @@ public class TeamController : Controller
             {
                 Id = tm.MediaFile.Id,
                 FileName = Path.GetFileName(tm.MediaFile.Path),
-                Path = tm.MediaFile.Path
+                Path = CrossPlatformPathUtility.CombineAndNormalize(basePath, tm.MediaFile.Path)
             }).ToList()
         };
 
         return View(viewModel);
     }
 
-    [HttpPost("{teamSlug}/upload-media")]
+    [HttpPost("upload-media/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> UploadMedia(string teamSlug, TeamMediaViewModel model)
     {
@@ -472,19 +462,22 @@ public class TeamController : Controller
             return RedirectToAction(nameof(TeamMediaManagement), new { teamSlug });
         }
 
+        var uploadPath = Path.Combine(_configuration["ImageStoragePath"]!, "teams", teamDetails.Slug);
+        Directory.CreateDirectory(uploadPath);
+
         foreach (var file in model.NewMediaFiles)
         {
             var fileName = FileNameGenerator.GetUniqueFileName(file.FileName);
-            var fullFilePath = CrossPlatformPathUtility.CombineAndNormalize(teamDetails.TeamFolderUrl, fileName);
+            var filePath = Path.Combine(uploadPath, fileName);
 
-            await using (var stream = new FileStream(fullFilePath, FileMode.Create))
+            await using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
-            
+
             var mediaFile = new MediaFile
             {
-                Path = CrossPlatformPathUtility.CombineAndNormalize(teamDetails.TeamFolderUrl, fileName)
+                Path = $"/media/teams/{teamDetails.Slug}/{fileName}"
             };
 
             _context.MediaFiles.Add(mediaFile);
@@ -505,7 +498,7 @@ public class TeamController : Controller
         return RedirectToAction("TeamMediaManagement", new { teamSlug });
     }
 
-    [HttpPost("{teamSlug}/delete-media")]
+    [HttpPost("delete-media{teamSlug}/")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> DeleteMedia(string teamSlug, int mediaId)
     {

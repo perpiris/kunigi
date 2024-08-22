@@ -1,0 +1,95 @@
+﻿@model GamePuzzlesViewModel
+
+@{
+    ViewData["Title"] = @Model.GameType;
+    var mainPuzzles = Model.Puzzles.Where(p => p.Type == "Main").ToList();
+    var parallelPuzzles = Model.Puzzles.Where(p => p.Type == "Parallel").ToList();
+    var hasParallelPuzzles = parallelPuzzles.Any();
+}
+
+<section>
+    <div class="container">
+        <div class="row justify-content-md-center mb-4">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
+                <h2 class="display-5 text-center">Γρίφοι για το @Model.GameType</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="@(hasParallelPuzzles ? "col-md-6" : "col-12")">
+                <h3 class="mb-3">Κύριοι Γρίφοι</h3>
+                <div class="accordion" id="mainPuzzleAccordion">
+                    @foreach (var puzzle in mainPuzzles)
+                    {
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="mainHeading@(puzzle.Id)">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mainCollapse@(puzzle.Id)" aria-expanded="false" aria-controls="mainCollapse@(puzzle.Id)">
+                                    @($"{puzzle.Order}ος Γρίφος")
+                                </button>
+                            </h2>
+                            <div id="mainCollapse@(puzzle.Id)" class="accordion-collapse collapse" aria-labelledby="mainHeading@(puzzle.Id)" data-bs-parent="#mainPuzzleAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <h5>Γρίφοος:</h5>
+                                        <p>@puzzle.Question</p>
+                                        @if (puzzle.QuestionMedia.Any())
+                                        {
+                                            <p>Question Media Files: @puzzle.QuestionMedia.Count</p>
+                                        }
+                                    </div>
+                                    <div>
+                                        <h5>Απάντηση:</h5>
+                                        <p>@puzzle.Answer</p>
+                                        @if (puzzle.AnswerMedia.Any())
+                                        {
+                                            <p>Answer Media Files: @puzzle.AnswerMedia.Count</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (hasParallelPuzzles)
+            {
+                <div class="col-md-6">
+                    <h3 class="mb-3">Παράλληλοι Γρίφοι</h3>
+                    <div class="accordion" id="parallelPuzzleAccordion">
+                        @foreach (var puzzle in parallelPuzzles)
+                        {
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="parallelHeading@(puzzle.Id)">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#parallelCollapse@(puzzle.Id)" aria-expanded="false" aria-controls="parallelCollapse@(puzzle.Id)">
+                                        @($"{puzzle.Order}ος Γρίφος")
+                                    </button>
+                                </h2>
+                                <div id="parallelCollapse@(puzzle.Id)" class="accordion-collapse collapse" aria-labelledby="parallelHeading@(puzzle.Id)" data-bs-parent="#parallelPuzzleAccordion">
+                                    <div class="accordion-body">
+                                        <div class="mb-3">
+                                            <h5>Γρίφοος:</h5>
+                                            <p>@puzzle.Question</p>
+                                            @if (puzzle.QuestionMedia.Any())
+                                            {
+                                                <p>Question Media Files: @puzzle.QuestionMedia.Count</p>
+                                            }
+                                        </div>
+                                        <div>
+                                            <h5>Απάντηση:</h5>
+                                            <p>@puzzle.Answer</p>
+                                            @if (puzzle.AnswerMedia.Any())
+                                            {
+                                                <p>Answer Media Files: @puzzle.AnswerMedia.Count</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
