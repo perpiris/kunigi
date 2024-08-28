@@ -1,7 +1,7 @@
 ﻿@model List<TeamDetailsViewModel>
 
 @{
-    ViewData["Title"] = "Όλες οι Ομάδες";
+    ViewData["Title"] = "Ομάδες";
 }
 
 <style>
@@ -30,7 +30,7 @@
 </style>
 
 <div class="container-fluid mt-4">
-    <h1 class="display-4 text-center mb-5">@ViewData["Title"]</h1>
+    <h3 class="display-4 mb-5">@ViewData["Title"]</h3>
 
     @if (Model == null || !Model.Any())
     {

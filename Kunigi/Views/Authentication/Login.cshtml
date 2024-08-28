@@ -4,19 +4,36 @@
     ViewData["Title"] = "Σύνδεση";
 }
 
-<h2 class="mb-4 display-5 text-center">Σύνδεση.</h2>
-<hr/>
+<style>
+    .login-container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .login-title {
+        text-align: center;
+    }
+    .login-button {
+        width: 100%;
+    }
+</style>
 
-<form asp-action="Login" method="post" style="max-width: 400px; margin: auto" class="mt-2" autocomplete="off">
-    <div class="form-group mb-2">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control"/>
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="form-group mb-2">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control"/>
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Login</button>
-</form>
+<div class="login-container">
+    <h1 class="login-title">Σύνδεση</h1>
+    <form asp-action="Login" method="post" class="mt-2" autocomplete="off">
+        <div class="form-group mb-3">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" class="form-control"/>
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" class="form-control"/>
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary login-button">Σύνδεση</button>
+    </form>
+</div>

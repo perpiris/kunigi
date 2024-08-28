@@ -26,7 +26,7 @@
 <header>
     <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
         <div class="container">
-            <a class="navbar-brand" asp-controller="Home" asp-action="Index">Κυνήγι</a>
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">Μουσείο Κυνηγιού</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -39,18 +39,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @(GetActive("teams", "list"))"
+                        <a class="nav-link @(GetActive("Team", "TeamList"))"
                            asp-area="" asp-controller="Team" asp-action="TeamList">
                             Ομάδες
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link @(GetActive("games", "list"))"
+                        <a class="nav-link @(GetActive("Game", "ParentGameList"))"
                            asp-area="" asp-controller="Game" asp-action="ParentGameList">
                             Παιχνίδια
                         </a>
                     </li>
-                    @if (User.Identity is { IsAuthenticated: true } && User.IsInRole("Manager"))
+                    @if (User.Identity is { IsAuthenticated: true } && (User.IsInRole("Admin") || User.IsInRole("Manager")))
                     {
                         <li class="nav-item">
                             <a class="nav-link @(GetActive("Home", "Dashboard"))"
@@ -72,13 +72,13 @@
                     else
                     {
                         <li class="nav-item">
-                            <a class="nav-link @(GetActive("Home", "Login"))"
+                            <a class="nav-link @(GetActive("Authentication", "Login"))"
                                asp-controller="Authentication" asp-action="Login">
                                 Σύνδεση
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(GetActive("Home", "Register"))"
+                            <a class="nav-link @(GetActive("Authentication", "Register"))"
                                asp-controller="Authentication" asp-action="Register">
                                 Εγγραφή
                             </a>
@@ -89,42 +89,6 @@
         </div>
     </nav>
 
-    @if (User.Identity is { IsAuthenticated: true } && User.IsInRole("Admin"))
-    {
-        <nav class="navbar navbar-expand-lg bg-secondary" data-bs-theme="light">
-            <div class="container">
-                <span class="navbar-brand">Διαχείριση</span>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarManagement">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarManagement">
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link @(GetActive("Teams", "Manage"))"
-                               asp-controller="Team" asp-action="TeamManagement">
-                                Διαχείριση Ομάδων
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(GetActive("Games", "Manage"))"
-                               asp-controller="Game" asp-action="ParentGameManagement">
-                                Διαχείριση Παιχνιδιών
-                            </a>
-                        </li>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link @(GetActive("Account", "Manage"))"
-                                   asp-controller="Authentication" asp-action="Manage">
-                                    Διαχείριση Χρηστών
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    }
 </header>
 
 <div class="container mt-4">
