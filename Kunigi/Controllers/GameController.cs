@@ -27,17 +27,10 @@ public class GameController : Controller
     [HttpGet("list")]
     public async Task<IActionResult> ParentGameList(int pageIndex = 1)
     {
-        var resultCount = _context.ParentGames.Count();
-        var pageInfo = new PageInfo(resultCount, pageIndex);
-        var skip = (pageIndex - 1) * pageInfo.PageSize;
-        ViewBag.PageInfo = pageInfo;
-
         var parentGameList =
             await _context.ParentGames
                 .Include(x => x.Host)
                 .Include(x => x.Winner)
-                .Skip(skip)
-                .Take(pageInfo.PageSize)
                 .ToListAsync();
 
         var viewModel =
@@ -79,7 +72,7 @@ public class GameController : Controller
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> CreateParentGame()
     {
-        var viewModel = new ParentGameCreateOrUpdateViewModel
+        var viewModel = new ParentGameCreateOrEditViewModel
         {
             Year = (short)DateTime.Now.Year,
             Order = 1
@@ -93,7 +86,7 @@ public class GameController : Controller
     [HttpPost("create-parent-game")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> CreateParentGame(
-        ParentGameCreateOrUpdateViewModel viewModel, IFormFile profileImage)
+        ParentGameCreateOrEditViewModel viewModel, IFormFile profileImage)
     {
         ModelState.Remove("Title");
         ModelState.Remove("Description");
@@ -244,7 +237,7 @@ public class GameController : Controller
     [HttpPost("edit-parent-game/{gameYear}")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> EditParentGame(string gameYear,
-        ParentGameCreateOrUpdateViewModel viewModel, IFormFile profileImage)
+        ParentGameCreateOrEditViewModel viewModel, IFormFile profileImage)
     {
         if (string.IsNullOrEmpty(gameYear))
         {
@@ -316,17 +309,10 @@ public class GameController : Controller
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> ParentGameManagement(int pageIndex = 1)
     {
-        var resultCount = _context.ParentGames.Count();
-        var pageInfo = new PageInfo(resultCount, pageIndex);
-        var skip = (pageIndex - 1) * pageInfo.PageSize;
-        ViewBag.PageInfo = pageInfo;
-
         var parentGameList =
             await _context.ParentGames
                 .Include(x => x.Host)
                 .Include(x => x.Winner)
-                .Skip(skip)
-                .Take(pageInfo.PageSize)
                 .ToListAsync();
 
         var viewModel =
@@ -369,7 +355,7 @@ public class GameController : Controller
     }
 
     private async Task PrepareViewModel(
-        ParentGameCreateOrUpdateViewModel viewModel)
+        ParentGameCreateOrEditViewModel viewModel)
     {
         var teamList = await _context.Teams.ToListAsync();
         var gameTypes = await _context.GameTypes.ToListAsync();
@@ -444,10 +430,10 @@ public class GameController : Controller
         return viewModel;
     }
 
-    private static ParentGameCreateOrUpdateViewModel
+    private static ParentGameCreateOrEditViewModel
         GetMappedCreateOrEditViewModel(ParentGame parentGameDetails)
     {
-        var viewModel = new ParentGameCreateOrUpdateViewModel
+        var viewModel = new ParentGameCreateOrEditViewModel
         {
             Id = parentGameDetails.Id,
             Title = parentGameDetails.Title,

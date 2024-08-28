@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Kunigi.ViewModels.Game;
 
-public class ParentGameCreateOrUpdateViewModel
+public class ParentGameCreateOrEditViewModel
 {
     public int Id { get; set; }
     

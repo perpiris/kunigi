@@ -9,11 +9,9 @@
         transition: transform 0.2s;
         width: 100%;
     }
-
     .game-card:hover {
         transform: scale(1.03);
     }
-
     .card-img-top-wrapper {
         height: 200px;
         overflow: hidden;
@@ -22,7 +20,6 @@
         justify-content: center;
         background-color: #f8f9fa;
     }
-
     .card-img-top {
         max-width: 100%;
         max-height: 100%;
@@ -30,52 +27,37 @@
     }
 </style>
 
-<div class="container-fluid mt-4">
-    <h3 class="display-4 mb-5">@ViewData["Title"]</h3>
+<h3 class="mb-4">@ViewData["Title"]</h3>
 
-    @if (Model == null || !Model.Any())
-    {
-        <h2 class="mb-4 display-5 text-center">Δεν βρέθηκαν δεδομένα.</h2>
-    }
-    else
-    {
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-2">
-            @foreach (var item in Model)
-            {
-                <div class="col px-1">
-                    <a asp-controller="Game" asp-action="GameDetails" asp-route-gameYear="@item.Year" class="text-decoration-none">
-                        <div class="card h-100 shadow game-card">
-                            <div class="card-img-top-wrapper">
-                                @if (string.IsNullOrEmpty(item.ProfileImageUrl))
-                                {
-                                    <img src="~/media/profile.jpg" class="card-img-top" alt="Default Game Image">
-                                }
-                                else
-                                {
-                                    <img src="@item.ProfileImageUrl" class="card-img-top" alt="@item.Title">
-                                }
-                            </div>
-                            <div class="card-body">
-                                <h4 class="card-title text-center">@($"{item.Title}({item.Year})")</h4>
-                            </div>
+@if (Model == null || !Model.Any())
+{
+    <h3 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h3>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-2">
+        @foreach (var item in Model)
+        {
+            <div class="col px-1">
+                <a asp-controller="Game" asp-action="GameDetails" asp-route-gameYear="@item.Year"
+                   class="text-decoration-none">
+                    <div class="card h-100 shadow game-card">
+                        <div class="card-img-top-wrapper">
+                            @if (string.IsNullOrEmpty(item.ProfileImageUrl))
+                            {
+                                <img src="~/media/profile.jpg" class="card-img-top" alt="Default Game Image">
+                            }
+                            else
+                            {
+                                <img src="@item.ProfileImageUrl" class="card-img-top" alt="@item.Title">
+                            }
                         </div>
-                    </a>
-                </div>
-            }
-        </div>
-
-        <nav class="mt-5">
-            <ul class="pagination justify-content-center">
-                @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
-                {
-                    <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
-                        <a class="page-link" asp-controller="Game" asp-action="ParentGameList"
-                           asp-route-pageIndex="@pageIndex">
-                            @pageIndex
-                        </a>
-                    </li>
-                }
-            </ul>
-        </nav>
-    }
-</div>
+                        <div class="card-body">
+                            <h4 class="card-title text-center">@($"{item.Title}({item.Year})")</h4>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+}

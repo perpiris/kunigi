@@ -10,7 +10,7 @@
 
 @if (Model == null || Model.UserList.Count == 0)
 {
-    <h2 class="mb-4 display-5 text-center">Δεν βρέθηκαν δεδομένα.</h2>
+    <h2 class="mb-4 display-5 text-center">Δεν βρέθηκαν αποτελέσματα.</h2>
 }
 else
 {
@@ -33,13 +33,4 @@ else
         }
         </tbody>
     </table>
-
-    <ul class="pagination justify-content-center mt-5">
-        @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
-        {
-            <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
-                <a class="page-link" asp-controller="Account" asp-action="Manage" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
-            </li>
-        }
-    </ul>
 }

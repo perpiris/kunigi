@@ -1,1 +1,60 @@
-﻿
+﻿@{
+    ViewData["Title"] = "Διαχείριση";
+}
+
+@if (User.IsInRole("Admin"))
+{
+    <h3 class="mb-4">Γενική Διαχείριση</h3>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        <div class="col">
+            <a asp-controller="Team" asp-action="TeamManagement" class="card-link">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Ομάδες</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a asp-controller="Game" asp-action="ParentGameManagement" class="card-link">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Παιχνίδια</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a asp-controller="Account" asp-action="UserManagement" class="card-link">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Χρήστες</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+}
+
+@if (User.IsInRole("Manager"))
+{
+    var teamList = ViewBag.TeamList;
+    if (teamList != null)
+    {
+        <h3 class="mb-4 mt-4">Οι Ομάδες μου</h3>
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            @foreach (var team in teamList)
+            {
+                <div class="col team-item" data-team-name="@team.Name.ToLower()">
+                    <a asp-controller="Team" asp-action="TeamActions" asp-route-teamSlug="@team.Slug" class="card-link">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">@team.Name</h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+}

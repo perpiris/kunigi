@@ -1,11 +1,11 @@
 ﻿@model List<ParentGameDetailsViewModel>
 
 @{
-    ViewData["Title"] = "Διαχείρηση Παιχνιδιών";
+    ViewData["Title"] = "Διαχείριση Παιχνιδιών";
 }
 
-<div class="d-flex flex-wrap align-items-center mb-4">
-    <h2 class="mb-0 me-3 display-5 flex-grow-1">Διαχείριση Παιχνιδιών</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">@ViewData["Title"]</h3>
     <div>
         <a class="btn btn-primary"
            asp-controller="Game" asp-action="CreateParentGame">
@@ -16,7 +16,7 @@
 
 @if (Model == null || Model.Count == 0)
 {
-    <h2 class="mb-4 display-5 text-center">Δεν βρέθηκαν δεδομένα.</h2>
+    <h3 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h3>
 }
 else
 {
@@ -43,13 +43,4 @@ else
         }
         </tbody>
     </table>
-
-    <ul class="pagination justify-content-center mt-5">
-        @for (var pageIndex = 1; pageIndex <= ViewBag.PageInfo.TotalPages; pageIndex++)
-        {
-            <li class="page-item @(ViewBag.PageInfo.CurrentPage == pageIndex ? "active" : "")">
-                <a class="page-link" asp-controller="Game" asp-action="ParentGameManagement" asp-route-pageIndex="@pageIndex">@(pageIndex)</a>
-            </li>
-        }
-    </ul>
 }

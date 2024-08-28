@@ -23,18 +23,12 @@ public class AccountController : Controller
         _roleManager = roleManager;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Manage(int pageIndex = 1)
+    [HttpGet("manage")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UserManagement(int pageIndex = 1)
     {
-        var resultcount = _userManager.Users.Count();
-        var pageInfo = new PageInfo(resultcount, pageIndex);
-        var skip = (pageIndex - 1) * pageInfo.PageSize;
-        ViewBag.PageInfo = pageInfo;
-
         var users =
             await _userManager.Users
-                .Skip(skip)
-                .Take(pageInfo.PageSize)
                 .ToListAsync();
         var userList = new List<UserDetailsUpdateViewModel>();
 
@@ -64,7 +58,7 @@ public class AccountController : Controller
         if (user is null)
         {
             TempData["error"] = "User not found";
-            return RedirectToAction("Manage");
+            return RedirectToAction("UserManagement");
         }
 
         var userRoles = await _userManager.GetRolesAsync(user);
@@ -90,7 +84,7 @@ public class AccountController : Controller
         if (user == null)
         {
             TempData["error"] = "User not found";
-            return RedirectToAction("Manage");
+            return RedirectToAction("UserManagement");
         }
 
         var userRoles = await _userManager.GetRolesAsync(user);
@@ -110,6 +104,6 @@ public class AccountController : Controller
         }
 
         TempData["success"] = "Roles updated successfully";
-        return RedirectToAction("Manage");
+        return RedirectToAction("UserManagement");
     }
 }
