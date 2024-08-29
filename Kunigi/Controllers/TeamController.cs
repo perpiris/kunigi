@@ -238,7 +238,7 @@ public class TeamController : Controller
     }
 
     [HttpGet("edit-managers/{teamSlug}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> EditTeamManagers(string teamSlug)
     {
         if (string.IsNullOrEmpty(teamSlug))
@@ -284,7 +284,7 @@ public class TeamController : Controller
     }
 
     [HttpPost("edit-managers/{teamSlug}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> EditTeamManagers(string teamSlug,
         TeamManagerEditViewModel viewModel)
     {
@@ -322,7 +322,7 @@ public class TeamController : Controller
                 if (!result.Succeeded)
                 {
                     TempData["error"] = "Αποτυχία προσθήκης του χρήστη στο ρόλο του Διαχειριστή.";
-                    return RedirectToAction("EditTeamManagers", new { id = viewModel.Slug });
+                    return RedirectToAction("EditTeamManagers", new { teamSlug = viewModel.Slug });
                 }
             }
 
@@ -351,11 +351,11 @@ public class TeamController : Controller
             TempData["error"] = "Δεν βρέθηκε ο επιλεγμένος διαχειριστής.";
         }
 
-        return RedirectToAction("EditTeamManagers", new { id = viewModel.Slug });
+        return RedirectToAction("EditTeamManagers", new { teamSlug = viewModel.Slug });
     }
 
     [HttpPost("remove-manager/{teamSlug}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> RemoveManager(string teamSlug, string managerId)
     {
         if (string.IsNullOrEmpty(teamSlug))
@@ -397,7 +397,7 @@ public class TeamController : Controller
         return RedirectToAction("EditTeamManagers", new { teamSlug });
     }
 
-    [HttpGet("manage-media/{teamSlug}/")]
+    [HttpGet("manage-media/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> TeamMediaManagement(string teamSlug)
     {
@@ -499,7 +499,7 @@ public class TeamController : Controller
         return RedirectToAction("TeamMediaManagement", new { teamSlug });
     }
 
-    [HttpPost("delete-media{teamSlug}/")]
+    [HttpPost("delete-media/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> DeleteMedia(string teamSlug, int mediaId)
     {

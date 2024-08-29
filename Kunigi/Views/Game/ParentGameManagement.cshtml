@@ -5,8 +5,11 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0">@ViewData["Title"]</h3>
-    <div>
+    <h3>@ViewData["Title"]</h3>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <input type="text" id="search-filter" class="form-control me-2" placeholder="Αναζήτηση" style="max-width: 250px">
+
         <a class="btn btn-primary"
            asp-controller="Game" asp-action="CreateParentGame">
             Δημιουργία
@@ -20,27 +23,18 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Τίτλος</th>
-            <th>Διοργανωτής</th>
-            <th>Ενέργειες</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var game in Model)
+    <div id="data-container" class="row row-cols-1 row-cols-md-4 g-4">
+        @foreach (var team in Model)
         {
-            <tr>
-                <td>@game.Title</td>
-                <td>@game.Host</td>
-                <td>
-                    <a href="@Url.Action("GameDetails", "Game", new { gameYear = game.Year })" class="btn btn-info">Προβολή</a>
-                    <a href="@Url.Action("EditParentGame", "Game", new { gameYear = game.Year })" class="btn btn-primary">Επεξεργασία</a>
-                    <a href="@Url.Action("GameList", "Game", new { gameYear = game.Year })" class="btn btn-primary">Παιχνίδια</a>
-                </td>
-            </tr>
+            <div class="col data-item" data-item-name="@team.Year">
+                <a asp-controller="Game" asp-action="ParentGameActions" asp-route-gameYear="@team.Year" class="card-link">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-center">@team.Year</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
         }
-        </tbody>
-    </table>
+    </div>
 }

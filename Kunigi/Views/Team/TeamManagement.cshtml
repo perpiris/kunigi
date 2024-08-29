@@ -4,39 +4,12 @@
     ViewData["Title"] = "Διαχείριση Ομάδων";
 }
 
-<style>
-    .team-header {
-        padding: 1rem 0;
-        margin-bottom: 2rem;
-    }
-    .team-header .container {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 1rem;
-    }
-    .team-header h3 {
-        margin-bottom: 0;
-        margin-right: auto;
-    }
-    #teamFilter {
-        max-width: 300px;
-    }
-    @@media (max-width: 768px) {
-        .team-header .container {
-            flex-direction: column;
-            align-items: stretch;
-        }
-        #teamFilter {
-            max-width: 100%;
-        }
-    }
-</style>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>@ViewData["Title"]</h3>
 
-<div class="team-header">
-    <div class="container">
-        <h3>@ViewData["Title"]</h3>
-        <input type="text" id="teamFilter" class="form-control" placeholder="Αναζήτηση">
+    <div class="d-flex justify-content-between align-items-center">
+        <input type="text" id="search-filter" class="form-control me-2" placeholder="Αναζήτηση" style="max-width: 250px">
+
         <a class="btn btn-primary"
            asp-controller="Team" asp-action="CreateTeam">
             Δημιουργία
@@ -50,10 +23,10 @@
 }
 else
 {
-    <div id="teamsContainer" class="row row-cols-1 row-cols-md-4 g-4">
+    <div id="data-container" class="row row-cols-1 row-cols-md-4 g-4">
         @foreach (var team in Model)
         {
-            <div class="col team-item" data-team-name="@team.Name.ToLower()">
+            <div class="col data-item" data-item-name="@team.Name.ToLower()">
                 <a asp-controller="Team" asp-action="TeamActions" asp-route-teamSlug="@team.Slug" class="card-link">
                     <div class="card h-100">
                         <div class="card-body">
@@ -65,36 +38,3 @@ else
         }
     </div>
 }
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const teamFilter = document.getElementById('teamFilter');
-        const teamsContainer = document.getElementById('teamsContainer');
-        const teamItems = teamsContainer.getElementsByClassName('team-item');
-
-        teamFilter.addEventListener('input', function() {
-            const filterValue = this.value.toLowerCase().trim();
-
-            Array.from(teamItems).forEach(item => {
-                const teamName = item.getAttribute('data-team-name');
-                if (teamName.includes(filterValue)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-
-            let allHidden = Array.from(teamItems).every(item => item.style.display === 'none');
-            let noResultsMsg = teamsContainer.querySelector('.no-results-message');
-
-            if (allHidden && !noResultsMsg) {
-                noResultsMsg = document.createElement('div');
-                noResultsMsg.className = 'col-12 text-center no-results-message';
-                noResultsMsg.innerHTML = '<h3 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h3>';
-                teamsContainer.appendChild(noResultsMsg);
-            } else if (!allHidden && noResultsMsg) {
-                noResultsMsg.remove();
-            }
-        });
-    });
-</script>

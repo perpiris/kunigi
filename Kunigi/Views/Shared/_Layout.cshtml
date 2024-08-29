@@ -93,9 +93,12 @@
 
 <div class="container mt-4">
     <main role="main" class="pb-3">
-        <partial name="_Notification"/>
         @RenderBody()
     </main>
+</div>
+
+<div id="alertContainer" style="position: fixed; top: 80px; right: 20px; z-index: 1050;">
+    <partial name="_Notification"/>
 </div>
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>

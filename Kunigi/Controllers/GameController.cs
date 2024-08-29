@@ -353,6 +353,37 @@ public class GameController : Controller
 
         return View(viewModel);
     }
+    
+    [HttpGet("manage/{gameYear}")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> ParentGameActions(string gameYear)
+    {
+        if (string.IsNullOrEmpty(gameYear))
+        {
+            return RedirectToAction("ParentGameList");
+        }
+
+        var parentGameDetails =
+            await _context
+                .ParentGames
+                .Include(x => x.Games)
+                .ThenInclude(x => x.GameType)
+                .FirstOrDefaultAsync(x => x.Slug == gameYear.Trim());
+
+        if (parentGameDetails is null)
+        {
+            TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
+            return RedirectToAction("ParentGameList");
+        }
+
+        var viewModel =
+            parentGameDetails
+                .Games
+                .Select(GetMappedGameDetailsViewModel)
+                .ToList();
+
+        return View(viewModel);
+    }
 
     private async Task PrepareViewModel(
         ParentGameCreateOrEditViewModel viewModel)
