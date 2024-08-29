@@ -8,20 +8,21 @@
     .card {
         height: 100%;
     }
+    
     .list-group-item {
         word-break: break-all;
     }
 </style>
 
-<h2 class="mb-4 display-5 text-center">@ViewData["Title"]</h2>
+<h2 class="mb-4 text-center">@ViewData["Title"]</h2>
 
 <div class="container">
     <div class="row">
-        <!-- Left column: Search and Add -->
+
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Προσθήκη Διαχειριστή</h5>
+                    <h4 class="card-title">Προσθήκη Διαχειριστή</h4>
                     @using (Html.BeginForm("EditTeamManagers", "Team", FormMethod.Post))
                     {
                         @Html.HiddenFor(x => x.Slug)
@@ -31,20 +32,17 @@
                             </select>
                             <span asp-validation-for="SelectedManagerId" class="text-danger"></span>
                         </div>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Προσθήκη Διαχειριστή</button>
-                            <a asp-controller="Team" asp-action="TeamManagement" class="btn btn-secondary">Επιστροφή</a>
-                        </div>
+                        <button type="submit" class="btn btn-primary">Προσθήκη</button>
+                        <button class="btn btn-secondary" id="previous-page-button">Πίσω</button>
                     }
                 </div>
             </div>
         </div>
 
-        <!-- Right column: Manager List -->
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Λίστα Διαχειριστών</h5>
+                    <h4 class="card-title">Λίστα Διαχειριστών</h4>
                     @if (Model.ManagerList.Any())
                     {
                         <ul class="list-group">

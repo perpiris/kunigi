@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Kunigi.Controllers;
 
 [Route("account")]
-[Authorize(Roles = "Admin")]
 public class AccountController : Controller
 {
     private readonly UserManager<AppUser> _userManager;
@@ -25,7 +24,7 @@ public class AccountController : Controller
 
     [HttpGet("manage")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> UserManagement(int pageIndex = 1)
+    public async Task<IActionResult> UserManagement()
     {
         var users =
             await _userManager.Users

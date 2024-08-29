@@ -33,3 +33,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+document.getElementById('previous-page-button').addEventListener('click', function(e) {
+    e.preventDefault();
+    window.history.back();
+});

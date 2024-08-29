@@ -1,7 +1,7 @@
 ﻿@model GamePuzzlesViewModel
 
 @{
-    ViewData["Title"] = @Model.GameType;
+    ViewData["Title"] = Model.Type;
     var mainPuzzles = Model.Puzzles.Where(p => p.Type == "Main").ToList();
     var parallelPuzzles = Model.Puzzles.Where(p => p.Type == "Parallel").ToList();
     var hasParallelPuzzles = parallelPuzzles.Any();
@@ -11,7 +11,7 @@
     <div class="container">
         <div class="row justify-content-md-center mb-4">
             <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
-                <h2 class="display-5 text-center">Γρίφοι για το @Model.GameType</h2>
+                <h2 class="text-center">@($"{Model.Title} ({Model.Year}) - {Model.Type}")</h2>
             </div>
         </div>
 

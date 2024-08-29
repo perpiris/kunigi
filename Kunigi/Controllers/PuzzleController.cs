@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Kunigi.Controllers;
 
 [Route("puzzles")]
-[Authorize(Roles = "Admin,Manager")]
 public class PuzzleController : Controller
 {
     private readonly DataContext _context;
@@ -22,16 +21,17 @@ public class PuzzleController : Controller
         _configuration = configuration;
     }
 
-    [HttpGet("{gameYear}/{gameSlug}")]
-    public async Task<IActionResult> PuzzleList(string gameYear, string gameSlug)
+    [HttpGet("{gameYear}/{gameTypeSlug}")]
+    public async Task<IActionResult> PuzzleList(string gameYear, string gameTypeSlug)
     {
         var game = await _context.Games
+            .Include(g => g.ParentGame)
             .Include(g => g.GameType)
             .Include(g => g.Puzzles)
             .ThenInclude(p => p.MediaFiles)
             .ThenInclude(pm => pm.MediaFile)
             .FirstOrDefaultAsync(g =>
-                g.ParentGame.Year.ToString() == gameYear && g.GameType.Slug == gameSlug.Trim());
+                g.ParentGame.Year.ToString() == gameYear && g.GameType.Slug == gameTypeSlug.Trim());
 
         if (game == null)
         {
@@ -41,8 +41,10 @@ public class PuzzleController : Controller
 
         var viewModel = new GamePuzzlesViewModel
         {
-            GameId = game.Id,
-            GameType = game.GameType.Description,
+            Id = game.Id,
+            Type = game.GameType.Description,
+            Title = game.ParentGame.Title,
+            Year = game.ParentGame.Year,
             Puzzles = game.Puzzles.Select(p => new PuzzleDetailsViewModel
             {
                 Id = p.Id,
@@ -65,6 +67,7 @@ public class PuzzleController : Controller
     }
 
     [HttpGet("manage/{gameId:int}")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> ManagePuzzles(int gameId)
     {
         var game = await _context.Games
@@ -99,6 +102,7 @@ public class PuzzleController : Controller
     }
 
     [HttpGet("create/{gameId:int}")]
+    [Authorize(Roles = "Admin,Manager")]
     public IActionResult CreatePuzzle(int gameId)
     {
         var viewModel = new PuzzleCreateViewModel
@@ -117,6 +121,7 @@ public class PuzzleController : Controller
     }
 
     [HttpPost("create/{gameId:int}")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> CreatePuzzle(int gameId, PuzzleCreateViewModel model)
     {
         if (!ModelState.IsValid)

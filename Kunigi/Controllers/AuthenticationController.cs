@@ -1,5 +1,6 @@
 ﻿using Kunigi.Entities;
 using Kunigi.ViewModels.Account;
+using Kunigi.ViewModels.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 

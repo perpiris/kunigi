@@ -4,39 +4,18 @@
     ViewData["Title"] = "Δημιουργία νέας ομάδας";
 }
 
-<section>
+<h2 class="mb-4 text-center">@ViewData["Title"]</h2>
 
-    <div class="container">
-        <div class="row justify-content-md-center">
-            <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
-                <h2 class="mb-4 display-5 text-center">@ViewData["Title"]</h2>
-            </div>
+<div class="form-container">
+    @using (Html.BeginForm("CreateTeam", "Team", FormMethod.Post))
+    {
+        <div class="form-group mb-4">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" class="form-control @(ViewData.ModelState["Name"] != null ? "is-invalid" : "")"/>
+            <span asp-validation-for="Name" class="text-danger"></span>
         </div>
-    </div>
-
-    <div class="container">
-        <div class="row justify-content-lg-center">
-            <div class="col-12 col-lg-9">
-                <div class="bg-white border rounded shadow-sm overflow-hidden">
-
-                    @using (Html.BeginForm("CreateTeam", "Team", FormMethod.Post))
-                    {
-                        <div class="row gy-4 p-4">
-                            <div class="col-12">
-                                <label asp-for="Name" class="form-label"></label>
-                                <input asp-for="Name" class="form-control @(ViewData.ModelState["Name"] != null ? "is-invalid" : "")"/>
-                                <span asp-validation-for="Name" class="text-danger"></span>
-                            </div>
-                            <div>
-                                <button type="submit" class="btn btn-primary">Αποθήκευση</button>
-                                <a asp-controller="Team" asp-action="TeamManagement" class="btn btn-secondary">Πίσω</a>
-                            </div>
-                        </div>
-                    }
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-</section>
+        
+        <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+        <button class="btn btn-secondary" id="previous-page-button">Πίσω</button>
+    }
+</div>

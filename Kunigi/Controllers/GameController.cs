@@ -64,7 +64,7 @@ public class GameController : Controller
             return RedirectToAction("ParentGameList");
         }
 
-        var viewModel = GetFullMappedParentDetailsViewModel(parentGameDetails);
+        var viewModel = GetFullMappedParentGameDetailsViewModel(parentGameDetails);
         return View(viewModel);
     }
 
@@ -324,36 +324,6 @@ public class GameController : Controller
         return View(viewModel);
     }
 
-    [HttpGet("list/{gameYear}")]
-    public async Task<IActionResult> GameList(string gameYear)
-    {
-        if (string.IsNullOrEmpty(gameYear))
-        {
-            return RedirectToAction("ParentGameList");
-        }
-
-        var parentGameDetails =
-            await _context
-                .ParentGames
-                .Include(x => x.Games)
-                .ThenInclude(x => x.GameType)
-                .FirstOrDefaultAsync(x => x.Slug == gameYear.Trim());
-
-        if (parentGameDetails is null)
-        {
-            TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
-            return RedirectToAction("ParentGameList");
-        }
-
-        var viewModel =
-            parentGameDetails
-                .Games
-                .Select(GetMappedGameDetailsViewModel)
-                .ToList();
-
-        return View(viewModel);
-    }
-    
     [HttpGet("manage/{gameYear}")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> ParentGameActions(string gameYear)
@@ -366,6 +336,8 @@ public class GameController : Controller
         var parentGameDetails =
             await _context
                 .ParentGames
+                .Include(x => x.Host)
+                .Include(x => x.Winner)
                 .Include(x => x.Games)
                 .ThenInclude(x => x.GameType)
                 .FirstOrDefaultAsync(x => x.Slug == gameYear.Trim());
@@ -376,12 +348,32 @@ public class GameController : Controller
             return RedirectToAction("ParentGameList");
         }
 
-        var viewModel =
-            parentGameDetails
-                .Games
-                .Select(GetMappedGameDetailsViewModel)
-                .ToList();
+        var viewModel = GetFullMappedParentGameDetailsViewModel(parentGameDetails);
+        return View(viewModel);
+    }
 
+    [HttpGet("manage/{gameYear}/{gameTypeSlug}")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> GameActions(string gameYear, string gameTypeSlug)
+    {
+        if (string.IsNullOrEmpty(gameYear))
+        {
+            return RedirectToAction("ParentGameList");
+        }
+
+        var gameDetails = await _context.Games
+            .Include(g => g.ParentGame)
+            .Include(g => g.GameType)
+            .FirstOrDefaultAsync(g =>
+                g.ParentGame.Year.ToString() == gameYear && g.GameType.Slug == gameTypeSlug.Trim());
+
+        if (gameDetails is null)
+        {
+            TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
+            return RedirectToAction("ParentGameList");
+        }
+
+        var viewModel = GetFullMappedGameDetailsViewModel(gameDetails);
         return View(viewModel);
     }
 
@@ -416,8 +408,8 @@ public class GameController : Controller
 
         return viewModel;
     }
-    
-    private static ParentGameDetailsViewModel GetFullMappedParentDetailsViewModel(
+
+    private static ParentGameDetailsViewModel GetFullMappedParentGameDetailsViewModel(
         ParentGame parentGameDetails)
     {
         var viewModel = new ParentGameDetailsViewModel
@@ -433,36 +425,37 @@ public class GameController : Controller
             HostSlug = parentGameDetails.Host.Slug,
             GameList = []
         };
-        
+
         foreach (var gameDetails in parentGameDetails.Games)
         {
             viewModel.GameList.Add(new GameDetailsViewModel
             {
                 Id = gameDetails.Id,
-                GameType = gameDetails.GameType.Description,
-                Year = parentGameDetails.Year.ToString(),
+                Type = gameDetails.GameType.Description,
+                Year = parentGameDetails.Year,
                 Slug = gameDetails.GameType.Slug
             });
         }
 
         return viewModel;
     }
-
-    private static GameDetailsViewModel GetMappedGameDetailsViewModel(
-        Game gameDetails)
+    
+    private static GameDetailsViewModel GetFullMappedGameDetailsViewModel(
+        Game parentGameDetails)
     {
         var viewModel = new GameDetailsViewModel
         {
-            Id = gameDetails.Id,
-            Description = gameDetails.Description,
-            GameType = gameDetails.GameType.Description
+            Id = parentGameDetails.Id,
+            Title = parentGameDetails.ParentGame.Title,
+            Year = parentGameDetails.ParentGame.Year,
+            Type = parentGameDetails.GameType.Description
         };
 
         return viewModel;
     }
 
-    private static ParentGameCreateOrEditViewModel
-        GetMappedCreateOrEditViewModel(ParentGame parentGameDetails)
+    private static ParentGameCreateOrEditViewModel GetMappedCreateOrEditViewModel(
+        ParentGame parentGameDetails)
     {
         var viewModel = new ParentGameCreateOrEditViewModel
         {

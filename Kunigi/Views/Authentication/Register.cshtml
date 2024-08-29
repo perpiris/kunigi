@@ -1,45 +1,30 @@
-﻿@model Kunigi.ViewModels.Account.RegisterViewModel
+﻿@model RegisterViewModel
 
 @{
     ViewData["Title"] = "Εγγραφή";
 }
 
-<style>
-    .register-container {
-        max-width: 400px;
-        margin: 0 auto;
-        padding: 20px;
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .register-title {
-        text-align: center;
-    }
-    .register-button {
-        width: 100%;
-    }
-</style>
+<div class="form-container">
+    <h2 class="text-center">Εγγραφή</h2>
+    <h6 class="text-center mb-4">Μόνο για διαχειριστές ομάδων</h6>
 
-<div class="register-container">
-    <h1 class="register-title">Εγγραφή</h1>
-    <h6 class="register-title">Μόνο για διαχειριστές ομάδων</h6>
-    <form asp-action="Register" method="post" class="mt-4" autocomplete="off">
+    @using (Html.BeginForm("Register", "Authentication", FormMethod.Post))
+    {
         <div class="form-group mb-4">
             <label asp-for="Email"></label>
-            <input asp-for="Email" class="form-control"/>
+            <input asp-for="Email" class="form-control @(ViewData.ModelState["Email"] != null ? "is-invalid" : "")"/>
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
         <div class="form-group mb-4">
             <label asp-for="Password"></label>
-            <input asp-for="Password" class="form-control"/>
+            <input asp-for="Password" class="form-control @(ViewData.ModelState["Password"] != null ? "is-invalid" : "")"/>
             <span asp-validation-for="Password" class="text-danger"></span>
         </div>
         <div class="form-group mb-4">
             <label asp-for="ConfirmPassword"></label>
-            <input asp-for="ConfirmPassword" class="form-control"/>
+            <input asp-for="ConfirmPassword" class="form-control @(ViewData.ModelState["ConfirmPassword"] != null ? "is-invalid" : "")"/>
             <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
         </div>
-        <button type="submit" class="btn btn-primary register-button">Εγγραφή</button>
-    </form>
+        <button type="submit" class="btn btn-primary w-100">Εγγραφή</button>
+    }
 </div>

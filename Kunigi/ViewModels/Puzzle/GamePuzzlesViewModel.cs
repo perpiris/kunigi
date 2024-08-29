@@ -2,7 +2,13 @@
 
 public class GamePuzzlesViewModel
 {
-    public int GameId { get; set; }
-    public string GameType { get; set; }
-    public List<PuzzleDetailsViewModel> Puzzles { get; set; } = new();
+    public int Id { get; set; }
+
+    public string Title { get; set; }
+    
+    public short Year { get; set; }
+    
+    public string Type { get; set; }
+    
+    public List<PuzzleDetailsViewModel> Puzzles { get; set; } = [];
 }

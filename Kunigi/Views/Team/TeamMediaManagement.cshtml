@@ -1,40 +1,90 @@
 ﻿@model TeamMediaViewModel
 
+<style>
+    .card {
+        max-width: 200px;
+        margin: 0 auto;
+    }
+
+    .card-img-top, .video-thumbnail {
+        height: 100px;
+        object-fit: cover;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .video-thumbnail .play-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2rem;
+        color: white;
+        text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .upload-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .upload-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+
 @{
     ViewData["Title"] = "Διαχείριση Υλικού";
 }
 
-<div class="d-flex flex-wrap align-items-center mb-4">
-    <h3 class="mb-0 me-3 flex-grow-1">@ViewData["Title"]</h3>
-    <div>
-        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#uploadModal">
-            Upload
-        </button>
-        <a asp-controller="Team" asp-action="TeamManagement" class="btn btn-secondary">Επιστροφή</a>
+<div class="container">
+    <div class="d-flex flex-wrap align-items-center mb-4">
+        <h2 class="mb-0 me-3 flex-grow-1">@ViewData["Title"]</h2>
+        <button class="btn btn-secondary" id="previous-page-button">Πίσω</button>
     </div>
-</div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Όνομα Αρχείου</th>
-            <th>Ενέργειες</th>
-        </tr>
-    </thead>
-    <tbody>
+    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
+
+        <div class="col">
+            <div class="card h-100 upload-card" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <i class="bi bi-plus-circle" style="font-size: 1.5rem;"></i>
+                </div>
+                <div class="card-footer text-center p-1">
+                    <small class="text-muted">Upload</small>
+                </div>
+            </div>
+        </div>
+        
         @foreach (var file in Model.MediaFiles)
         {
-            <tr>
-                <td>@file.FileName</td>
-                <td>
-                    <form asp-action="DeleteMedia" asp-route-teamSlug="@Model.TeamSlug" asp-route-mediaId="@file.Id" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">Διαγραφή</button>
-                    </form>
-                </td>
-            </tr>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body p-2">
+                        @if (IsVideo(file.FileName))
+                        {
+                            <div class="video-thumbnail" data-bs-toggle="modal" data-bs-target="#mediaPreviewModal" data-media-type="video" data-media-src="@file.Path">
+                                <img src="@file.Path" class="card-img-top mb-2" alt="@file.FileName">
+                                <i class="bi bi-play-circle-fill play-icon"></i>
+                            </div>
+                        }
+                        else
+                        {
+                            <img src="@file.Path" class="card-img-top mb-2" alt="@file.FileName" data-bs-toggle="modal" data-bs-target="#mediaPreviewModal" data-media-type="image" data-media-src="/path/to/full/@file.FileName">
+                        }
+                        <h6 class="card-title mb-0 text-truncate" title="@file.FileName">@file.FileName</h6>
+                    </div>
+                    <div class="card-footer p-1">
+                        <form asp-action="DeleteMedia" asp-route-teamSlug="@Model.TeamSlug" asp-route-mediaId="@file.Id" method="post">
+                            <button type="submit" class="btn btn-sm btn-danger w-100" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">Διαγραφή</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         }
-    </tbody>
-</table>
+    </div>
+</div>
 
 <div class="modal" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -58,3 +108,44 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let mediaPreviewModal = document.getElementById('mediaPreviewModal');
+        if (mediaPreviewModal) {
+            let modal = new bootstrap.Modal(mediaPreviewModal);
+        }
+        
+        let previewImage = document.getElementById('previewImage');
+        let previewVideo = document.getElementById('previewVideo');
+
+        mediaPreviewModal.addEventListener('show.bs.modal', function (event) {
+            let button = event.relatedTarget;
+            let mediaType = button.getAttribute('data-media-type');
+            let mediaSrc = button.getAttribute('data-media-src');
+
+            if (mediaType === 'image') {
+                previewImage.src = mediaSrc;
+                previewImage.style.display = 'block';
+                previewVideo.style.display = 'none';
+            } else if (mediaType === 'video') {
+                previewVideo.src = mediaSrc;
+                previewVideo.style.display = 'block';
+                previewImage.style.display = 'none';
+            }
+        });
+
+        mediaPreviewModal.addEventListener('hidden.bs.modal', function () {
+            previewVideo.pause();
+        });
+    });
+</script>
+
+@functions {
+
+    static bool IsVideo(string fileName)
+    {
+        string[] videoExtensions = [".mp4", ".avi", ".mov", ".wmv"];
+        return videoExtensions.Any(ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
+}

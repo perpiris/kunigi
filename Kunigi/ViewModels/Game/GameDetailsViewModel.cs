@@ -6,9 +6,11 @@ public class GameDetailsViewModel
     
     public string Description { get; set; }
 
-    public string GameType { get; set; }
+    public string Type { get; set; }
+    
+    public string Title { get; set; }
 
-    public string Year { get; set; }
+    public short Year { get; set; }
 
     public string Slug { get; set; }
 }

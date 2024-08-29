@@ -5,7 +5,7 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3>@ViewData["Title"]</h3>
+    <h2>@ViewData["Title"]</h2>
 
     <div class="d-flex justify-content-between align-items-center">
         <input type="text" id="search-filter" class="form-control me-2" placeholder="Αναζήτηση" style="max-width: 250px">
@@ -19,7 +19,7 @@
 
 @if (Model == null || Model.Count == 0)
 {
-    <h3 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h3>
+    <h4 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h4>
 }
 else
 {

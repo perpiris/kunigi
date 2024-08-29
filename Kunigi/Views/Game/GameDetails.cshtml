@@ -50,7 +50,7 @@
                                     @foreach (var game in Model.GameList)
                                     {
                                         <li class="list-group-item">
-                                            <a asp-controller="Puzzle" asp-action="PuzzleList" asp-route-gameYear="@game.Year" asp-route-gameSlug="@game.Slug">@game.GameType</a>
+                                            <a asp-controller="Puzzle" asp-action="PuzzleList" asp-route-gameYear="@game.Year" asp-route-gameSlug="@game.Slug">@game.Type</a>
                                         </li>
                                     }
                                 </ul>
@@ -65,7 +65,7 @@
                         <div class="container">
                             <div class="row justify-content-md-center">
                                 <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
-                                    <h2 class="mb-4 display-5 text-center">@Model.Title</h2>
+                                    <h2 class="mb-4 text-center">@Model.Title</h2>
                                 </div>
                             </div>
                         </div>
