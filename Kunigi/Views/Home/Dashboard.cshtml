@@ -17,7 +17,7 @@
 
 @if (User.IsInRole("Admin"))
 {
-    <h3 class="mb-4">Γενική Διαχείριση</h3>
+    <h4 class="mb-4">Γενική Διαχείριση</h4>
     <div class="row row-cols-1 row-cols-md-4 g-4">
         <div class="col">
             <a asp-controller="Team" asp-action="TeamManagement" class="card-link">
@@ -59,7 +59,7 @@
         var teamDetailsViewModels = teamList as TeamDetailsViewModel[] ?? teamList.ToArray();
         if (teamDetailsViewModels.Any())
         {
-            <h3 class="mb-4 mt-4">Οι Ομάδες μου</h3>
+            <h4 class="mb-4 mt-4">Οι Ομάδες μου</h4>
             <div class="row row-cols-1 row-cols-md-4 g-4">
                 @foreach (var team in teamDetailsViewModels)
                 {
@@ -77,7 +77,7 @@
         }
         else
         {
-            <h3 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h3>
+            <h4 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h4>
         }
     }
 }

@@ -13,16 +13,18 @@
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+    
     .login-title {
         text-align: center;
     }
+    
     .login-button {
         width: 100%;
     }
 </style>
 
 <div class="login-container">
-    <h1 class="login-title">Σύνδεση</h1>
+    <h2 class="login-title">Σύνδεση</h2>
     <form asp-action="Login" method="post" class="mt-4" autocomplete="off">
         <div class="form-group mb-4">
             <label asp-for="Email"></label>

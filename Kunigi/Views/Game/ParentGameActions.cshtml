@@ -1,1 +1,59 @@
-﻿
+﻿@model ParentGameDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Year;
+}
+
+<style>
+    .card-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-body i {
+        font-size: 1.5rem;
+        color: #2c3e50;
+    }
+</style>
+
+<h2 class="mb-4">@($"{Model.Title} ({Model.Year})")</h2>
+<h4 class="mb-4">Ενέργειες</h4>
+
+<div class="row row-cols-1 row-cols-md-4 g-4 mb-4">
+    <div class="col">
+        <a asp-controller="Game" asp-action="GameDetails" asp-route-gameYear="@Model.Year"
+           class="card-link">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Προβολή</h5>
+                    <i class="bi bi-eye"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col">
+        <a asp-controller="Game" asp-action="EditParentGame" asp-route-gameYear="@Model.Year"
+           class="card-link">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Επεξεργασία</h5>
+                    <i class="bi bi-pencil"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col">
+        <a asp-controller="Game" asp-action="ParentMediaManagement" asp-route-gameYear="@Model.Year"
+           class="card-link">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Υλικό</h5>
+                    <i class="bi bi-card-image"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<h4 class="mb-4">Παιχνίδια</h4>

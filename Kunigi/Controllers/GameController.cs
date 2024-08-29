@@ -323,36 +323,6 @@ public class GameController : Controller
 
         return View(viewModel);
     }
-
-    [HttpGet("list/{gameYear}")]
-    public async Task<IActionResult> GameList(string gameYear)
-    {
-        if (string.IsNullOrEmpty(gameYear))
-        {
-            return RedirectToAction("ParentGameList");
-        }
-
-        var parentGameDetails =
-            await _context
-                .ParentGames
-                .Include(x => x.Games)
-                .ThenInclude(x => x.GameType)
-                .FirstOrDefaultAsync(x => x.Slug == gameYear.Trim());
-
-        if (parentGameDetails is null)
-        {
-            TempData["error"] = "Το παιχνίδι δεν υπάρχει.";
-            return RedirectToAction("ParentGameList");
-        }
-
-        var viewModel =
-            parentGameDetails
-                .Games
-                .Select(GetMappedGameDetailsViewModel)
-                .ToList();
-
-        return View(viewModel);
-    }
     
     [HttpGet("manage/{gameYear}")]
     [Authorize(Roles = "Admin,Manager")]
@@ -366,6 +336,8 @@ public class GameController : Controller
         var parentGameDetails =
             await _context
                 .ParentGames
+                .Include(x => x.Host)
+                .Include(x => x.Winner)
                 .Include(x => x.Games)
                 .ThenInclude(x => x.GameType)
                 .FirstOrDefaultAsync(x => x.Slug == gameYear.Trim());
@@ -376,12 +348,7 @@ public class GameController : Controller
             return RedirectToAction("ParentGameList");
         }
 
-        var viewModel =
-            parentGameDetails
-                .Games
-                .Select(GetMappedGameDetailsViewModel)
-                .ToList();
-
+        var viewModel = GetFullMappedParentDetailsViewModel(parentGameDetails);
         return View(viewModel);
     }
 
