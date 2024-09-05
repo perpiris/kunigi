@@ -56,27 +56,27 @@
                 </div>
             </div>
         </div>
-        
-        @foreach (var file in Model.MediaFiles)
+
+        @foreach (var mediaFile in Model.MediaFiles)
         {
             <div class="col">
                 <div class="card h-100">
                     <div class="card-body p-2">
-                        @if (IsVideo(file.FileName))
+                        @if (IsVideo(mediaFile.FileName))
                         {
-                            <div class="video-thumbnail" data-bs-toggle="modal" data-bs-target="#mediaPreviewModal" data-media-type="video" data-media-src="@file.Path">
-                                <img src="@file.Path" class="card-img-top mb-2" alt="@file.FileName">
+                            <div class="video-thumbnail" data-bs-toggle="modal" data-bs-target="#mediaPreviewModal" data-media-type="video" data-media-src="/@mediaFile.Path">
+                                <img src="~/@mediaFile.Path" class="card-img-top mb-2" alt="@mediaFile.FileName">
                                 <i class="bi bi-play-circle-fill play-icon"></i>
                             </div>
                         }
                         else
                         {
-                            <img src="@file.Path" class="card-img-top mb-2" alt="@file.FileName" data-bs-toggle="modal" data-bs-target="#mediaPreviewModal" data-media-type="image" data-media-src="/path/to/full/@file.FileName">
+                            <img src="~/@Url.Content(mediaFile.Path)" class="card-img-top mb-2" alt="@mediaFile.FileName" data-bs-toggle="modal" data-bs-target="#mediaPreviewModal" data-media-type="image" data-media-src="/@mediaFile.FileName">
                         }
-                        <h6 class="card-title mb-0 text-truncate" title="@file.FileName">@file.FileName</h6>
+                        <h6 class="card-title mb-0 text-truncate" title="@mediaFile.FileName">@mediaFile.FileName</h6>
                     </div>
                     <div class="card-footer p-1">
-                        <form asp-action="DeleteMedia" asp-route-teamSlug="@Model.TeamSlug" asp-route-mediaId="@file.Id" method="post">
+                        <form asp-action="DeleteTeamMedia" asp-route-teamSlug="@Model.TeamSlug" asp-route-mediaId="@mediaFile.Id" method="post">
                             <button type="submit" class="btn btn-sm btn-danger w-100" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">Διαγραφή</button>
                         </form>
                     </div>
@@ -89,7 +89,7 @@
 <div class="modal" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form asp-action="UploadMedia" asp-route-teamSlug="@Model.TeamSlug" method="post" enctype="multipart/form-data">
+            <form asp-action="UploadTeamMedia" asp-route-teamSlug="@Model.TeamSlug" method="post" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h5 class="modal-title" id="uploadModalLabel">Upload Media Files</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -148,4 +148,5 @@
         string[] videoExtensions = [".mp4", ".avi", ".mov", ".wmv"];
         return videoExtensions.Any(ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
     }
+
 }

@@ -1,8 +1,10 @@
 ﻿using System.Security.Claims;
 using Kunigi.Data;
 using Kunigi.Entities;
+using Kunigi.Enums;
 using Kunigi.Utilities;
 using Kunigi.ViewModels.Game;
+using Kunigi.ViewModels.Puzzle;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -43,7 +45,7 @@ public class GameController : Controller
     }
 
     [HttpGet("{gameYear}")]
-    public async Task<IActionResult> GameDetails(string gameYear)
+    public async Task<IActionResult> ParentGameDetails(string gameYear)
     {
         if (string.IsNullOrEmpty(gameYear))
         {
@@ -65,6 +67,52 @@ public class GameController : Controller
         }
 
         var viewModel = GetFullMappedParentGameDetailsViewModel(parentGameDetails);
+        return View(viewModel);
+    }
+    
+    [HttpGet("{gameYear}/{gameTypeSlug}")]
+    public async Task<IActionResult> GameDetails(string gameYear, string gameTypeSlug)
+    {
+        var game = await _context.Games
+            .Include(g => g.ParentGame)
+            .Include(g => g.GameType)
+            .Include(g => g.Puzzles)
+            .ThenInclude(p => p.MediaFiles)
+            .ThenInclude(pm => pm.MediaFile)
+            .FirstOrDefaultAsync(g =>
+                g.ParentGame.Year.ToString() == gameYear && g.GameType.Slug == gameTypeSlug.Trim());
+
+        if (game == null)
+        {
+            TempData["error"] = "Το παιχνίδι δεν βρέθηκε.";
+            return RedirectToAction("ParentGameDetails", "Game");
+        }
+
+        var viewModel = new GamePuzzlesViewModel
+        {
+            Id = game.Id,
+            Type = game.GameType.Description,
+            Title = game.ParentGame.Title,
+            Year = game.ParentGame.Year,
+            Description = game.Description,
+            Puzzles = game.Puzzles.Select(p => new PuzzleDetailsViewModel
+            {
+                Id = p.Id,
+                Question = p.Question,
+                Answer = p.Answer,
+                Type = p.Type.ToString(),
+                Order = p.Order,
+                QuestionMedia = p.MediaFiles
+                    .Where(m => m.MediaType == PuzzleMediaType.Question)
+                    .Select(m => m.MediaFile.Path)
+                    .ToList(),
+                AnswerMedia = p.MediaFiles
+                    .Where(m => m.MediaType == PuzzleMediaType.Answer)
+                    .Select(m => m.MediaFile.Path)
+                    .ToList()
+            }).OrderBy(p => p.Order).ToList()
+        };
+
         return View(viewModel);
     }
 
@@ -222,7 +270,7 @@ public class GameController : Controller
                     .FirstOrDefaultAsync(t =>
                         t.Managers.Any(m => m.Id == userId));
 
-            if (team == null || team.Id != parentGameDetails.Host.Id)
+            if (team == null || team.TeamId != parentGameDetails.Host.TeamId)
             {
                 TempData["error"] =
                     "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού.";
@@ -262,7 +310,7 @@ public class GameController : Controller
                 .Include(t => t.Managers)
                 .FirstOrDefaultAsync(t => t.Managers.Any(m => m.Id == userId));
 
-            if (team == null || team.Id != parentGameDetails.Host.Id)
+            if (team == null || team.TeamId != parentGameDetails.Host.TeamId)
             {
                 TempData["error"] =
                     "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού.";
@@ -382,7 +430,6 @@ public class GameController : Controller
     {
         var teamList = await _context.Teams.ToListAsync();
         var gameTypes = await _context.GameTypes.ToListAsync();
-        teamList.Insert(0, new Team { Id = 0, Name = "Επιλέξτε..." });
 
         viewModel.HostSelectList = new SelectList(teamList, "Id", "Name", 0);
         viewModel.WinnerSelectList = new SelectList(teamList, "Id", "Name", 0);
@@ -397,13 +444,12 @@ public class GameController : Controller
         {
             Id = parentGameDetails.Id,
             Title = parentGameDetails.Title,
+            Description = parentGameDetails.Description,
             Year = parentGameDetails.Year,
             Order = parentGameDetails.Order,
             ProfileImageUrl = parentGameDetails.ProfileImageUrl,
             Winner = parentGameDetails.Winner.Name,
-            WinnerSlug = parentGameDetails.Winner.Slug,
             Host = parentGameDetails.Host.Name,
-            HostSlug = parentGameDetails.Host.Slug
         };
 
         return viewModel;
@@ -416,13 +462,12 @@ public class GameController : Controller
         {
             Id = parentGameDetails.Id,
             Title = parentGameDetails.Title,
+            Description = parentGameDetails.Description,
             Year = parentGameDetails.Year,
             Order = parentGameDetails.Order,
             ProfileImageUrl = parentGameDetails.ProfileImageUrl,
             Winner = parentGameDetails.Winner.Name,
-            WinnerSlug = parentGameDetails.Winner.Slug,
             Host = parentGameDetails.Host.Name,
-            HostSlug = parentGameDetails.Host.Slug,
             GameList = []
         };
 
@@ -447,6 +492,7 @@ public class GameController : Controller
         {
             Id = parentGameDetails.Id,
             Title = parentGameDetails.ParentGame.Title,
+            Description = parentGameDetails.Description,
             Year = parentGameDetails.ParentGame.Year,
             Type = parentGameDetails.GameType.Description
         };

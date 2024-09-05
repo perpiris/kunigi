@@ -9,8 +9,6 @@ public class MediaFile
     [Column(TypeName = "varchar(255)")]
     public string Path { get; set; }
     
-    public int ParentId { get; set; }
-    
     public virtual ICollection<TeamMedia> TeamMediaFiles { get; set; }
     
     public virtual ICollection<ParentGameMedia> ParentGameMediaFiles { get; set; }

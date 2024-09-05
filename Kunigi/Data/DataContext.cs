@@ -40,7 +40,7 @@ public class DataContext : IdentityDbContext<AppUser>
         
         modelBuilder.Entity<TeamMedia>(entity =>
         {
-            entity.HasKey(e => e.Id);
+            entity.HasKey(e => e.TeamMediaId);
 
             entity.HasOne(d => d.Team)
                 .WithMany(p => p.MediaFiles)

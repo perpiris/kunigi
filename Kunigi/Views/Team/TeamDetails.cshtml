@@ -4,172 +4,185 @@
     ViewData["Title"] = Model.Name;
 }
 
-<section>
-    
-    <div class="container">
-        <div class="row gy-4 gy-lg-0">
-            <div class="col-12 col-lg-4 col-xl-3">
-                <div class="row gy-4">
-                    <div class="col-12">
-                        <div class="card widget-card border-light shadow-sm">
-                            <div class="card-body">
-                                <div class="text-center mb-3">
-                                    @if (string.IsNullOrEmpty(Model.ProfileImageUrl))
-                                    {
-                                        <img src="~/media/profile.jpg" class="img-fluid" alt="Default Team Image">
-                                    }
-                                    else
-                                    {
-                                        <img src="@Model.ProfileImageUrl" class="img-fluid" alt="Team Image">
-                                    }
-                                </div>
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a asp-controller="Team" asp-action="TeamList">Ομάδες</a>
+    </li>
+    <li class="breadcrumb-item active">@Model.Name</li>
+</ol>
+
+<div class="container">
+    <div class="row gy-4 gy-lg-0">
+        <div class="col-12 col-lg-4 col-xl-3">
+            <div class="row gy-4">
+                <div class="col-12">
+                    <div class="card widget-card border-light shadow-sm">
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                @if (string.IsNullOrEmpty(Model.ProfileImageUrl))
+                                {
+                                    <img src="~/media/profile.jpg" class="img-fluid" alt="Default Team Image">
+                                }
+                                else
+                                {
+                                    <img src="~/@Url.Content(Model.ProfileImageUrl)" class="card-img-top" alt="@Model.Name">
+                                }
                             </div>
                         </div>
                     </div>
-
-                    @if (!string.IsNullOrEmpty(Model.Website) || !string.IsNullOrEmpty(Model.Facebook) || 
-                         !string.IsNullOrEmpty(Model.Youtube) || !string.IsNullOrEmpty(Model.Instagram))
-                    {
-                        <div class="col-12">
-                            <div class="card widget-card border-light shadow-sm">
-                                <div class="card-header text-bg-primary">Σύνδεσμοι</div>
-                                <div class="card-body">
-
-                                    @if (!string.IsNullOrEmpty(Model.Website))
-                                    {
-                                        <a href="@Model.Website" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
-                                            <i class="bi bi-globe"></i>
-                                        </a>
-                                    }
-
-                                    @if (!string.IsNullOrEmpty(Model.Facebook))
-                                    {
-                                        <a href="@Model.Facebook" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
-                                            <i class="bi bi-facebook"></i>
-                                        </a>
-                                    }
-
-                                    @if (!string.IsNullOrEmpty(Model.Youtube))
-                                    {
-                                        <a href="@Model.Youtube" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
-                                            <i class="bi bi-youtube"></i>
-                                        </a>
-                                    }
-
-                                    @if (!string.IsNullOrEmpty(Model.Instagram))
-                                    {
-                                        <a href="@Model.Instagram" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
-                                            <i class="bi bi-instagram"></i>
-                                        </a>
-                                    }
-
-                                </div>
-                            </div>
-                        </div>
-                    }
-
                 </div>
+
+                @if (!string.IsNullOrEmpty(Model.Website) || !string.IsNullOrEmpty(Model.Facebook) ||
+                     !string.IsNullOrEmpty(Model.Youtube) || !string.IsNullOrEmpty(Model.Instagram))
+                {
+                    <div class="col-12">
+                        <div class="card widget-card border-light shadow-sm">
+                            <div class="card-header text-bg-primary">Σύνδεσμοι</div>
+                            <div class="card-body">
+
+                                @if (!string.IsNullOrEmpty(Model.Website))
+                                {
+                                    <a href="@Model.Website" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                        <i class="bi bi-globe"></i>
+                                    </a>
+                                }
+
+                                @if (!string.IsNullOrEmpty(Model.Facebook))
+                                {
+                                    <a href="@Model.Facebook" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                        <i class="bi bi-facebook"></i>
+                                    </a>
+                                }
+
+                                @if (!string.IsNullOrEmpty(Model.Youtube))
+                                {
+                                    <a href="@Model.Youtube" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                        <i class="bi bi-youtube"></i>
+                                    </a>
+                                }
+
+                                @if (!string.IsNullOrEmpty(Model.Instagram))
+                                {
+                                    <a href="@Model.Instagram" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                        <i class="bi bi-instagram"></i>
+                                    </a>
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+                }
+
             </div>
-            <div class="col-12 col-lg-8 col-xl-9">
-                <div class="card widget-card border-light shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="container">
-                            <div class="row justify-content-md-center">
-                                <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
-                                    <h2 class="mb-4 text-center">@Model.Name</h2>
+        </div>
+        <div class="col-12 col-lg-8 col-xl-9">
+            <div class="card widget-card border-light shadow-sm">
+                <div class="card-body p-4">
+                    <div class="container">
+                        <div class="row justify-content-md-center">
+                            <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
+                                <h2 class="mb-4 text-center">@Model.Name</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="nav nav-tabs" id="profileTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-tab-pane" type="button" role="tab" aria-controls="overview-tab-pane" aria-selected="true">Περιγραφή</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="games-tab" data-bs-toggle="tab" data-bs-target="#games-tab-pane" type="button" role="tab" aria-controls="photos-tab-pane" aria-selected="true">Παιχνίδια</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos-tab-pane" type="button" role="tab" aria-controls="photos-tab-pane" aria-selected="true">Υλικό</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content pt-4" id="profileTabContent">
+                        <div class="tab-pane show active" id="overview-tab-pane" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
+                            <p class="lead">@Model.Description</p>
+                        </div>
+                        <div class="tab-pane" id="games-tab-pane" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
+                            <div class="row g-0">
+                                <div class="col-5 col-md-3 bg-light border-bottom border-white border-3">
+                                    <div class="p-2">Νίκες</div>
+                                </div>
+                                <div
+                                    class="col-7 col-md-9 bg-light border-start border-bottom border-white border-3">
+                                    <div class="p-2">
+
+                                        @if (Model.GamesWon.Any())
+                                        {
+                                            <ul>
+                                                @foreach (var game in Model.GamesWon)
+                                                {
+                                                    <li>
+                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@game.GetFullTitle()</a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <span>Καμία</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-5 col-md-3 bg-light border-bottom border-white border-3">
+                                    <div class="p-2">Διοργανώσεις</div>
+                                </div>
+                                <div
+                                    class="col-7 col-md-9 bg-light border-start border-bottom border-white border-3">
+                                    <div class="p-2">
+                                        @if (Model.GamesHosted.Any())
+                                        {
+                                            <ul>
+                                                @foreach (var game in Model.GamesHosted)
+                                                {
+                                                    <li>
+                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@game.GetFullTitle()</a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <span>Καμία</span>
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <ul class="nav nav-tabs" id="profileTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-tab-pane" type="button" role="tab" aria-controls="overview-tab-pane" aria-selected="true">Περιγραφή</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos-tab-pane" type="button" role="tab" aria-controls="photos-tab-pane" aria-selected="true">Υλικό</button>
-                            </li>
-                        </ul>
-                        <div class="tab-content pt-4" id="profileTabContent">
-                            <div class="tab-pane show active" id="overview-tab-pane" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
-                                <p class="lead mb-3">@Model.Description</p>
-                                <div class="row g-0">
-                                    <div class="col-5 col-md-3 bg-light border-bottom border-white border-3">
-                                        <div class="p-2">Νίκες</div>
-                                    </div>
-                                    <div
-                                        class="col-7 col-md-9 bg-light border-start border-bottom border-white border-3">
-                                        <div class="p-2">
-
-                                            @if (Model.GamesWon.Any())
+                        <div class="tab-pane" id="photos-tab-pane" role="tabpanel" aria-labelledby="photos-tab" tabindex="0">
+                            @if (!Model.MediaFiles.Any())
+                            {
+                                <h4 class="mb-4 text-center">Δεν υπάρχει υλικό</h4>
+                            }
+                            else
+                            {
+                                @foreach (var media in Model.MediaFiles)
+                                {
+                                    <div class="col">
+                                        <div class="card h-100">
+                                            @if (IsImage(media.Path))
                                             {
-                                                <ul>
-                                                    @foreach (var game in Model.GamesWon)
-                                                    {
-                                                        <li>
-                                                            <a type="button" class="btn btn-link" asp-controller="Game" asp-action="GameDetails" asp-route-gameYear="@game.Year">@game.GetFullTitle()</a>
-                                                        </li>
-                                                    }
-                                                </ul>
+                                                <img src="~/@media.Path" class="card-img-top img-fluid" alt="@media.FileName" style="height: 200px; object-fit: cover;" data-bs-toggle="modal" data-bs-target="#mediaModal" data-media-src="/@media.Path" data-media-type="image">
                                             }
-                                            else
+                                            else if (IsVideo(media.Path))
                                             {
-                                                <span>Καμία</span>
+                                                <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;" data-bs-toggle="modal" data-bs-target="#mediaModal" data-media-src="/@media.Path" data-media-type="video">
+                                                    <i class="bi bi-play-circle" style="font-size: 3rem;"></i>
+                                                </div>
                                             }
                                         </div>
                                     </div>
-                                    <div class="col-5 col-md-3 bg-light border-bottom border-white border-3">
-                                        <div class="p-2">Διοργανώσεις</div>
-                                    </div>
-                                    <div
-                                        class="col-7 col-md-9 bg-light border-start border-bottom border-white border-3">
-                                        <div class="p-2">
-                                            @if (Model.GamesHosted.Any())
-                                            {
-                                                <ul>
-                                                    @foreach (var game in Model.GamesHosted)
-                                                    {
-                                                        <li>
-                                                            <a type="button" class="btn btn-link" asp-controller="Game" asp-action="GameDetails" asp-route-gameYear="@game.Year">@game.GetFullTitle()</a>
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            }
-                                            else
-                                            {
-                                                <span>Καμία</span>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tab-pane" id="photos-tab-pane" role="tabpanel" aria-labelledby="photos-tab" tabindex="0">
-                                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                                    @foreach (var media in Model.MediaFiles)
-                                    {
-                                        <div class="col">
-                                            <div class="card h-100">
-                                                @if (IsImage(media.Path))
-                                                {
-                                                    <img src="@media.Path" class="card-img-top img-fluid" alt="@media.FileName" style="height: 200px; object-fit: cover;" data-bs-toggle="modal" data-bs-target="#mediaModal" data-media-src="@media.Path" data-media-type="image">
-                                                }
-                                                else if (IsVideo(media.Path))
-                                                {
-                                                    <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;" data-bs-toggle="modal" data-bs-target="#mediaModal" data-media-src="@media.Path" data-media-type="video">
-                                                        <i class="bi bi-play-circle" style="font-size: 3rem;"></i>
-                                                    </div>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
+                                }
+                            }
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-</section>
+</div>
 
 <div class="modal" id="mediaModal" tabindex="-1" aria-labelledby="mediaModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -189,13 +202,13 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var mediaModal = document.getElementById('mediaModal');
-            var mediaContainer = document.getElementById('mediaContainer');
+            let mediaModal = document.getElementById('mediaModal');
+            let mediaContainer = document.getElementById('mediaContainer');
 
             mediaModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var mediaType = button.getAttribute('data-media-type');
-                var mediaSrc = button.getAttribute('data-media-src');
+                let button = event.relatedTarget;
+                let mediaType = button.getAttribute('data-media-type');
+                let mediaSrc = button.getAttribute('data-media-src');
                 
                 mediaContainer.innerHTML = '';
                 
@@ -222,4 +235,5 @@
         var videoExtensions = new[] { ".mp4", ".webm", ".ogg" };
         return videoExtensions.Any(ext => path.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
     }
+
 }

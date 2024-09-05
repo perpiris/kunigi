@@ -2,7 +2,7 @@
 
 public class TeamMedia
 {
-    public int Id { get; set; }
+    public int TeamMediaId { get; set; }
     
     public int TeamId { get; set; }
     

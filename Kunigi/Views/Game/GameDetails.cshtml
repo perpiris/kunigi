@@ -1,94 +1,97 @@
-﻿@model ParentGameDetailsViewModel
+﻿@model GamePuzzlesViewModel
 
 @{
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = Model.Type;
+    var mainPuzzles = Model.Puzzles.Where(p => p.Type == "Main").ToList();
+    var parallelPuzzles = Model.Puzzles.Where(p => p.Type == "Parallel").ToList();
+    var hasParallelPuzzles = parallelPuzzles.Any();
 }
 
-<section>
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a asp-controller="Game" asp-action="ParentGameList">Παιχνίδια</a>
+    </li>
+    <li class="breadcrumb-item">
+        <a asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@Model.Year">@Model.Year</a>
+    </li>
+    <li class="breadcrumb-item active">@Model.Type</li>
+</ol>
 
-    <div class="container">
-        <div class="row gy-4 gy-lg-0">
-            <div class="col-12 col-lg-4 col-xl-3">
-                <div class="row gy-4">
-                    <div class="col-12">
-                        <div class="card widget-card border-light shadow-sm">
-                            <div class="card-body">
-                                <div class="text-center mb-3">
-                                    @if (string.IsNullOrEmpty(Model.ProfileImageUrl))
-                                    {
-                                        <img src="~/media/profile.jpg" class="img-fluid" alt="Default Team Image">
-                                    }
-                                    else
-                                    {
-                                        <img src="@Model.ProfileImageUrl" class="img-fluid" alt="Team Image">
-                                    }
-                                </div>
+<h2 class="text-center mb-4">@($"{Model.Title} ({Model.Year}) - {Model.Type}")</h2>
+
+<div class="row">
+    <div class="@(hasParallelPuzzles ? "col-md-6" : "col-12")">
+        <h3 class="mb-3">Κύριοι Γρίφοι</h3>
+        <div class="accordion" id="mainPuzzleAccordion">
+            @foreach (var puzzle in mainPuzzles)
+            {
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="mainHeading@(puzzle.Id)">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mainCollapse@(puzzle.Id)" aria-expanded="false" aria-controls="mainCollapse@(puzzle.Id)">
+                            @($"{puzzle.Order}ος Γρίφος")
+                        </button>
+                    </h2>
+                    <div id="mainCollapse@(puzzle.Id)" class="accordion-collapse collapse" aria-labelledby="mainHeading@(puzzle.Id)" data-bs-parent="#mainPuzzleAccordion">
+                        <div class="accordion-body">
+                            <div class="mb-3">
+                                <h5>Γρίφοος:</h5>
+                                <p>@puzzle.Question</p>
+                                @if (puzzle.QuestionMedia.Any())
+                                {
+                                    <p>Question Media Files: @puzzle.QuestionMedia.Count</p>
+                                }
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="card widget-card border-light shadow-sm">
-                            <div class="card-header text-bg-primary">Διοργάνωση</div>
-                            <div class="card-body">
-                                <a type="button" class="btn btn-link" asp-controller="Team" asp-action="TeamDetails" asp-route-teamSlug="@Model.HostSlug">@Model.Host</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="card widget-card border-light shadow-sm">
-                            <div class="card-header text-bg-primary">Νικητές</div>
-                            <div class="card-body">
-                                <a type="button" class="btn btn-link" asp-controller="Team" asp-action="TeamDetails" asp-route-teamSlug="@Model.WinnerSlug">@Model.Winner</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="card widget-card border-light shadow-sm">
-                            <div class="card-header text-bg-primary">Παιχνίδια</div>
-                            <div class="card-body">
-                                <ul class="list-group list-group-flush">
-                                    @foreach (var game in Model.GameList)
-                                    {
-                                        <li class="list-group-item">
-                                            <a asp-controller="Puzzle" asp-action="PuzzleList" asp-route-gameYear="@game.Year" asp-route-gameSlug="@game.Slug">@game.Type</a>
-                                        </li>
-                                    }
-                                </ul>
+                            <div>
+                                <h5>Απάντηση:</h5>
+                                <p>@puzzle.Answer</p>
+                                @if (puzzle.AnswerMedia.Any())
+                                {
+                                    <p>Answer Media Files: @puzzle.AnswerMedia.Count</p>
+                                }
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-12 col-lg-8 col-xl-9">
-                <div class="card widget-card border-light shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="container">
-                            <div class="row justify-content-md-center">
-                                <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
-                                    <h2 class="mb-4 text-center">@Model.Title</h2>
-                                </div>
-                            </div>
-                        </div>
-                        <ul class="nav nav-tabs" id="profileTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-tab-pane" type="button" role="tab" aria-controls="overview-tab-pane" aria-selected="true">Περιγραφή</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos-tab-pane" type="button" role="tab" aria-controls="photos-tab-pane" aria-selected="true">Υλικό</button>
-                            </li>
-                        </ul>
-                        <div class="tab-content pt-4" id="profileTabContent">
-                            <div class="tab-pane show active" id="overview-tab-pane" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
-                                <p class="lead mb-3">details</p>
-                            </div>
-                            <div class="tab-pane" id="photos-tab-pane" role="tabpanel" aria-labelledby="photos-tab" tabindex="0">
-                                <p class="lead mb-3">photos</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
 
-</section>
+    @if (hasParallelPuzzles)
+    {
+        <div class="col-md-6">
+            <h3 class="mb-3">Παράλληλοι Γρίφοι</h3>
+            <div class="accordion" id="parallelPuzzleAccordion">
+                @foreach (var puzzle in parallelPuzzles)
+                {
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="parallelHeading@(puzzle.Id)">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#parallelCollapse@(puzzle.Id)" aria-expanded="false" aria-controls="parallelCollapse@(puzzle.Id)">
+                                @($"{puzzle.Order}ος Γρίφος")
+                            </button>
+                        </h2>
+                        <div id="parallelCollapse@(puzzle.Id)" class="accordion-collapse collapse" aria-labelledby="parallelHeading@(puzzle.Id)" data-bs-parent="#parallelPuzzleAccordion">
+                            <div class="accordion-body">
+                                <div class="mb-3">
+                                    <h5>Γρίφοος:</h5>
+                                    <p>@puzzle.Question</p>
+                                    @if (puzzle.QuestionMedia.Any())
+                                    {
+                                        <p>Question Media Files: @puzzle.QuestionMedia.Count</p>
+                                    }
+                                </div>
+                                <div>
+                                    <h5>Απάντηση:</h5>
+                                    <p>@puzzle.Answer</p>
+                                    @if (puzzle.AnswerMedia.Any())
+                                    {
+                                        <p>Answer Media Files: @puzzle.AnswerMedia.Count</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

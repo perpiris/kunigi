@@ -6,69 +6,47 @@
 
 <h2 class="mb-4 text-center">Δημιουργία νέου παιχνιδιού</h2>
 
-<section>
+<div class="form-container-large">
+    @using (Html.BeginForm("CreateParentGame", "Game", FormMethod.Post))
+    {
+        <div class="row">
+            <div class="col-12 col-md-6 mb-4 form-group">
+                <label asp-for="Year" class="form-label"></label>
+                <input asp-for="Year" class="form-control @(ViewData.ModelState["Year"] != null ? "is-invalid" : "")" min="1989" max="@DateTime.Now.Year.ToString()" pattern="[0-9]{4}"/>
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+            <div class="col-12 col-md-6 mb-4 form-group">
+                <label asp-for="Order" class="form-label"></label>
+                <input asp-for="Order" class="form-control @(ViewData.ModelState["Order"] != null ? "is-invalid" : "")" min="1"/>
+                <span asp-validation-for="Order" class="text-danger"></span>
+            </div>
+            <div class="col-12 col-md-6 mb-4 form-group">
+                <label asp-for="HostId" class="form-label"></label>
+                <select asp-for="HostId" asp-items="Model.HostSelectList" class="form-select @(ViewData.ModelState["HostId"] != null ? "is-invalid" : "")">
 
-    <div class="container">
-        <div class="row justify-content-md-center">
-            <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
-                
+                </select>
+                <span asp-validation-for="HostId" class="text-danger"></span>
+            </div>
+            <div class="col-12 col-md-6 mb-4 form-group">
+                <label asp-for="WinnerId" class="form-label"></label>
+                <select asp-for="WinnerId" asp-items="Model.WinnerSelectList" class="form-select @(ViewData.ModelState["WinnerId"] != null ? "is-invalid" : "")">
+
+                </select>
+                <span asp-validation-for="WinnerId" class="text-danger"></span>
+            </div>
+            <div class="col-12 col-md-6 mb-4 form-group">
+                <label class="form-label">Επιλογές</label>
+                @foreach (var gameType in Model.GameTypes)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="SelectedGameTypeIds" value="@gameType.Id"/>
+                        <label class="form-check-label">@gameType.Description</label>
+                    </div>
+                }
             </div>
         </div>
-    </div>
-
-    <div class="container">
-        <div class="row justify-content-lg-center">
-            <div class="col-12 col-lg-9">
-                <div class="bg-white border rounded shadow-sm overflow-hidden">
-
-                    @using (Html.BeginForm("CreateParentGame", "Game", FormMethod.Post))
-                    {
-                        <div class="row gy-4 gy-xl-5 p-4 p-xl-5">
-                            <div class="col-12 col-md-6">
-                                <label asp-for="Year" class="form-label"></label>
-                                <input asp-for="Year" class="form-control @(ViewData.ModelState["Year"] != null ? "is-invalid" : "")" min="1989" max="@DateTime.Now.Year.ToString()" pattern="[0-9]{4}"/>
-                                <span asp-validation-for="Year" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label asp-for="Order" class="form-label"></label>
-                                <input asp-for="Order" class="form-control @(ViewData.ModelState["Order"] != null ? "is-invalid" : "")" min="1"/>
-                                <span asp-validation-for="Order" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label asp-for="HostId" class="form-label"></label>
-                                <select asp-for="HostId" asp-items="Model.HostSelectList" class="form-select @(ViewData.ModelState["HostId"] != null ? "is-invalid" : "")">
-
-                                </select>
-                                <span asp-validation-for="HostId" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label asp-for="WinnerId" class="form-label"></label>
-                                <select asp-for="WinnerId" asp-items="Model.WinnerSelectList" class="form-select @(ViewData.ModelState["WinnerId"] != null ? "is-invalid" : "")">
-
-                                </select>
-                                <span asp-validation-for="WinnerId" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">Επιλογές</label>
-                                @foreach (var gameType in Model.GameTypes)
-                                {
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="SelectedGameTypeIds" value="@gameType.Id"/>
-                                        <label class="form-check-label">@gameType.Description</label>
-                                    </div>
-                                }
-                            </div>
-                            <div class="col-12">
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary">Αποθήκευση</button>
-                                    <a asp-controller="Game" asp-action="ParentGameManagement" class="btn btn-secondary">Πίσω</a>
-                                </div>
-                            </div>
-                        </div>
-                    }
-
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+        
+        <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+        <button class="btn btn-secondary" id="previous-page-button">Πίσω</button>
+    }
+</div>

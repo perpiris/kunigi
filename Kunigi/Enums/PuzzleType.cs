@@ -5,5 +5,5 @@ namespace Kunigi.Enums;
 public enum PuzzleType
 {
     Main,
-    Parallel
+    Joker
 }

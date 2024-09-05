@@ -10,5 +10,7 @@ public class GamePuzzlesViewModel
     
     public string Type { get; set; }
     
+    public string Description { get; set; }
+    
     public List<PuzzleDetailsViewModel> Puzzles { get; set; } = [];
 }

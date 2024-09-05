@@ -6,5 +6,5 @@ public class TeamMediaViewModel
     
     public List<MediaFileViewModel> MediaFiles { get; set; } = [];
     
-    public List<IFormFile> NewMediaFiles { get; set; }
+    public List<IFormFile> NewMediaFiles { get; set; } // do not delete
 }

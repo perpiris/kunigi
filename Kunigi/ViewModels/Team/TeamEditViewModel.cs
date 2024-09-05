@@ -1,15 +1,13 @@
 ﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 
 namespace Kunigi.ViewModels.Team;
 
-public class TeamCreateOrEditViewModel
+public class TeamEditViewModel
 {
-    [DisplayName("Όνομα Ομάδας")]
-    [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
-    public string Name { get; set; }
+    public int TeamId { get; set; }
     
-    public string Slug { get; set; }
+    [DisplayName("Όνομα Ομάδας")]
+    public string Name { get; set; }
     
     [DisplayName("Σύντομη περιγραφή")]
     public string Description { get; set; }

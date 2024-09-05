@@ -21,51 +21,6 @@ public class PuzzleController : Controller
         _configuration = configuration;
     }
 
-    [HttpGet("{gameYear}/{gameTypeSlug}")]
-    public async Task<IActionResult> PuzzleList(string gameYear, string gameTypeSlug)
-    {
-        var game = await _context.Games
-            .Include(g => g.ParentGame)
-            .Include(g => g.GameType)
-            .Include(g => g.Puzzles)
-            .ThenInclude(p => p.MediaFiles)
-            .ThenInclude(pm => pm.MediaFile)
-            .FirstOrDefaultAsync(g =>
-                g.ParentGame.Year.ToString() == gameYear && g.GameType.Slug == gameTypeSlug.Trim());
-
-        if (game == null)
-        {
-            TempData["error"] = "Το παιχνίδι δεν βρέθηκε.";
-            return RedirectToAction("GameDetails", "Game");
-        }
-
-        var viewModel = new GamePuzzlesViewModel
-        {
-            Id = game.Id,
-            Type = game.GameType.Description,
-            Title = game.ParentGame.Title,
-            Year = game.ParentGame.Year,
-            Puzzles = game.Puzzles.Select(p => new PuzzleDetailsViewModel
-            {
-                Id = p.Id,
-                Question = p.Question,
-                Answer = p.Answer,
-                Type = p.Type.ToString(),
-                Order = p.Order,
-                QuestionMedia = p.MediaFiles
-                    .Where(m => m.MediaType == PuzzleMediaType.Question)
-                    .Select(m => m.MediaFile.Path)
-                    .ToList(),
-                AnswerMedia = p.MediaFiles
-                    .Where(m => m.MediaType == PuzzleMediaType.Answer)
-                    .Select(m => m.MediaFile.Path)
-                    .ToList()
-            }).OrderBy(p => p.Order).ToList()
-        };
-
-        return View(viewModel);
-    }
-
     [HttpGet("manage/{gameId:int}")]
     [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> ManagePuzzles(int gameId)

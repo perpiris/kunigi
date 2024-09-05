@@ -37,12 +37,12 @@ public class HomeController : Controller
                 await _context.Teams
                     .Include(x => x.Managers)
                     .Where(x => x.Managers.Any(y => y.Id.Equals(userId)))
-                    .Select(x => new TeamDetailsViewModel { Name = x.Name, Slug = x.Slug})
+                    .Select(x => new TeamDetailsViewModel { Name = x.Name, TeamId = x.TeamId })
                     .ToListAsync();
-            
+
             ViewBag.TeamList = teamList;
         }
-        
+
         return View();
     }
 }

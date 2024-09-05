@@ -1,9 +1,7 @@
-﻿using System.Security.Claims;
-using Kunigi.Data;
+﻿using Kunigi.Data;
 using Kunigi.Entities;
-using Kunigi.Utilities;
-using Kunigi.ViewModels;
-using Kunigi.ViewModels.Game;
+using Kunigi.Exceptions;
+using Kunigi.Services;
 using Kunigi.ViewModels.Team;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -16,229 +14,115 @@ namespace Kunigi.Controllers;
 [Route("teams")]
 public class TeamController : Controller
 {
+    private readonly ITeamService _teamService;
     private readonly DataContext _context;
-    private readonly IConfiguration _configuration;
     private readonly UserManager<AppUser> _userManager;
 
-    public TeamController(
-        DataContext context,
-        IConfiguration configuration,
-        UserManager<AppUser> userManager)
+    public TeamController(ITeamService teamService)
     {
-        _context = context;
-        _configuration = configuration;
-        _userManager = userManager;
+        _teamService = teamService;
     }
 
     [HttpGet("list")]
     public async Task<IActionResult> TeamList()
     {
-        var teamList =
-            await _context
-                .Teams
-                .ToListAsync();
-
-        var viewModel =
-            teamList
-                .Select(GetFullMappedDetailsViewModel)
-                .OrderBy(x => x.Name)
-                .ToList();
-
+        var viewModel = await _teamService.GetAllTeams();
         return View(viewModel);
     }
 
     [HttpGet("{teamSlug}")]
     public async Task<IActionResult> TeamDetails(string teamSlug)
     {
-        if (string.IsNullOrEmpty(teamSlug))
+        try
+        {
+            var viewModel = await _teamService.GetTeamDetails(teamSlug);
+            return View(viewModel);
+        }
+        catch (Exception)
         {
             return RedirectToAction("TeamList");
         }
-
-        var teamDetails =
-            await _context.Teams
-                .Include(x => x.HostedYears.OrderBy(y => y.Year))
-                .Include(x => x.WonYears.OrderBy(y => y.Year))
-                .Include(x => x.MediaFiles)
-                .ThenInclude(x => x.MediaFile)
-                .FirstOrDefaultAsync(x => x.Slug == teamSlug.Trim());
-
-        if (teamDetails is null)
-        {
-            TempData["error"] = "Η ομάδα δεν υπάρχει";
-            return RedirectToAction("TeamList");
-        }
-
-        var viewModel = GetFullMappedDetailsViewModel(teamDetails);
-        return View(viewModel);
     }
 
-    [HttpGet("create")]
     [Authorize(Roles = "Admin")]
+    [HttpGet("create-team")]
     public IActionResult CreateTeam()
     {
         return View();
     }
 
-    [HttpPost("create")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> CreateTeam(TeamCreateOrEditViewModel viewModel)
+    [HttpPost("create-team")]
+    public async Task<IActionResult> CreateTeam(TeamCreateViewModel viewModel)
     {
         if (!ModelState.IsValid) return View();
 
-        var teamList = await _context.Teams.ToListAsync();
-        var exists = teamList.Any(x =>
-            x.Name.Equals(viewModel.Name, StringComparison.OrdinalIgnoreCase));
-        if (exists)
+        try
         {
-            ModelState.AddModelError("Name", "Υπάρχει ήδη ομάδα με αυτό το όνομα.");
-            return View(viewModel);
+            await _teamService.CreateTeam(viewModel);
+            TempData["success"] = "Η ομάδα δημιουργήθηκε.";
+        }
+        catch (Exception)
+        {
+            TempData["error"] = "Η ομάδα δεν δημιουργήθηκε.";
         }
 
-        var slug = SlugGenerator.GenerateSlug(viewModel.Name);
-        var newTeam = new Team
-        {
-            Name = viewModel.Name,
-            Slug = slug
-        };
-
-        var basePathFromConfig = _configuration["ImageStoragePath"];
-        var teamFolderPath = Path.Combine(basePathFromConfig!, "teams", slug);
-        Directory.CreateDirectory(teamFolderPath);
-        newTeam.TeamFolderUrl = teamFolderPath;
-
-        _context.Teams.Add(newTeam);
-        await _context.SaveChangesAsync();
-
-        TempData["success"] = "Η ομάδα δημιουργήθηκε.";
         return RedirectToAction("TeamManagement");
     }
 
-    [HttpGet("edit/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("edit-team/{teamSlug}")]
     public async Task<IActionResult> EditTeam(string teamSlug)
     {
-        if (string.IsNullOrEmpty(teamSlug))
+        try
         {
-            return RedirectToAction("TeamManagement");
+            var viewModel = await _teamService.PrepareEditViewModel(teamSlug, User);
+            return View(viewModel);
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("TeamList");
         }
 
-        var teamDetails =
-            await _context.Teams
-                .Include(team => team.Managers)
-                .SingleOrDefaultAsync(x => x.Slug == teamSlug.Trim());
-
-        if (teamDetails == null)
-        {
-            return RedirectToAction("TeamManagement");
-        }
-
-        if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (teamDetails.Managers.All(x => x.Id != userId))
-            {
-                TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
-                return RedirectToAction("TeamList");
-            }
-        }
-
-        var viewModel = GetMappedCreateOrEditViewModel(teamDetails);
-        if (viewModel != null) return View(viewModel);
-
-        return RedirectToAction("TeamManagement");
+        return RedirectToAction("TeamList");
     }
 
-    [HttpPost("edit/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> EditTeam(string teamSlug,
-        TeamCreateOrEditViewModel updatedTeamDetails,
-        IFormFile profileImage)
+    [HttpPost("edit-team/{teamSlug}")]
+    public async Task<IActionResult> EditTeam(string teamSlug, TeamEditViewModel viewModel, IFormFile profileImage)
     {
-        if (string.IsNullOrEmpty(teamSlug))
+        try
         {
-            return RedirectToAction("TeamManagement");
+            await _teamService.EditTeam(teamSlug, viewModel, profileImage, User);
+            return RedirectToAction("TeamActions", new { teamSlug });
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("TeamList");
         }
 
-        var teamDetails =
-            await _context.Teams
-                .Include(team => team.Managers)
-                .SingleOrDefaultAsync(x => x.Slug == teamSlug.Trim());
-
-        if (teamDetails == null)
-        {
-            TempData["error"] = "Η ομάδα δεν υπάρχει";
-            return RedirectToAction("TeamManagement");
-        }
-
-        if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (teamDetails.Managers.All(x => x.Id != userId))
-            {
-                TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
-                return RedirectToAction("TeamList");
-            }
-        }
-
-        teamDetails.Description = updatedTeamDetails.Description;
-        teamDetails.Facebook = updatedTeamDetails.Facebook;
-        teamDetails.Youtube = updatedTeamDetails.Youtube;
-        teamDetails.Instagram = updatedTeamDetails.Instagram;
-        teamDetails.Website = updatedTeamDetails.Website;
-
-        if (profileImage != null)
-        {
-            var basePathFromConfig = _configuration["ImageStoragePath"];
-            var teamFolderPath = Path.Combine(basePathFromConfig!, "teams", teamDetails.Slug);
-            var fileName = "profile" + Path.GetExtension(profileImage.FileName);
-            var filePath = Path.Combine(teamFolderPath, fileName);
-
-            if (!Directory.Exists(teamFolderPath))
-            {
-                Directory.CreateDirectory(teamFolderPath);
-            }
-
-            await using (var fileStream = new FileStream(filePath, FileMode.Create,
-                             FileAccess.Write, FileShare.None))
-            {
-                await profileImage.CopyToAsync(fileStream);
-            }
-
-            var relativePath = Path.Combine("teams", teamDetails.Slug, fileName).Replace("\\", "/");
-            teamDetails.ProfileImageUrl = $"/media/{relativePath}";
-        }
-
-        _context.Teams.Update(teamDetails);
-        await _context.SaveChangesAsync();
-
-        TempData["success"] = "Οι αλλαγές αποθηκεύτηκαν επιτυχώς.";
-        return RedirectToAction("TeamManagement");
+        return RedirectToAction("TeamList");
     }
 
 
-    [HttpGet("manage")]
     [Authorize(Roles = "Admin")]
+    [HttpGet("manage-teams")]
     public async Task<IActionResult> TeamManagement()
     {
-        var teamList =
-            await _context
-                .Teams
-                .ToListAsync();
-
-        var viewModel =
-            teamList
-                .Select(GetFullMappedDetailsViewModel)
-                .OrderBy(x => x.Name)
-                .ToList();
-
+        var viewModel = await _teamService.GetAllTeams();
         return View(viewModel);
     }
 
-    [HttpGet("edit-managers/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("edit-team-managers/{teamSlug}")]
     public async Task<IActionResult> EditTeamManagers(string teamSlug)
     {
         if (string.IsNullOrEmpty(teamSlug))
@@ -283,8 +167,8 @@ public class TeamController : Controller
         return View(viewModel);
     }
 
-    [HttpPost("edit-managers/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
+    [HttpPost("edit-team-managers/{teamSlug}")]
     public async Task<IActionResult> EditTeamManagers(string teamSlug,
         TeamManagerEditViewModel viewModel)
     {
@@ -332,7 +216,7 @@ public class TeamController : Controller
 
                 var teamManager = new TeamManager
                 {
-                    TeamId = teamToUpdate.Id,
+                    TeamId = teamToUpdate.TeamId,
                     AppUserId = selectedManager.Id
                 };
 
@@ -354,8 +238,9 @@ public class TeamController : Controller
         return RedirectToAction("EditTeamManagers", new { teamSlug = viewModel.Slug });
     }
 
-    [HttpPost("remove-manager/{teamSlug}")]
+
     [Authorize(Roles = "Admin,Manager")]
+    [HttpPost("remove-team-manager/{teamSlug}")]
     public async Task<IActionResult> RemoveManager(string teamSlug, string managerId)
     {
         if (string.IsNullOrEmpty(teamSlug))
@@ -379,7 +264,7 @@ public class TeamController : Controller
             teamToUpdate.Managers.Remove(managerToRemove);
             var teamManager = await _context.TeamManagers
                 .SingleOrDefaultAsync(tm =>
-                    tm.TeamId == teamToUpdate.Id && tm.AppUserId == managerId);
+                    tm.TeamId == teamToUpdate.TeamId && tm.AppUserId == managerId);
             if (teamManager != null)
             {
                 _context.TeamManagers.Remove(teamManager);
@@ -397,223 +282,89 @@ public class TeamController : Controller
         return RedirectToAction("EditTeamManagers", new { teamSlug });
     }
 
-    [HttpGet("manage-media/{teamSlug}")]
+
     [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("manage-team-media/{teamSlug}")]
     public async Task<IActionResult> TeamMediaManagement(string teamSlug)
     {
-        if (string.IsNullOrEmpty(teamSlug))
+        try
         {
-            return RedirectToAction("TeamManagement");
+            var viewModel = await _teamService.GetTeamMedia(teamSlug, User);
+            return View(viewModel);
         }
-
-        var teamDetails = await _context.Teams
-            .Include(team => team.Managers)
-            .Include(t => t.MediaFiles)
-            .ThenInclude(tm => tm.MediaFile)
-            .SingleOrDefaultAsync(x => x.Slug == teamSlug.Trim());
-
-        if (teamDetails == null)
+        catch (UnauthorizedOperationException)
         {
-            TempData["error"] = "Η ομάδα δεν υπάρχει";
-            return RedirectToAction("TeamManagement");
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
         }
-
-        if (User.IsInRole("Manager") && !User.IsInRole("Admin"))
+        catch (Exception)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (teamDetails.Managers.All(x => x.Id != userId))
-            {
-                TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
-                return RedirectToAction("TeamList");
-            }
+            return RedirectToAction("TeamList");
         }
-
-        var basePath = _configuration["ImageStoragePath"];
-        var viewModel = new TeamMediaViewModel
-        {
-            TeamSlug = teamDetails.Slug,
-            MediaFiles = teamDetails.MediaFiles.Select(tm => new MediaFileViewModel
-            {
-                Id = tm.MediaFile.Id,
-                FileName = Path.GetFileName(tm.MediaFile.Path),
-                Path = CrossPlatformPathUtility.CombineAndNormalize(basePath, tm.MediaFile.Path)
-            }).ToList()
-        };
-
-        return View(viewModel);
+        
+        return RedirectToAction("TeamList");
     }
 
-    [HttpPost("upload-media/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> UploadMedia(string teamSlug, TeamMediaViewModel model)
+    [HttpPost("upload-team-media/{teamSlug}")]
+    public async Task<IActionResult> UploadTeamMedia(string teamSlug, TeamMediaViewModel viewModel)
     {
-        if (!ModelState.IsValid)
+        try
         {
-            return RedirectToAction(nameof(TeamMediaManagement), new { teamSlug });
+            await _teamService.AddTeamMedia(teamSlug, viewModel.NewMediaFiles, User);
+            TempData["success"] = "Τα αρχεία ανέβηκαν επιτυχώς.";
+            return RedirectToAction("TeamMediaManagement", new { teamSlug });
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("TeamList");
         }
 
-        var teamDetails = await _context.Teams
-            .FirstOrDefaultAsync(t => t.Slug == teamSlug);
-
-        if (teamDetails == null)
-        {
-            TempData["error"] = "Η ομάδα δεν υπάρχει";
-            return RedirectToAction(nameof(TeamMediaManagement), new { teamSlug });
-        }
-
-        var uploadPath =
-            Path.Combine(_configuration["ImageStoragePath"]!, "teams", teamDetails.Slug);
-        Directory.CreateDirectory(uploadPath);
-
-        foreach (var file in model.NewMediaFiles)
-        {
-            var fileName = FileNameGenerator.GetUniqueFileName(file.FileName);
-            var filePath = Path.Combine(uploadPath, fileName);
-
-            await using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            var mediaFile = new MediaFile
-            {
-                Path = $"/media/teams/{teamDetails.Slug}/{fileName}"
-            };
-
-            _context.MediaFiles.Add(mediaFile);
-            await _context.SaveChangesAsync();
-
-            var teamMedia = new TeamMedia
-            {
-                TeamId = teamDetails.Id,
-                MediaFileId = mediaFile.Id
-            };
-
-            _context.TeamMediaFiles.Add(teamMedia);
-        }
-
-        await _context.SaveChangesAsync();
-
-        TempData["success"] = "Media files uploaded successfully.";
-        return RedirectToAction("TeamMediaManagement", new { teamSlug });
+        return RedirectToAction("TeamList");
     }
 
-    [HttpPost("delete-media/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> DeleteMedia(string teamSlug, int mediaId)
+    [HttpPost("delete-team-media/{teamSlug}")]
+    public async Task<IActionResult> DeleteTeamMedia(string teamSlug, int mediaId)
     {
-        var media = await _context.MediaFiles.FindAsync(mediaId);
-        if (media == null)
+        try
         {
-            return RedirectToAction(nameof(TeamMediaManagement), new { teamSlug });
+            await _teamService.DeleteTeamMedia(teamSlug, mediaId, User);
+            TempData["success"] = "Τα αρχείο διαγράφηκε επιτυχώς.";
+            return RedirectToAction("TeamMediaManagement", new { teamSlug });
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("TeamList");
         }
 
-        var filePath = Path.Combine(_configuration["ImageStoragePath"]!, media.Path.TrimStart('/'));
-        if (System.IO.File.Exists(filePath))
-        {
-            System.IO.File.Delete(filePath);
-        }
-
-        _context.MediaFiles.Remove(media);
-        await _context.SaveChangesAsync();
-
-        TempData["success"] = "Media file deleted successfully.";
-        return RedirectToAction("TeamMediaManagement", new { teamSlug });
+        return RedirectToAction("TeamList");
     }
 
-    [HttpGet("manage/{teamSlug}")]
     [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("team-actions/{teamSlug}")]
     public async Task<IActionResult> TeamActions(string teamSlug)
     {
-        if (string.IsNullOrEmpty(teamSlug))
+        try
         {
-            return RedirectToAction("Dashboard", "Home");
+            var viewModel = await _teamService.GetTeamDetails(teamSlug);
+            return View(viewModel);
         }
-
-        var viewModel = await _context.Teams
-            .Include(x => x.HostedYears.OrderBy(y => y.Year))
-            .Include(x => x.WonYears.OrderBy(y => y.Year))
-            .Where(x => x.Slug == teamSlug.Trim())
-            .Select(teamDetails => GetFullMappedDetailsViewModel(teamDetails))
-            .SingleOrDefaultAsync();
-
-        return View(viewModel);
-    }
-
-    private static TeamDetailsViewModel GetFullMappedDetailsViewModel(Team teamDetails)
-    {
-        var viewModel = new TeamDetailsViewModel
+        catch (ArgumentNullException)
         {
-            Name = teamDetails.Name,
-            Slug = teamDetails.Slug,
-            Description = teamDetails.Description,
-            ProfileImageUrl = teamDetails.ProfileImageUrl,
-            Facebook = teamDetails.Facebook,
-            Youtube = teamDetails.Youtube,
-            Instagram = teamDetails.Instagram,
-            Website = teamDetails.Website,
-            GamesWon = [],
-            GamesHosted = [],
-            MediaFiles = []
-        };
-
-        if (teamDetails.WonYears != null)
-        {
-            foreach (var year in teamDetails.WonYears)
-            {
-                viewModel.GamesWon.Add(new ParentGameDetailsViewModel
-                {
-                    Id = year.Id,
-                    Title = year.Title,
-                    Year = year.Year
-                });
-            }
+            return RedirectToAction("TeamList");
         }
-
-        if (teamDetails.HostedYears != null)
+        catch (NotFoundException)
         {
-            foreach (var year in teamDetails.HostedYears)
-            {
-                viewModel.GamesHosted.Add(new ParentGameDetailsViewModel
-                {
-                    Id = year.Id,
-                    Title = year.Title,
-                    Year = year.Year
-                });
-            }
+            return RedirectToAction("TeamList");
         }
-
-        if (teamDetails.MediaFiles != null)
-        {
-            foreach (var teamMedia in teamDetails.MediaFiles)
-            {
-                viewModel.MediaFiles.Add(new MediaFileViewModel
-                {
-                    Id = teamMedia.MediaFile.Id,
-                    FileName = Path.GetFileName(teamMedia.MediaFile.Path),
-                    Path = teamMedia.MediaFile.Path
-                });
-            }
-        }
-
-        return viewModel;
-    }
-
-    private static TeamCreateOrEditViewModel GetMappedCreateOrEditViewModel(Team teamDetails)
-    {
-        var viewModel = new TeamCreateOrEditViewModel
-        {
-            Name = teamDetails.Name,
-            Description = teamDetails.Description,
-            ProfileImageUrl = teamDetails.ProfileImageUrl,
-            Facebook = teamDetails.Facebook,
-            Youtube = teamDetails.Youtube,
-            Instagram = teamDetails.Instagram,
-            Website = teamDetails.Website
-        };
-
-        return viewModel;
     }
 
     private async Task PopulateUpdateManagerViewModel(TeamManagerEditViewModel viewModel)

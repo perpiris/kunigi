@@ -1,4 +1,4 @@
-﻿@model TeamCreateOrEditViewModel
+﻿@model TeamCreateViewModel
 
 @{
     ViewData["Title"] = "Δημιουργία νέας ομάδας";
@@ -7,15 +7,17 @@
 <h2 class="mb-4 text-center">@ViewData["Title"]</h2>
 
 <div class="form-container">
-    @using (Html.BeginForm("CreateTeam", "Team", FormMethod.Post))
-    {
+    <form asp-action="CreateTeam" asp-controller="Team" method="post">
         <div class="form-group mb-4">
             <label asp-for="Name"></label>
-            <input asp-for="Name" class="form-control @(ViewData.ModelState["Name"] != null ? "is-invalid" : "")"/>
+            <input asp-for="Name" class="form-control" maxlength="255"/>
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
-        
         <button type="submit" class="btn btn-primary">Αποθήκευση</button>
         <button class="btn btn-secondary" id="previous-page-button">Πίσω</button>
-    }
+    </form>
 </div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

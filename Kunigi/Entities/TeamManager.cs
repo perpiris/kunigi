@@ -2,7 +2,7 @@
 
 public class TeamManager
 {
-    public int Id { get; set; }
+    public int TeamManagerId { get; set; }
 
     public int TeamId { get; set; }
 

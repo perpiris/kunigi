@@ -9,6 +9,8 @@ public class ParentGameDetailsViewModel
     public short Order { get; set; }
     
     public string Title { get; set; }
+
+    public string Description { get; set; }
     
     public string WinnerSlug { get; set; }
 
@@ -26,4 +28,6 @@ public class ParentGameDetailsViewModel
     {
         return $"{Title} ({Year})";
     }
+    
+    public List<MediaFileViewModel> MediaFiles { get; set; } = [];
 }
