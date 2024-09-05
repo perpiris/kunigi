@@ -2,7 +2,7 @@
 
 public class ParentGameMedia
 {
-    public int Id { get; set; }
+    public int ParentGameMediaId { get; set; }
     
     public int ParentGameId { get; set; }
     

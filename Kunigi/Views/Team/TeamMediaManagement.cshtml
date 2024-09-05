@@ -38,52 +38,55 @@
     ViewData["Title"] = "Διαχείριση Υλικού";
 }
 
-<div class="container">
-    <div class="d-flex flex-wrap align-items-center mb-4">
-        <h2 class="mb-0 me-3 flex-grow-1">@ViewData["Title"]</h2>
-        <button class="btn btn-secondary" id="previous-page-button">Πίσω</button>
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a asp-controller="Home" asp-action="Dashboard">Διαχείριση</a>
+    </li>
+    <li class="breadcrumb-item">
+        <a asp-controller="Team" asp-action="TeamActions" asp-route-teamSlug="@Model.TeamSlug">@Model.Name</a>
+    </li>
+    <li class="breadcrumb-item active">Υλικό</li>
+</ol>
+
+<div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
+
+    <div class="col">
+        <div class="card h-100 upload-card" data-bs-toggle="modal" data-bs-target="#uploadModal">
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <i class="bi bi-plus-circle" style="font-size: 1.5rem;"></i>
+            </div>
+            <div class="card-footer text-center p-1">
+                <small class="text-muted">Upload</small>
+            </div>
+        </div>
     </div>
 
-    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
-
+    @foreach (var mediaFile in Model.MediaFiles)
+    {
         <div class="col">
-            <div class="card h-100 upload-card" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                <div class="card-body d-flex align-items-center justify-content-center">
-                    <i class="bi bi-plus-circle" style="font-size: 1.5rem;"></i>
+            <div class="card h-100">
+                <div class="card-body p-2">
+                    @if (IsVideo(mediaFile.FileName))
+                    {
+                        <div class="video-thumbnail" data-bs-toggle="modal" data-bs-target="#mediaPreviewModal" data-media-type="video" data-media-src="/@mediaFile.Path">
+                            <img src="~/@mediaFile.Path" class="card-img-top mb-2" alt="@mediaFile.FileName">
+                            <i class="bi bi-play-circle-fill play-icon"></i>
+                        </div>
+                    }
+                    else
+                    {
+                        <img src="~/@Url.Content(mediaFile.Path)" class="card-img-top mb-2" alt="@mediaFile.FileName" data-bs-toggle="modal" data-bs-target="#mediaPreviewModal" data-media-type="image" data-media-src="/@mediaFile.FileName">
+                    }
+                    <h6 class="card-title mb-0 text-truncate" title="@mediaFile.FileName">@mediaFile.FileName</h6>
                 </div>
-                <div class="card-footer text-center p-1">
-                    <small class="text-muted">Upload</small>
+                <div class="card-footer p-1">
+                    <form asp-action="DeleteTeamMedia" asp-route-teamSlug="@Model.TeamSlug" asp-route-mediaId="@mediaFile.Id" method="post">
+                        <button type="submit" class="btn btn-sm btn-danger w-100" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">Διαγραφή</button>
+                    </form>
                 </div>
             </div>
         </div>
-
-        @foreach (var mediaFile in Model.MediaFiles)
-        {
-            <div class="col">
-                <div class="card h-100">
-                    <div class="card-body p-2">
-                        @if (IsVideo(mediaFile.FileName))
-                        {
-                            <div class="video-thumbnail" data-bs-toggle="modal" data-bs-target="#mediaPreviewModal" data-media-type="video" data-media-src="/@mediaFile.Path">
-                                <img src="~/@mediaFile.Path" class="card-img-top mb-2" alt="@mediaFile.FileName">
-                                <i class="bi bi-play-circle-fill play-icon"></i>
-                            </div>
-                        }
-                        else
-                        {
-                            <img src="~/@Url.Content(mediaFile.Path)" class="card-img-top mb-2" alt="@mediaFile.FileName" data-bs-toggle="modal" data-bs-target="#mediaPreviewModal" data-media-type="image" data-media-src="/@mediaFile.FileName">
-                        }
-                        <h6 class="card-title mb-0 text-truncate" title="@mediaFile.FileName">@mediaFile.FileName</h6>
-                    </div>
-                    <div class="card-footer p-1">
-                        <form asp-action="DeleteTeamMedia" asp-route-teamSlug="@Model.TeamSlug" asp-route-mediaId="@mediaFile.Id" method="post">
-                            <button type="submit" class="btn btn-sm btn-danger w-100" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">Διαγραφή</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
+    }
 </div>
 
 <div class="modal" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">

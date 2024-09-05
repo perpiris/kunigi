@@ -2,8 +2,6 @@
 
 public class ParentGameDetailsViewModel
 {
-    public int Id { get; set; }
-    
     public short Year { get; set; }
 
     public short Order { get; set; }
@@ -11,6 +9,8 @@ public class ParentGameDetailsViewModel
     public string Title { get; set; }
 
     public string Description { get; set; }
+    
+    public string Slug { get; set; }
     
     public string WinnerSlug { get; set; }
 
@@ -23,11 +23,6 @@ public class ParentGameDetailsViewModel
     public string ProfileImageUrl { get; set; }
     
     public List<GameDetailsViewModel> GameList { get; set; }
-    
-    public string GetFullTitle()
-    {
-        return $"{Title} ({Year})";
-    }
     
     public List<MediaFileViewModel> MediaFiles { get; set; } = [];
 }

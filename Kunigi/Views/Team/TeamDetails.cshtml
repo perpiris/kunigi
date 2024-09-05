@@ -115,7 +115,7 @@
                                                 @foreach (var game in Model.GamesWon)
                                                 {
                                                     <li>
-                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@game.GetFullTitle()</a>
+                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@GetGameFullTitle(game)</a>
                                                     </li>
                                                 }
                                             </ul>
@@ -138,7 +138,7 @@
                                                 @foreach (var game in Model.GamesHosted)
                                                 {
                                                     <li>
-                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@game.GetFullTitle()</a>
+                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@GetGameFullTitle(game)</a>
                                                     </li>
                                                 }
                                             </ul>
@@ -234,6 +234,11 @@
     {
         var videoExtensions = new[] { ".mp4", ".webm", ".ogg" };
         return videoExtensions.Any(ext => path.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
+
+    static string GetGameFullTitle(ParentGameDetailsViewModel parentGameDetailsViewModel)
+    {
+        return $"{parentGameDetailsViewModel.Title} ({parentGameDetailsViewModel.Year})";
     }
 
 }

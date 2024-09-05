@@ -10,9 +10,10 @@
     <form asp-action="CreateTeam" asp-controller="Team" method="post">
         <div class="form-group mb-4">
             <label asp-for="Name"></label>
-            <input asp-for="Name" class="form-control" maxlength="255"/>
+            <input asp-for="Name" class="form-control mb-2" maxlength="255"/>
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
+        
         <button type="submit" class="btn btn-primary">Αποθήκευση</button>
         <button class="btn btn-secondary" id="previous-page-button">Πίσω</button>
     </form>

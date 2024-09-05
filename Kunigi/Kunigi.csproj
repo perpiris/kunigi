@@ -16,6 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="CustomAttributes\" />
       <Folder Include="wwwroot\media\" />
     </ItemGroup>
 

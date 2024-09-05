@@ -4,7 +4,7 @@ namespace Kunigi.Entities;
 
 public class ParentGame
 {
-    public int Id { get; set; }
+    public int ParentGameId { get; set; }
 
     public short Year { get; set; }
 
@@ -19,10 +19,10 @@ public class ParentGame
     public string Slug { get; set; }
     
     [Column(TypeName = "varchar(255)")]
-    public string ProfileImageUrl { get; set; }
+    public string ParentGameProfileImagePath { get; set; }
     
     [Column(TypeName = "varchar(255)")]
-    public string ParentGameFolderUrl { get; set; }
+    public string ParentGameFolderPath { get; set; }
     
     public int HostId { get; set; }
     

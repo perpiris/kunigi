@@ -26,14 +26,14 @@ public class Team
     [Column(TypeName = "varchar(255)")]
     public string Instagram { get; set; }
     
-    public string ProfileImageUrl { get; set; }
+    public string TeamProfileImagePath { get; set; }
     
     [Column(TypeName = "varchar(255)")]
-    public string TeamFolderUrl { get; set; }
+    public string TeamFolderPath { get; set; }
     
-    public virtual ICollection<ParentGame> HostedYears { get; set; }
+    public virtual ICollection<ParentGame> HostedGames { get; set; }
     
-    public virtual ICollection<ParentGame> WonYears { get; set; }
+    public virtual ICollection<ParentGame> WonGames { get; set; }
     
     public virtual ICollection<AppUser> Managers { get; set; }
     

@@ -11,7 +11,7 @@ public interface ITeamService
     
     Task CreateTeam(TeamCreateViewModel team);
 
-    Task<TeamEditViewModel> PrepareEditViewModel(string teamSlug, ClaimsPrincipal user);
+    Task<TeamEditViewModel> PrepareEditTeamViewModel(string teamSlug, ClaimsPrincipal user);
     
     Task EditTeam(string teamSlug, TeamEditViewModel viewModel, IFormFile profileImage, ClaimsPrincipal user);
     

@@ -1,4 +1,4 @@
-﻿@model ParentGameCreateOrEditViewModel
+﻿@model ParentGameEditViewModel
 
 @{
     ViewData["Title"] = Model.Title;
@@ -25,8 +25,12 @@
                 <input type="file" name="profileImage" class="form-control" accept="image/png, image/jpeg"/>
             </div>
         </div>
-        
+
         <button type="submit" class="btn btn-primary">Αποθήκευση</button>
         <button class="btn btn-secondary" id="previous-page-button">Πίσω</button>
     }
 </div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

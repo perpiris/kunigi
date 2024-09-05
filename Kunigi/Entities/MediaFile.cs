@@ -4,7 +4,7 @@ namespace Kunigi.Entities;
 
 public class MediaFile
 {
-    public int Id { get; set; }
+    public int MediaFileId { get; set; }
     
     [Column(TypeName = "varchar(255)")]
     public string Path { get; set; }

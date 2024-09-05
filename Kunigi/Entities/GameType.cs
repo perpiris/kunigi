@@ -4,7 +4,7 @@ namespace Kunigi.Entities;
 
 public class GameType
 {
-    public int Id { get; set; }
+    public int GameTypeId { get; set; }
 
     [Column(TypeName = "varchar(255)")]
     public string Description { get; set; }

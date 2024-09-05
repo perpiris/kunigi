@@ -5,10 +5,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Kunigi.ViewModels.Game;
 
-public class ParentGameCreateOrEditViewModel
+public class ParentGameCreateViewModel
 {
-    public int Id { get; set; }
-    
     [DisplayName("Έτος διεξαγωγής")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
     public short Year { get; set; }
@@ -25,23 +23,12 @@ public class ParentGameCreateOrEditViewModel
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
     public int WinnerId { get; set; }
     
-    [DisplayName("Τίτλος")]
-    [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
-    public string Title { get; set; }
-
-    [DisplayName("Περιγραφή")]
-    [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
-    public string Description { get; set; }
-    
-    [DisplayName("Αφίσα")]
-    public string ProfileImageUrl { get; set; }
+    [DisplayName("Επιλογές")]
+    public List<int> SelectedGameTypeIds { get; set; } = [];
     
     public SelectList HostSelectList { get; set; }
     
     public SelectList WinnerSelectList { get; set; }
-    
-    [DisplayName("Επιλογές")]
-    public List<int> SelectedGameTypeIds { get; set; } = [];
     
     public List<GameType> GameTypes { get; set; } = [];
 }

@@ -23,7 +23,7 @@ public class TeamService : ITeamService
     public async Task<List<TeamDetailsViewModel>> GetAllTeams()
     {
         var allTeams = await _context.Teams.ToListAsync();
-        return allTeams.Select(team => team.ToBaseInfoViewModel()).ToList();
+        return allTeams.Select(x => x.ToBaseTeamDetailsViewModel()).ToList();
     }
 
     public async Task<TeamDetailsViewModel> GetTeamDetails(string teamSlug)
@@ -35,8 +35,8 @@ public class TeamService : ITeamService
 
         teamSlug = teamSlug.Trim();
         var teamDetails = await _context.Teams
-            .Include(x => x.HostedYears.OrderBy(y => y.Year))
-            .Include(x => x.WonYears.OrderBy(y => y.Year))
+            .Include(x => x.HostedGames.OrderBy(y => y.Year))
+            .Include(x => x.WonGames.OrderBy(y => y.Year))
             .Include(x => x.MediaFiles)
             .ThenInclude(x => x.MediaFile)
             .FirstOrDefaultAsync(x => x.Slug == teamSlug);
@@ -46,7 +46,7 @@ public class TeamService : ITeamService
             throw new NotFoundException();
         }
 
-        return teamDetails.ToFullInfoViewModel();
+        return teamDetails.ToFullTeamDetailsViewModel();
     }
 
     public async Task CreateTeam(TeamCreateViewModel teamData)
@@ -59,7 +59,7 @@ public class TeamService : ITeamService
         };
 
         var teamFolderPath = _mediaService.CreateFolder($"teams/{slug}");
-        newTeam.TeamFolderUrl = teamFolderPath;
+        newTeam.TeamFolderPath = teamFolderPath;
 
         _context.Teams.Add(newTeam);
         await _context.SaveChangesAsync();
@@ -78,17 +78,17 @@ public class TeamService : ITeamService
         if (profileImage != null)
         {
             var profileImagePath = await _mediaService.SaveMediaFile(profileImage, $"teams/{teamDetails.Slug}", true);
-            teamDetails.ProfileImageUrl = profileImagePath;
+            teamDetails.TeamProfileImagePath = profileImagePath;
         }
 
         _context.Teams.Update(teamDetails);
         await _context.SaveChangesAsync();
     }
 
-    public async Task<TeamEditViewModel> PrepareEditViewModel(string teamSlug, ClaimsPrincipal user)
+    public async Task<TeamEditViewModel> PrepareEditTeamViewModel(string teamSlug, ClaimsPrincipal user)
     {
         var teamDetails = await CheckTeamAndOwneship(teamSlug, user);
-        return teamDetails.ToEditViewModel();
+        return teamDetails.ToTeamEditViewModel();
     }
 
     public async Task<TeamMediaViewModel> GetTeamMedia(string teamSlug, ClaimsPrincipal user)
@@ -98,7 +98,7 @@ public class TeamService : ITeamService
             .Include(x => x.MediaFile)
             .Where(x => x.TeamId == teamDetails.TeamId).ToListAsync();
 
-        var viewModel = TeamMappings.ToMediaViewModel(teamSlug, teamMedia);
+        var viewModel = TeamMappings.ToTeamMediaViewModel(teamDetails, teamMedia);
         return viewModel;
     }
 

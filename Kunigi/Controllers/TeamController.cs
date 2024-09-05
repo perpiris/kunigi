@@ -55,7 +55,7 @@ public class TeamController : Controller
     [HttpPost("create-team")]
     public async Task<IActionResult> CreateTeam(TeamCreateViewModel viewModel)
     {
-        if (!ModelState.IsValid) return View();
+        if (!ModelState.IsValid) return View(viewModel);
 
         try
         {
@@ -76,7 +76,7 @@ public class TeamController : Controller
     {
         try
         {
-            var viewModel = await _teamService.PrepareEditViewModel(teamSlug, User);
+            var viewModel = await _teamService.PrepareEditTeamViewModel(teamSlug, User);
             return View(viewModel);
         }
         catch (UnauthorizedOperationException)
@@ -85,10 +85,10 @@ public class TeamController : Controller
         }
         catch (Exception)
         {
-            return RedirectToAction("TeamList");
+            return RedirectToAction("Dashboard", "Home");
         }
 
-        return RedirectToAction("TeamList");
+        return RedirectToAction("Dashboard", "Home");
     }
 
     [Authorize(Roles = "Admin,Manager")]
@@ -98,6 +98,7 @@ public class TeamController : Controller
         try
         {
             await _teamService.EditTeam(teamSlug, viewModel, profileImage, User);
+            TempData["success"] = "Η ομάδα επεξεργάστηκε επιτυχώς.";
             return RedirectToAction("TeamActions", new { teamSlug });
         }
         catch (UnauthorizedOperationException)
@@ -106,10 +107,10 @@ public class TeamController : Controller
         }
         catch (Exception)
         {
-            return RedirectToAction("TeamList");
+            return RedirectToAction("Dashboard", "Home");
         }
 
-        return RedirectToAction("TeamList");
+        return RedirectToAction("Dashboard", "Home");
     }
 
 
@@ -127,7 +128,7 @@ public class TeamController : Controller
     {
         if (string.IsNullOrEmpty(teamSlug))
         {
-            return RedirectToAction("TeamList");
+            return RedirectToAction("Dashboard", "Home");
         }
 
         var teamToUpdate = await _context.Teams
@@ -137,7 +138,7 @@ public class TeamController : Controller
         if (teamToUpdate == null)
         {
             TempData["error"] = "Η ομάδα δεν υπάρχει";
-            return RedirectToAction("TeamManagement");
+            return RedirectToAction("Dashboard", "Home");
         }
 
         var users = await _context.AppUsers.ToListAsync();
@@ -190,7 +191,7 @@ public class TeamController : Controller
         if (teamToUpdate == null)
         {
             TempData["error"] = "Η ομάδα δεν υπάρχει";
-            return RedirectToAction("TeamManagement");
+            return RedirectToAction("Dashboard", "Home");
         }
 
         var selectedManager = await _context.AppUsers
@@ -245,7 +246,7 @@ public class TeamController : Controller
     {
         if (string.IsNullOrEmpty(teamSlug))
         {
-            return RedirectToAction("TeamList");
+            return RedirectToAction("Dashboard", "Home");
         }
 
         var teamToUpdate = await _context.Teams
@@ -255,7 +256,7 @@ public class TeamController : Controller
         if (teamToUpdate == null)
         {
             TempData["error"] = "Η ομάδα δεν υπάρχει";
-            return RedirectToAction("TeamManagement");
+            return RedirectToAction("Dashboard", "Home");
         }
 
         var managerToRemove = teamToUpdate.Managers.SingleOrDefault(m => m.Id == managerId);
@@ -298,10 +299,10 @@ public class TeamController : Controller
         }
         catch (Exception)
         {
-            return RedirectToAction("TeamList");
+            return RedirectToAction("TeamMediaManagement", new { teamSlug });
         }
         
-        return RedirectToAction("TeamList");
+        return RedirectToAction("TeamMediaManagement", new { teamSlug });
     }
 
     [Authorize(Roles = "Admin,Manager")]
@@ -359,11 +360,11 @@ public class TeamController : Controller
         }
         catch (ArgumentNullException)
         {
-            return RedirectToAction("TeamList");
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (NotFoundException)
         {
-            return RedirectToAction("TeamList");
+            return RedirectToAction("Dashboard", "Home");
         }
     }
 

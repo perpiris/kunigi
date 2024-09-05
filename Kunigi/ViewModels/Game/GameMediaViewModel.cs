@@ -1,10 +1,8 @@
-﻿namespace Kunigi.ViewModels.Team;
+﻿namespace Kunigi.ViewModels.Game;
 
-public class TeamMediaViewModel
+public class GameMediaViewModel
 {
-    public string TeamSlug { get; set; }
-    
-    public string Name { get; set; }
+    public short Year { get; set; }
     
     public List<MediaFileViewModel> MediaFiles { get; set; } = [];
     

@@ -30,7 +30,7 @@ public class PuzzleController : Controller
             .Include(g => g.Puzzles)
             .ThenInclude(p => p.MediaFiles)
             .ThenInclude(pm => pm.MediaFile).Include(game => game.GameType)
-            .FirstOrDefaultAsync(g => g.Id == gameId);
+            .FirstOrDefaultAsync(g => g.GameId == gameId);
 
         if (game == null)
         {
@@ -45,7 +45,7 @@ public class PuzzleController : Controller
             GameType = game.GameType.Description,
             Puzzles = game.Puzzles.Select(p => new PuzzleDetailsViewModel
             {
-                Id = p.Id,
+                Id = p.GameId,
                 Question = p.Question,
                 Answer = p.Answer,
                 Type = p.Type.ToString(),
@@ -140,26 +140,28 @@ public class PuzzleController : Controller
     private async Task<PuzzleMedia> CreatePuzzleMedia(Game game, IFormFile mediaFile,
         PuzzleMediaType mediaType)
     {
-        var basePath = _configuration["ImageStoragePath"];
-        var gameFolderPath = CrossPlatformPathUtility.CombineAndNormalize(basePath, "games",
-            game.ParentGame.Slug, game.GameType.Slug);
-        Directory.CreateDirectory(gameFolderPath);
+        // var basePath = _configuration["ImageStoragePath"];
+        // var gameFolderPath = CrossPlatformPathUtility.CombineAndNormalize(basePath, "games",
+        //     game.ParentGame.Slug, game.GameType.Slug);
+        // Directory.CreateDirectory(gameFolderPath);
+        //
+        // var fileName = FileNameGenerator.GetUniqueFileName(mediaFile.FileName);
+        // var fullFilePath = CrossPlatformPathUtility.CombineAndNormalize(gameFolderPath, fileName);
+        //
+        // await using (var stream = new FileStream(fullFilePath, FileMode.Create))
+        // {
+        //     await mediaFile.CopyToAsync(stream);
+        // }
+        //
+        // return new PuzzleMedia
+        // {
+        //     MediaFile = new MediaFile
+        //     {
+        //         Path = CrossPlatformPathUtility.GetRelativePath(basePath, fullFilePath)
+        //     },
+        //     MediaType = mediaType
+        // };
 
-        var fileName = FileNameGenerator.GetUniqueFileName(mediaFile.FileName);
-        var fullFilePath = CrossPlatformPathUtility.CombineAndNormalize(gameFolderPath, fileName);
-
-        await using (var stream = new FileStream(fullFilePath, FileMode.Create))
-        {
-            await mediaFile.CopyToAsync(stream);
-        }
-
-        return new PuzzleMedia
-        {
-            MediaFile = new MediaFile
-            {
-                Path = CrossPlatformPathUtility.GetRelativePath(basePath, fullFilePath)
-            },
-            MediaType = mediaType
-        };
+        return new PuzzleMedia();
     }
 }

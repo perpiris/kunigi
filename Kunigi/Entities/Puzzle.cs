@@ -4,7 +4,7 @@ namespace Kunigi.Entities;
 
 public class Puzzle
 {
-    public int Id { get; set; }
+    public int PuzzleId { get; set; }
     
     public string Question { get; set; }
     

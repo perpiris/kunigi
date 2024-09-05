@@ -4,7 +4,7 @@ namespace Kunigi.Entities;
 
 public class PuzzleMedia
 {
-    public int Id { get; set; }
+    public int PuzzleMediaId { get; set; }
     
     public int PuzzleId { get; set; }
     

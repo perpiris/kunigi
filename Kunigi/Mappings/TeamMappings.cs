@@ -7,51 +7,49 @@ namespace Kunigi.Mappings;
 
 public static class TeamMappings
 {
-    public static TeamDetailsViewModel ToBaseInfoViewModel(this Team teamDetails)
+    public static TeamDetailsViewModel ToBaseTeamDetailsViewModel(this Team teamDetails)
     {
         var viewModel = new TeamDetailsViewModel
         {
             Name = teamDetails.Name,
             Slug = teamDetails.Slug,
             Description = teamDetails.Description,
-            ProfileImageUrl = teamDetails.ProfileImageUrl,
+            ProfileImageUrl = teamDetails.TeamProfileImagePath,
             Facebook = teamDetails.Facebook,
             Youtube = teamDetails.Youtube,
             Instagram = teamDetails.Instagram,
-            Website = teamDetails.Website,
+            Website = teamDetails.Website
         };
 
         return viewModel;
     }
 
-    public static TeamDetailsViewModel ToFullInfoViewModel(this Team teamDetails)
+    public static TeamDetailsViewModel ToFullTeamDetailsViewModel(this Team teamDetails)
     {
-        var viewModel = teamDetails.ToBaseInfoViewModel();
+        var viewModel = teamDetails.ToBaseTeamDetailsViewModel();
 
         viewModel.GamesWon = [];
         viewModel.GamesHosted = [];
         viewModel.MediaFiles = [];
 
-        if (teamDetails.WonYears != null)
+        if (teamDetails.WonGames != null)
         {
-            foreach (var year in teamDetails.WonYears)
+            foreach (var year in teamDetails.WonGames)
             {
                 viewModel.GamesWon.Add(new ParentGameDetailsViewModel
                 {
-                    Id = year.Id,
                     Title = year.Title,
                     Year = year.Year
                 });
             }
         }
 
-        if (teamDetails.HostedYears != null)
+        if (teamDetails.HostedGames != null)
         {
-            foreach (var year in teamDetails.HostedYears)
+            foreach (var year in teamDetails.HostedGames)
             {
                 viewModel.GamesHosted.Add(new ParentGameDetailsViewModel
                 {
-                    Id = year.Id,
                     Title = year.Title,
                     Year = year.Year
                 });
@@ -64,7 +62,7 @@ public static class TeamMappings
             {
                 viewModel.MediaFiles.Add(new MediaFileViewModel
                 {
-                    Id = teamMedia.MediaFile.Id,
+                    Id = teamMedia.MediaFile.MediaFileId,
                     FileName = Path.GetFileName(teamMedia.MediaFile.Path),
                     Path = teamMedia.MediaFile.Path
                 });
@@ -74,30 +72,31 @@ public static class TeamMappings
         return viewModel;
     }
 
-    public static TeamEditViewModel ToEditViewModel(this Team teamDetails)
+    public static TeamEditViewModel ToTeamEditViewModel(this Team teamDetails)
     {
         var viewModel = new TeamEditViewModel
         {
             Name = teamDetails.Name,
             Description = teamDetails.Description,
-            ProfileImageUrl = teamDetails.ProfileImageUrl,
+            ProfileImageUrl = teamDetails.TeamProfileImagePath,
             Facebook = teamDetails.Facebook,
             Youtube = teamDetails.Youtube,
             Instagram = teamDetails.Instagram,
-            Website = teamDetails.Website,
+            Website = teamDetails.Website
         };
 
         return viewModel;
     }
 
-    public static TeamMediaViewModel ToMediaViewModel(string teamSlug, List<TeamMedia> teamMedia)
+    public static TeamMediaViewModel ToTeamMediaViewModel(Team teamDetails, List<TeamMedia> teamMedia)
     {
         var viewModel = new TeamMediaViewModel
         {
-            TeamSlug = teamSlug,
+            Name = teamDetails.Name,
+            TeamSlug = teamDetails.Slug,
             MediaFiles = teamMedia.Select(x => new MediaFileViewModel
             {
-                Id = x.MediaFile.Id,
+                Id = x.MediaFile.MediaFileId,
                 FileName = Path.GetFileName(x.MediaFile.Path),
                 Path = x.MediaFile.Path
             }).ToList()
