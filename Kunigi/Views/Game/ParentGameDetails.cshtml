@@ -93,23 +93,7 @@
                             }
                             else
                             {
-                                @foreach (var mediaFile in Model.MediaFiles)
-                                {
-                                    <div class="col">
-                                        <div class="card h-100">
-                                            @if (IsImage(mediaFile.Path))
-                                            {
-                                                <img src="@Url.Content(mediaFile.Path)" class="card-img-top img-fluid" alt="@mediaFile.FileName" style="height: 200px; object-fit: cover;" data-bs-toggle="modal" data-bs-target="#mediaModal" data-media-src="@mediaFile.Path" data-media-type="image">
-                                            }
-                                            else if (IsVideo(mediaFile.Path))
-                                            {
-                                                <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;" data-bs-toggle="modal" data-bs-target="#mediaModal" data-media-src="@mediaFile.Path" data-media-type="video">
-                                                    <i class="bi bi-play-circle" style="font-size: 3rem;"></i>
-                                                </div>
-                                            }
-                                        </div>
-                                    </div>
-                                }
+                                @await Html.PartialAsync("_PhotoGallery", Model.MediaFiles)
                             }
                         </div>
                     </div>
@@ -118,42 +102,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            let mediaModal = document.getElementById('mediaModal');
-            let mediaContainer = document.getElementById('mediaContainer');
-
-            mediaModal.addEventListener('show.bs.modal', function (event) {
-                let button = event.relatedTarget;
-                let mediaType = button.getAttribute('data-media-type');
-                let mediaSrc = button.getAttribute('data-media-src');
-                
-                mediaContainer.innerHTML = '';
-                
-                if (mediaType === 'image') {
-                    mediaContainer.innerHTML = '<img src="' + mediaSrc + '" class="img-fluid" alt="Media Preview">';
-                } else if (mediaType === 'video') {
-                    mediaContainer.innerHTML = '<video src="' + mediaSrc + '" controls class="img-fluid">Your browser does not support the video tag.</video>';
-                }
-            });
-        });
-    </script>
-}
-
-@functions {
-
-    static bool IsImage(string path)
-    {
-        var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
-        return imageExtensions.Any(ext => path.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
-    }
-
-    static bool IsVideo(string path)
-    {
-        var videoExtensions = new[] { ".mp4", ".webm", ".ogg" };
-        return videoExtensions.Any(ext => path.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
-    }
-
-}
