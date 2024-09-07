@@ -4,16 +4,24 @@
     ViewData["Title"] = $"Επεξεργασία {Model.Name}";
 }
 
-<h2 class="mb-4 text-center">@ViewData["Title"]</h2>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item">
+        <a asp-controller="Home" asp-action="Dashboard">Διαχείριση</a>
+    </li>
+    <li class="breadcrumb-item">
+        <a asp-controller="Team" asp-action="TeamActions" asp-route-teamSlug="@Model.Slug">@Model.Name</a>
+    </li>
+    <li class="breadcrumb-item active">Επεξεργασία</li>
+</ol>
 
 <div class="form-container-large">
     @using (Html.BeginForm("EditTeam", "Team", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         <div class="row">
             <div class="col-12 col-md-6 mb-4 form-group">
-                <label asp-for="Name" class="form-label mt-4"></label>
-                <input asp-for="Name" class="form-control" readonly="readonly"/>
-                <span asp-validation-for="Name" class="text-danger"></span>
+                <label asp-for="Slug" class="form-label mt-4"></label>
+                <input asp-for="Slug" class="form-control"/>
+                <span asp-validation-for="Slug" class="text-danger"></span>
             </div>
             <div class="col-12 col-md-6 mb-4 form-group">
                 <label asp-for="ProfileImageUrl" class="form-label mt-4"></label>

@@ -4,11 +4,11 @@
     ViewData["Title"] = Model.Title;
 }
 
-<ol class="breadcrumb">
+<ol class="breadcrumb mb-4">
     <li class="breadcrumb-item">
         <a asp-controller="Game" asp-action="ParentGameList">Παιχνίδια</a>
     </li>
-    <li class="breadcrumb-item active">@Model.Year</li>
+    <li class="breadcrumb-item active">@($"{Model.Title} ({Model.Year})")</li>
 </ol>
 
 <div class="container">
@@ -49,13 +49,13 @@
                 </div>
                 <div class="col-12">
                     <div class="card widget-card border-light shadow-sm">
-                        <div class="card-header text-bg-primary">Παιχνίδια</div>
+                        <div class="card-header text-bg-primary">Γρίφοι</div>
                         <div class="card-body">
                             <ul class="list-group list-group-flush">
                                 @foreach (var game in Model.GameList)
                                 {
                                     <li class="list-group-item">
-                                        <a asp-controller="Game" asp-action="GameDetails" asp-route-gameYear="@game.Year" asp-route-gameTypeSlug="@game.Slug">@game.Type</a>
+                                        <a asp-controller="Game" asp-action="GamePuzzleList" asp-route-gameYear="@game.Year" asp-route-gameTypeSlug="@game.TypeSlug">@game.Type</a>
                                     </li>
                                 }
                             </ul>
@@ -67,13 +67,6 @@
         <div class="col-12 col-lg-8 col-xl-9">
             <div class="card widget-card border-light shadow-sm">
                 <div class="card-body p-4">
-                    <div class="container">
-                        <div class="row justify-content-md-center">
-                            <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
-                                <h2 class="mb-4 text-center">@Model.Title</h2>
-                            </div>
-                        </div>
-                    </div>
                     <ul class="nav nav-tabs" id="profileTab" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-tab-pane" type="button" role="tab" aria-controls="overview-tab-pane" aria-selected="true">Περιγραφή</button>
@@ -84,7 +77,14 @@
                     </ul>
                     <div class="tab-content pt-4" id="profileTabContent">
                         <div class="tab-pane show active" id="overview-tab-pane" role="tabpanel" aria-labelledby="overview-tab" tabindex="0">
-                            <p class="lead mb-3">@Model.Description</p>
+                            <p class="lead mb-4">@Model.Description</p>
+                            
+                            @foreach (var game in Model.GameList)
+                            {
+                                <h4 class="mb-4 mt-4">@game.Type</h4>
+                                <p class="lead mb-3">@game.Description</p>
+                            }
+                            
                         </div>
                         <div class="tab-pane" id="photos-tab-pane" role="tabpanel" aria-labelledby="photos-tab" tabindex="0">
                             @if (!Model.MediaFiles.Any())

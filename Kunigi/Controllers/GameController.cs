@@ -1,7 +1,4 @@
-﻿using System.Security.Claims;
-using Kunigi.CustomAttributes;
-using Kunigi.Entities;
-using Kunigi.Exceptions;
+﻿using Kunigi.Exceptions;
 using Kunigi.Services;
 using Kunigi.ViewModels.Game;
 using Microsoft.AspNetCore.Authorization;
@@ -40,50 +37,18 @@ public class GameController : Controller
         }
     }
 
-    [HttpGet("{gameYear}/{gameTypeSlug}")]
-    public async Task<IActionResult> GameDetails(string gameYear, string gameTypeSlug)
+    [HttpGet("{gameYear}/{gameTypeSlug}/puzzle-list")]
+    public async Task<IActionResult> GamePuzzleList(short gameYear, string gameTypeSlug)
     {
-        // var game = await _context.Games
-        //     .Include(g => g.ParentGame)
-        //     .Include(g => g.GameType)
-        //     .Include(g => g.Puzzles)
-        //     .ThenInclude(p => p.MediaFiles)
-        //     .ThenInclude(pm => pm.MediaFile)
-        //     .FirstOrDefaultAsync(g =>
-        //         g.ParentGame.Year.ToString() == gameYear && g.GameType.Slug == gameTypeSlug.Trim());
-        //
-        // if (game == null)
-        // {
-        //     TempData["error"] = "Το παιχνίδι δεν βρέθηκε.";
-        //     return RedirectToAction("ParentGameDetails", "Game");
-        // }
-        //
-        // var viewModel = new GamePuzzlesViewModel
-        // {
-        //     Id = game.Id,
-        //     Type = game.GameType.Description,
-        //     Title = game.ParentGame.Title,
-        //     Year = game.ParentGame.Year,
-        //     Description = game.Description,
-        //     Puzzles = game.Puzzles.Select(p => new PuzzleDetailsViewModel
-        //     {
-        //         Id = p.Id,
-        //         Question = p.Question,
-        //         Answer = p.Answer,
-        //         Type = p.Type.ToString(),
-        //         Order = p.Order,
-        //         QuestionMedia = p.MediaFiles
-        //             .Where(m => m.MediaType == PuzzleMediaType.Question)
-        //             .Select(m => m.MediaFile.Path)
-        //             .ToList(),
-        //         AnswerMedia = p.MediaFiles
-        //             .Where(m => m.MediaType == PuzzleMediaType.Answer)
-        //             .Select(m => m.MediaFile.Path)
-        //             .ToList()
-        //     }).OrderBy(p => p.Order).ToList()
-        // };
-
-        return View();
+        try
+        {
+            var viewModel = await _gameService.GetGamePuzzleList(gameYear, gameTypeSlug);
+            return View(viewModel);
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("ParentGameList", "Game");
+        }
     }
 
 
@@ -246,32 +211,5 @@ public class GameController : Controller
         {
             return RedirectToAction("ParentGameList");
         }
-    }
-
-    private static GameDetailsViewModel GetFullMappedGameDetailsViewModel(
-        Game parentGameDetails)
-    {
-        var viewModel = new GameDetailsViewModel
-        {
-            Id = parentGameDetails.GameId,
-            Title = parentGameDetails.ParentGame.Title,
-            Description = parentGameDetails.Description,
-            Year = parentGameDetails.ParentGame.Year,
-            Type = parentGameDetails.GameType.Description
-        };
-
-        return viewModel;
-    }
-
-    private static ParentGameEditViewModel GetMappedCreateOrEditViewModel(
-        ParentGame parentGameDetails)
-    {
-        var viewModel = new ParentGameEditViewModel()
-        {
-            Title = parentGameDetails.Title,
-            Description = parentGameDetails.Description
-        };
-
-        return viewModel;
     }
 }

@@ -7,15 +7,15 @@
         margin: 0 auto;
     }
 
-    #mediaGallery .card-img-top, 
+    #mediaGallery .card-img-top,
     #mediaGallery .video-thumbnail {
-        height: 100px;
+        height: 200px;
         object-fit: cover;
         cursor: pointer;
         position: relative;
     }
 
-    #mediaGallery .video-thumbnail, 
+    #mediaGallery .video-thumbnail,
     #mediaGallery .play-icon {
         position: absolute;
         top: 50%;
@@ -23,7 +23,7 @@
         transform: translate(-50%, -50%);
         font-size: 2rem;
         color: white;
-        text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     }
 
     #mediaGallery {
@@ -41,7 +41,7 @@
         display: block;
     }
 
-     .nav-button {
+    .nav-button {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
@@ -68,7 +68,7 @@
 
     #mediaGallery .modal-content {
         background-color: #fff;
-        border: 1px solid rgba(0,0,0,.2);
+        border: 1px solid rgba(0, 0, 0, .2);
         border-radius: .3rem;
         outline: 0;
     }
@@ -79,7 +79,7 @@
         height: 100px;
     }
 
-     .close {
+    .close {
         position: absolute;
         right: 20px;
         top: 20px;
@@ -96,18 +96,18 @@
         justify-content: center;
         cursor: pointer;
         border: 2px solid white;
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     }
 
-     .close:hover,
-     .close:focus {
+    .close:hover,
+    .close:focus {
         color: #fff;
         text-decoration: none;
         opacity: 1;
         background: rgba(0, 0, 0, 0.9);
     }
 
-     .close {
+    .close {
         position: absolute;
         right: 15px;
         top: 15px;
@@ -125,20 +125,20 @@
         cursor: pointer;
     }
 
-     .close:hover,
-     .close:focus {
+    .close:hover,
+    .close:focus {
         color: #fff;
         text-decoration: none;
         opacity: 0.75;
     }
 </style>
 
-<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3" id="mediaGallery">
+<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-1" id="mediaGallery">
     @foreach (var mediaFile in Model)
     {
         <div class="col">
             <div class="card h-100">
-                <div class="card-body p-2">
+                <div class="card-body">
                     @if (IsVideo(mediaFile.FileName))
                     {
                         <div class="video-thumbnail" onclick="openMediaPreview('/@mediaFile.Path', 'video')">
@@ -150,7 +150,8 @@
                     }
                     else
                     {
-                        <img src="~/@Url.Content(mediaFile.Path)" class="card-img-top mb-2" alt="@mediaFile.FileName" onclick="openMediaPreview('/@Url.Content(mediaFile.Path)', 'image')">
+                        <img src="~/@Url.Content(mediaFile.Path)" class="card-img-top mb-2" alt="@mediaFile.FileName"
+                             onclick="openMediaPreview('/@Url.Content(mediaFile.Path)', 'image')">
                     }
                 </div>
             </div>
@@ -182,16 +183,16 @@
     document.querySelectorAll(".video-thumbnail, .card-img-top").forEach(item => {
         if (item.classList.contains("video-thumbnail")) {
             const videoSrc = item.querySelector("source").getAttribute("src");
-            mediaItems.push({ src: videoSrc, type: "video" });
+            mediaItems.push({src: videoSrc, type: "video"});
         } else {
             const imgSrc = item.getAttribute("src");
-            mediaItems.push({ src: imgSrc, type: "image" });
+            mediaItems.push({src: imgSrc, type: "image"});
         }
     });
 
     function openMediaPreview(src, type) {
         currentIndex = mediaItems.findIndex(item => item.src === src);
-        updatePreviewModal(type,src);
+        updatePreviewModal(type, src);
     }
 
     function updatePreviewModal(type, src) {
@@ -239,17 +240,17 @@
         document.getElementById('previewVideo').pause();
     });
 
-    document.getElementById('prevButton').addEventListener('click', function() {
+    document.getElementById('prevButton').addEventListener('click', function () {
         document.getElementById('previewVideo').pause();
         currentIndex = (currentIndex - 1 + mediaItems.length) % mediaItems.length;
-        const { type, src } = mediaItems[currentIndex];
+        const {type, src} = mediaItems[currentIndex];
         updatePreviewModal(type, src);
     });
 
-    document.getElementById('nextButton').addEventListener('click', function() {
+    document.getElementById('nextButton').addEventListener('click', function () {
         document.getElementById('previewVideo').pause();
         currentIndex = (currentIndex + 1) % mediaItems.length;
-        const { type, src } = mediaItems[currentIndex];
+        const {type, src} = mediaItems[currentIndex];
         updatePreviewModal(type, src);
     });
 

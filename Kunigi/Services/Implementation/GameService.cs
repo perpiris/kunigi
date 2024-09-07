@@ -13,17 +13,19 @@ public class GameService : IGameService
 {
     private readonly DataContext _context;
     private readonly IMediaService _mediaService;
+    private readonly IPuzzleService _puzzleService;
 
-    public GameService(DataContext context, IMediaService mediaService)
+    public GameService(DataContext context, IMediaService mediaService, IPuzzleService puzzleService)
     {
         _context = context;
         _mediaService = mediaService;
+        _puzzleService = puzzleService;
     }
 
     public async Task<List<ParentGameDetailsViewModel>> GetAllGames()
     {
         var allTeams = await _context.ParentGames.ToListAsync();
-        return allTeams.Select(x => x.ToBaseParentGameDetailsViewModel()).ToList();
+        return allTeams.Select(x => x.ToParentGameDetailsViewModel()).ToList();
     }
 
     public async Task<ParentGameDetailsViewModel> GetParentGameDetails(short gameYear)
@@ -47,7 +49,7 @@ public class GameService : IGameService
             throw new NotFoundException();
         }
 
-        return parentGameDetails.ToFullParentGameDetailsViewModel();
+        return parentGameDetails.ToParentGameDetailsViewModel(true);
     }
 
     public async Task<GameDetailsViewModel> GetGameDetails(short gameYear, string gameTypeSlug)
@@ -67,7 +69,35 @@ public class GameService : IGameService
             .Include(x => x.GameType)
             .FirstOrDefaultAsync(x => x.ParentGame.Year == gameYear && x.GameType.Slug == gameTypeSlug.Trim());
 
-        return gameDetails.ToBaseGameDetailsViewModel();
+        return gameDetails.ToGameDetailsViewModel();
+    }
+
+    public async Task<GamePuzzleDetailsViewModel> GetGamePuzzleList(short gameYear, string gameTypeSlug)
+    {
+        if (gameYear <= default(short))
+        {
+            throw new ArgumentNullException(nameof(gameYear));
+        }
+
+        if (string.IsNullOrEmpty(gameTypeSlug))
+        {
+            throw new ArgumentNullException(nameof(gameTypeSlug));
+        }
+
+        var gameDetails = await _context.Games
+            .Include(x => x.GameType)
+            .Include(x => x.ParentGame)
+            .Include(x => x.PuzzleList)
+            .ThenInclude(x => x.MediaFiles)
+            .ThenInclude(x => x.MediaFile)
+            .FirstOrDefaultAsync(x => x.GameType.Slug == gameTypeSlug && x.ParentGame.Year == gameYear);
+
+        if (gameDetails == null)
+        {
+            throw new NotFoundException();
+        }
+        
+        return gameDetails.ToGamePuzzleDetailsViewModel();
     }
 
     public async Task<ParentGameCreateViewModel> PrepareCreateParentGameViewModel(ParentGameCreateViewModel viewModel)
@@ -97,8 +127,7 @@ public class GameService : IGameService
             Year = viewModel.Year,
             Order = viewModel.Order,
             Slug = slug,
-            Title = "Τίτλος",
-            Description = "Περιγραφή",
+            Title = $"{viewModel.Order}ο Κυνήγι Θησαυρού",
             WinnerId = viewModel.WinnerId,
             HostId = viewModel.HostId,
             Games = new List<Game>()
@@ -141,7 +170,7 @@ public class GameService : IGameService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<GameMediaViewModel> GetTeamMedia(short gameYear, ClaimsPrincipal user)
+    public async Task<ParentGameMediaViewModel> GetTeamMedia(short gameYear, ClaimsPrincipal user)
     {
         var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
         var parentGameMedia = await _context.ParentGameMediaFiles

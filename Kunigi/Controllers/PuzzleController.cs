@@ -1,59 +1,20 @@
-﻿using Kunigi.Data;
-using Kunigi.Entities;
+﻿using Kunigi.Entities;
 using Kunigi.Enums;
-using Kunigi.Utilities;
+using Kunigi.Services;
 using Kunigi.ViewModels.Puzzle;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Kunigi.Controllers;
 
 [Route("puzzles")]
 public class PuzzleController : Controller
 {
-    private readonly DataContext _context;
-    private readonly IConfiguration _configuration;
+    private readonly IPuzzleService _puzzleService;
 
-    public PuzzleController(DataContext context, IConfiguration configuration)
+    public PuzzleController(IPuzzleService puzzleService)
     {
-        _context = context;
-        _configuration = configuration;
-    }
-
-    [HttpGet("manage/{gameId:int}")]
-    [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> ManagePuzzles(int gameId)
-    {
-        var game = await _context.Games
-            .Include(g => g.ParentGame)
-            .Include(g => g.Puzzles)
-            .ThenInclude(p => p.MediaFiles)
-            .ThenInclude(pm => pm.MediaFile).Include(game => game.GameType)
-            .FirstOrDefaultAsync(g => g.GameId == gameId);
-
-        if (game == null)
-        {
-            TempData["error"] = "Το παιχνίδι δεν βρέθηκε.";
-            return RedirectToAction("ParentGameList", "Game");
-        }
-
-        var viewModel = new PuzzleListViewModel
-        {
-            GameId = gameId,
-            ParentGameYear = game.ParentGame.Year,
-            GameType = game.GameType.Description,
-            Puzzles = game.Puzzles.Select(p => new PuzzleDetailsViewModel
-            {
-                Id = p.GameId,
-                Question = p.Question,
-                Answer = p.Answer,
-                Type = p.Type.ToString(),
-                Order = p.Order
-            }).ToList()
-        };
-
-        return View(viewModel);
+        _puzzleService = puzzleService;
     }
 
     [HttpGet("create/{gameId:int}")]
@@ -91,50 +52,50 @@ public class PuzzleController : Controller
             return View(model);
         }
 
-        var game = await _context.Games.FindAsync(model.GameId);
-        if (game == null)
-        {
-            return NotFound("Game not found");
-        }
+        // var game = await _context.Games.FindAsync(model.GameId);
+        // if (game == null)
+        // {
+        //     return NotFound("Game not found");
+        // }
+        //
+        // var puzzleType = Enum.Parse<PuzzleType>(model.Type);
+        //
+        // var maxOrder = await _context.Puzzles
+        //     .Where(p => p.GameId == model.GameId && p.Type == puzzleType)
+        //     .MaxAsync(p => (int?)p.Order) ?? 0;
 
-        var puzzleType = Enum.Parse<PuzzleType>(model.Type);
+        // var puzzle = new Puzzle
+        // {
+        //     GameId = model.GameId,
+        //     Question = model.Question,
+        //     Answer = model.Answer,
+        //     Type = puzzleType,
+        //     Order = maxOrder + 1,
+        //     MediaFiles = new List<PuzzleMedia>()
+        // };
+        //
+        // if (model.QuestionMediaFiles is { Count: > 0 })
+        // {
+        //     foreach (var mediaFile in model.QuestionMediaFiles)
+        //     {
+        //         puzzle.MediaFiles.Add(await CreatePuzzleMedia(game, mediaFile,
+        //             PuzzleMediaType.Question));
+        //     }
+        // }
+        //
+        // if (model.AnswerMediaFiles is { Count: > 0 })
+        // {
+        //     foreach (var mediaFile in model.AnswerMediaFiles)
+        //     {
+        //         puzzle.MediaFiles.Add(await CreatePuzzleMedia(game, mediaFile,
+        //             PuzzleMediaType.Answer));
+        //     }
+        // }
 
-        var maxOrder = await _context.Puzzles
-            .Where(p => p.GameId == model.GameId && p.Type == puzzleType)
-            .MaxAsync(p => (int?)p.Order) ?? 0;
+        // _context.Puzzles.Add(puzzle);
+        // await _context.SaveChangesAsync();
 
-        var puzzle = new Puzzle
-        {
-            GameId = model.GameId,
-            Question = model.Question,
-            Answer = model.Answer,
-            Type = puzzleType,
-            Order = maxOrder + 1,
-            MediaFiles = new List<PuzzleMedia>()
-        };
-
-        if (model.QuestionMediaFiles is { Count: > 0 })
-        {
-            foreach (var mediaFile in model.QuestionMediaFiles)
-            {
-                puzzle.MediaFiles.Add(await CreatePuzzleMedia(game, mediaFile,
-                    PuzzleMediaType.Question));
-            }
-        }
-
-        if (model.AnswerMediaFiles is { Count: > 0 })
-        {
-            foreach (var mediaFile in model.AnswerMediaFiles)
-            {
-                puzzle.MediaFiles.Add(await CreatePuzzleMedia(game, mediaFile,
-                    PuzzleMediaType.Answer));
-            }
-        }
-
-        _context.Puzzles.Add(puzzle);
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction(nameof(ManagePuzzles), new { gameId = model.GameId });
+        return View();
     }
 
     private async Task<PuzzleMedia> CreatePuzzleMedia(Game game, IFormFile mediaFile,

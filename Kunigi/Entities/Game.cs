@@ -14,7 +14,5 @@ public class Game
     
     public virtual ParentGame ParentGame { get; set; }
     
-    public virtual ICollection<Puzzle> Puzzles { get; set; }
-    
-    public virtual ICollection<ParentGameMedia> MediaFiles { get; set; }
+    public virtual ICollection<Puzzle> PuzzleList { get; set; }
 }

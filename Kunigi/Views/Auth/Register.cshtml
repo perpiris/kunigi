@@ -1,4 +1,4 @@
-﻿@model RegisterViewModel
+﻿@model Kunigi.ViewModels.Auth.RegisterViewModel
 
 @{
     ViewData["Title"] = "Εγγραφή";
@@ -8,7 +8,7 @@
     <h2 class="text-center">Εγγραφή</h2>
     <h6 class="text-center mb-4">Μόνο για διαχειριστές ομάδων</h6>
 
-    @using (Html.BeginForm("Register", "Authentication", FormMethod.Post))
+    @using (Html.BeginForm("Register", "Auth", FormMethod.Post))
     {
         <div class="form-group mb-4">
             <label asp-for="Email"></label>

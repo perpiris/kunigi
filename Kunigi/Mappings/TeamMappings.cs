@@ -7,7 +7,7 @@ namespace Kunigi.Mappings;
 
 public static class TeamMappings
 {
-    public static TeamDetailsViewModel ToBaseTeamDetailsViewModel(this Team teamDetails)
+    public static TeamDetailsViewModel ToTeamDetailsViewModel(this Team teamDetails, bool includeFullDetails = false)
     {
         var viewModel = new TeamDetailsViewModel
         {
@@ -21,52 +21,32 @@ public static class TeamMappings
             Website = teamDetails.Website
         };
 
-        return viewModel;
-    }
-
-    public static TeamDetailsViewModel ToFullTeamDetailsViewModel(this Team teamDetails)
-    {
-        var viewModel = teamDetails.ToBaseTeamDetailsViewModel();
-
-        viewModel.GamesWon = [];
-        viewModel.GamesHosted = [];
-        viewModel.MediaFiles = [];
-
-        if (teamDetails.WonGames != null)
+        if (includeFullDetails)
         {
-            foreach (var year in teamDetails.WonGames)
-            {
-                viewModel.GamesWon.Add(new ParentGameDetailsViewModel
+            viewModel.GamesWon = teamDetails.WonGames?
+                .Select(year => new ParentGameDetailsViewModel
                 {
                     Title = year.Title,
                     Year = year.Year
-                });
-            }
-        }
+                })
+                .ToList() ?? [];
 
-        if (teamDetails.HostedGames != null)
-        {
-            foreach (var year in teamDetails.HostedGames)
-            {
-                viewModel.GamesHosted.Add(new ParentGameDetailsViewModel
+            viewModel.GamesHosted = teamDetails.HostedGames?
+                .Select(year => new ParentGameDetailsViewModel
                 {
                     Title = year.Title,
                     Year = year.Year
-                });
-            }
-        }
+                })
+                .ToList() ?? [];
 
-        if (teamDetails.MediaFiles != null)
-        {
-            foreach (var teamMedia in teamDetails.MediaFiles)
-            {
-                viewModel.MediaFiles.Add(new MediaFileViewModel
+            viewModel.MediaFiles = teamDetails.MediaFiles?
+                .Select(teamMedia => new MediaFileViewModel
                 {
                     Id = teamMedia.MediaFile.MediaFileId,
                     FileName = Path.GetFileName(teamMedia.MediaFile.Path),
                     Path = teamMedia.MediaFile.Path
-                });
-            }
+                })
+                .ToList() ?? [];
         }
 
         return viewModel;
@@ -77,6 +57,7 @@ public static class TeamMappings
         var viewModel = new TeamEditViewModel
         {
             Name = teamDetails.Name,
+            Slug = teamDetails.Slug,
             Description = teamDetails.Description,
             ProfileImageUrl = teamDetails.TeamProfileImagePath,
             Facebook = teamDetails.Facebook,

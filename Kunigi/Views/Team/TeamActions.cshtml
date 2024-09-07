@@ -17,8 +17,12 @@
     }
 </style>
 
-<h2 class="mb-4">@Model.Name</h2>
-<h4 class="mb-4">Ενέργειες</h4>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item">
+        <a asp-controller="Home" asp-action="Dashboard">Διαχείριση</a>
+    </li>
+    <li class="breadcrumb-item active">@Model.Name</li>
+</ol>
 
 <div class="row row-cols-1 row-cols-md-4 g-4">
     <div class="col">

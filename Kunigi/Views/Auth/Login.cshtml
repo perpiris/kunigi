@@ -1,4 +1,4 @@
-﻿@model LoginViewModel
+﻿@model Kunigi.ViewModels.Auth.LoginViewModel
 
 @{
     ViewData["Title"] = "Σύνδεση";
@@ -7,7 +7,7 @@
 <div class="form-container">
     <h2 class="mb-4 text-center">Σύνδεση</h2>
 
-    @using (Html.BeginForm("Login", "Authentication", FormMethod.Post))
+    @using (Html.BeginForm("Login", "Auth", FormMethod.Post))
     {
         <div class="form-group mb-4">
             <label asp-for="Email"></label>

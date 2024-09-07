@@ -65,7 +65,7 @@
                     @if (User.Identity is { IsAuthenticated: true })
                     {
                         <li class="nav-item">
-                            <form id="logoutForm" asp-controller="Authentication" asp-action="Logout" method="post" class="form-inline">
+                            <form id="logoutForm" asp-controller="Auth" asp-action="Logout" method="post" class="form-inline">
                                 <button type="submit" class="btn btn-link nav-link">Αποσύνδεση</button>
                             </form>
                         </li>
@@ -74,13 +74,13 @@
                     {
                         <li class="nav-item">
                             <a class="nav-link @(GetActive("Authentication", "Login"))"
-                               asp-controller="Authentication" asp-action="Login">
+                               asp-controller="Auth" asp-action="Login">
                                 Σύνδεση
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(GetActive("Authentication", "Register"))"
-                               asp-controller="Authentication" asp-action="Register">
+                               asp-controller="Auth" asp-action="Register">
                                 Εγγραφή
                             </a>
                         </li>

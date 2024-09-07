@@ -1,18 +1,17 @@
 ﻿using Kunigi.Entities;
-using Kunigi.ViewModels.Account;
-using Kunigi.ViewModels.Authentication;
+using Kunigi.ViewModels.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kunigi.Controllers;
 
 [Route("auth")]
-public class AuthenticationController : Controller
+public class AuthController : Controller
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
 
-    public AuthenticationController(
+    public AuthController(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager)
     {

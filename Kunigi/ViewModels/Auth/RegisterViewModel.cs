@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace Kunigi.ViewModels.Authentication;
+namespace Kunigi.ViewModels.Auth;
 
 public class RegisterViewModel
 {

@@ -23,7 +23,7 @@ public class TeamService : ITeamService
     public async Task<List<TeamDetailsViewModel>> GetAllTeams()
     {
         var allTeams = await _context.Teams.ToListAsync();
-        return allTeams.Select(x => x.ToBaseTeamDetailsViewModel()).ToList();
+        return allTeams.Select(x => x.ToTeamDetailsViewModel()).ToList();
     }
 
     public async Task<TeamDetailsViewModel> GetTeamDetails(string teamSlug)
@@ -46,7 +46,7 @@ public class TeamService : ITeamService
             throw new NotFoundException();
         }
 
-        return teamDetails.ToFullTeamDetailsViewModel();
+        return teamDetails.ToTeamDetailsViewModel(true);
     }
 
     public async Task CreateTeam(TeamCreateViewModel teamData)
@@ -54,7 +54,7 @@ public class TeamService : ITeamService
         var slug = SlugGenerator.GenerateSlug(teamData.Name);
         var newTeam = new Team
         {
-            Name = teamData.Name,
+            Name = teamData.Name.Trim(),
             Slug = slug
         };
 
@@ -69,15 +69,20 @@ public class TeamService : ITeamService
     {
         var teamDetails = await CheckTeamAndOwneship(teamSlug, user);
 
-        teamDetails.Description = viewModel.Description;
-        teamDetails.Facebook = viewModel.Facebook;
-        teamDetails.Youtube = viewModel.Youtube;
-        teamDetails.Instagram = viewModel.Instagram;
-        teamDetails.Website = viewModel.Website;
+        if (!string.IsNullOrEmpty(viewModel.Slug))
+        {
+            teamDetails.Slug = viewModel.Slug.Trim();
+        }
+        
+        teamDetails.Description = viewModel.Description.Trim();
+        teamDetails.Facebook = viewModel.Facebook.Trim();
+        teamDetails.Youtube = viewModel.Youtube.Trim();
+        teamDetails.Instagram = viewModel.Instagram.Trim();
+        teamDetails.Website = viewModel.Website.Trim();
 
         if (profileImage != null)
         {
-            var profileImagePath = await _mediaService.SaveMediaFile(profileImage, $"teams/{teamDetails.Slug}", true);
+            var profileImagePath = await _mediaService.SaveMediaFile(profileImage, $"teams/{teamDetails.Slug.Trim()}", true);
             teamDetails.TeamProfileImagePath = profileImagePath;
         }
 

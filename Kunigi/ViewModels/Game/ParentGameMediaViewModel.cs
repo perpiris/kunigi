@@ -1,6 +1,6 @@
 ﻿namespace Kunigi.ViewModels.Game;
 
-public class GameMediaViewModel
+public class ParentGameMediaViewModel
 {
     public short Year { get; set; }
     

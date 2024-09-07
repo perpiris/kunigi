@@ -10,6 +10,8 @@ public interface IGameService
     Task<ParentGameDetailsViewModel> GetParentGameDetails(short gameYear);
     
     Task<GameDetailsViewModel> GetGameDetails(short gameYear, string gameTypeSlug);
+    
+    Task<GamePuzzleDetailsViewModel> GetGamePuzzleList(short gameYear, string gameTypeSlug);
 
     Task<ParentGameCreateViewModel> PrepareCreateParentGameViewModel(ParentGameCreateViewModel viewModel);
 
@@ -19,7 +21,7 @@ public interface IGameService
 
     Task EditParentGame(short gameYear, ParentGameEditViewModel viewModel, IFormFile profileImage, ClaimsPrincipal user);
     
-    Task<GameMediaViewModel> GetTeamMedia(short gameYear, ClaimsPrincipal user);
+    Task<ParentGameMediaViewModel> GetTeamMedia(short gameYear, ClaimsPrincipal user);
 
     Task AddGameMedia(short gameYear, List<IFormFile> files, ClaimsPrincipal user);
 
