@@ -1,17 +1,24 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kunigi.ViewModels.Team;
 
 public class TeamEditViewModel
 {
-    public int TeamId { get; set; }
-
-    public string Slug { get; set; }
+    [DisplayName("Slug")]
+    public string TeamSlug { get; set; }
     
     [DisplayName("Όνομα Ομάδας")]
     public string Name { get; set; }
     
-    [DisplayName("Σύντομη περιγραφή")]
+    [DisplayName("Έτος Δημιουργίας")]
+    [Range(1900, 2100, ErrorMessage = "Παρακαλώ εισάγετε έγκυρο έτος.")]
+    public short? CreatedYear { get; set; }
+
+    [DisplayName("Ενεργή")]
+    public bool IsActive { get; set; }
+    
+    [DisplayName("Περιγραφή")]
     public string Description { get; set; }
     
     public string Website { get; set; }

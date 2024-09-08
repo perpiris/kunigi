@@ -3,6 +3,7 @@ using Kunigi.Data;
 using Kunigi.Entities;
 using Kunigi.Exceptions;
 using Kunigi.Mappings;
+using Kunigi.ViewModels.Common;
 using Kunigi.ViewModels.Game;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -22,10 +23,25 @@ public class GameService : IGameService
         _puzzleService = puzzleService;
     }
 
-    public async Task<List<ParentGameDetailsViewModel>> GetAllGames()
+    public async Task<PaginatedViewModel<ParentGameDetailsViewModel>> GetPaginatedGame(int pageNumber = 1, int pageSize = 10)
     {
-        var allTeams = await _context.ParentGames.ToListAsync();
-        return allTeams.Select(x => x.ToParentGameDetailsViewModel()).ToList();
+        var query = _context.ParentGames.AsQueryable();
+        var totalItems = await query.CountAsync();
+
+        var games = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var gameViewModels = games.Select(x => x.ToParentGameDetailsViewModel()).ToList();
+
+        return new PaginatedViewModel<ParentGameDetailsViewModel>
+        {
+            Items = gameViewModels,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalItems = totalItems
+        };
     }
 
     public async Task<ParentGameDetailsViewModel> GetParentGameDetails(short gameYear)
@@ -127,7 +143,7 @@ public class GameService : IGameService
             Year = viewModel.Year,
             Order = viewModel.Order,
             Slug = slug,
-            Title = $"{viewModel.Order}ο Κυνήγι Θησαυρού",
+            MainTitle = $"{viewModel.Order}ο Κυνήγι Θησαυρού",
             WinnerId = viewModel.WinnerId,
             HostId = viewModel.HostId,
             Games = new List<Game>()
@@ -148,7 +164,7 @@ public class GameService : IGameService
         await _context.SaveChangesAsync();
     }
 
-    public Task<ParentGameEditViewModel> PrepareEditParentGameViewModel(short gameYear, ClaimsPrincipal user)
+    public async Task<ParentGameEditViewModel> PrepareEditParentGameViewModel(short gameYear, ClaimsPrincipal user)
     {
         throw new NotImplementedException();
     }
@@ -157,7 +173,7 @@ public class GameService : IGameService
     {
         var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
 
-        parentGameDetails.Title = viewModel.Title;
+        parentGameDetails.SubTitle = viewModel.SubTitle;
         parentGameDetails.Description = viewModel.Description;
 
         if (profileImage != null)

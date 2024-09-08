@@ -1,11 +1,12 @@
 ﻿using System.Security.Claims;
+using Kunigi.ViewModels.Common;
 using Kunigi.ViewModels.Game;
 
 namespace Kunigi.Services;
 
 public interface IGameService
 {
-    Task<List<ParentGameDetailsViewModel>> GetAllGames();
+    Task<PaginatedViewModel<ParentGameDetailsViewModel>> GetPaginatedGame(int pageNumber = 1, int pageSize = 10);
     
     Task<ParentGameDetailsViewModel> GetParentGameDetails(short gameYear);
     

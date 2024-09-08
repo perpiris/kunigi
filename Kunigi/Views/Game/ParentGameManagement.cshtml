@@ -1,19 +1,18 @@
-﻿@model List<ParentGameDetailsViewModel>
+﻿@model PaginatedViewModel<ParentGameDetailsViewModel>
 
 @{
     ViewData["Title"] = "Διαχείριση Παιχνιδιών";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center">
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item">
             <a asp-controller="Home" asp-action="Dashboard">Διαχείριση</a>
         </li>
-        <li class="breadcrumb-item active">Διαχείριση Παιχνιδιών</li>
+        <li class="breadcrumb-item active">Παιχνίδια</li>
     </ol>
 
     <div class="d-flex justify-content-between align-items-center">
-        <input type="text" id="search-filter" class="form-control me-2" placeholder="Αναζήτηση" style="max-width: 250px">
 
         <a class="btn btn-primary"
            asp-controller="Game" asp-action="CreateParentGame">
@@ -22,14 +21,14 @@
     </div>
 </div>
 
-@if (Model == null || Model.Count == 0)
+@if (Model == null || !Model.Items.Any())
 {
     <h4 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h4>
 }
 else
 {
     <div id="data-container" class="row row-cols-1 row-cols-md-4 g-4">
-        @foreach (var team in Model)
+        @foreach (var team in Model.Items)
         {
             <div class="col data-item" data-item-name="@team.Year">
                 <a asp-controller="Game" asp-action="ParentGameActions" asp-route-gameYear="@team.Year" class="card-link">
@@ -42,4 +41,17 @@ else
             </div>
         }
     </div>
+    
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+
+            @for (var i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" asp-action="ParentGameList" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                </li>
+            }
+
+        </ul>
+    </nav>
 }

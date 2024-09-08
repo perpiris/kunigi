@@ -3,6 +3,7 @@ using System;
 using Kunigi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kunigi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240908151045_team update year fix")]
+    partial class teamupdateyearfix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -163,9 +166,6 @@ namespace Kunigi.Data.Migrations
                     b.Property<int>("HostId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("MainTitle")
-                        .HasColumnType("varchar(255)");
-
                     b.Property<short>("Order")
                         .HasColumnType("INTEGER");
 
@@ -178,7 +178,7 @@ namespace Kunigi.Data.Migrations
                     b.Property<string>("Slug")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("SubTitle")
+                    b.Property<string>("Title")
                         .HasColumnType("varchar(255)");
 
                     b.Property<int>("WinnerId")
@@ -289,7 +289,7 @@ namespace Kunigi.Data.Migrations
                     b.Property<string>("Instagram")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<int>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")

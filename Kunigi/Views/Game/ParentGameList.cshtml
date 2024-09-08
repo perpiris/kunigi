@@ -1,4 +1,4 @@
-﻿@model List<ParentGameDetailsViewModel>
+﻿@model PaginatedViewModel<ParentGameDetailsViewModel>
 
 @{
     ViewData["Title"] = "Παιχνίδια";
@@ -34,19 +34,22 @@
     <li class="breadcrumb-item active">Παιχνίδια</li>
 </ol>
 
-@if (Model == null || !Model.Any())
+@if (Model == null || !Model.Items.Any())
 {
     <h4 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h4>
 }
 else
 {
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
-        @foreach (var game in Model)
+        @foreach (var game in Model.Items)
         {
             <div class="col px-1">
                 <a asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year"
                    class="text-decoration-none">
                     <div class="card h-100 game-card">
+                        <div class="card-body">
+                            <h6 class="card-title text-center">@($"{game.MainTitle} ({game.Year})")</h6>
+                        </div>
                         <div class="card-img-top-wrapper">
                             @if (string.IsNullOrEmpty(game.ProfileImageUrl))
                             {
@@ -54,15 +57,28 @@ else
                             }
                             else
                             {
-                                <img src="@Url.Content(game.ProfileImageUrl)" class="card-img-top" alt="@game.Title">
+                                <img src="@Url.Content(game.ProfileImageUrl)" class="card-img-top" alt="@game.MainTitle">
                             }
                         </div>
                         <div class="card-body">
-                            <h4 class="card-title text-center">@($"{game.Title}({game.Year})")</h4>
+                            <h6 class="card-title text-center">@game.SubTitle</h6>
                         </div>
                     </div>
                 </a>
             </div>
         }
     </div>
+    
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+
+            @for (var i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link" asp-action="ParentGameList" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                </li>
+            }
+
+        </ul>
+    </nav>
 }

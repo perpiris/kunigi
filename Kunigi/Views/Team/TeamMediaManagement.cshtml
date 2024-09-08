@@ -1,10 +1,64 @@
 ﻿@model TeamMediaViewModel
 
 <style>
-    
+
     .card {
         max-width: 200px;
         margin: 0 auto;
+        height: 180px;
+        position: relative;
+        overflow: visible;
+    }
+
+    .card-body {
+        height: 140px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .delete-btn {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background-color: #dc3545;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        color: #fff;
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        z-index: 10;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+
+    .delete-btn:hover {
+        background-color: #c82333;
+        transform: scale(1.1);
+    }
+
+    .delete-btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.5);
+    }
+
+    /* Add this new style for the icon */
+    .delete-btn i {
+        position: relative;
+        top: 1px; /* Adjust this value to center the icon vertically if needed */
+    }
+
+    .upload-card .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
 
     .card-img-top, .video-thumbnail {
@@ -27,11 +81,6 @@
     .upload-card {
         cursor: pointer;
         transition: all 0.3s ease;
-    }
-
-    .upload-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     .media-container {
@@ -159,11 +208,11 @@
 
     <div class="col">
         <div class="card h-100 upload-card" data-bs-toggle="modal" data-bs-target="#uploadModal">
-            <div class="card-body d-flex align-items-center justify-content-center">
-                <i class="bi bi-plus-circle" style="font-size: 1.5rem;"></i>
-            </div>
-            <div class="card-footer text-center p-1">
-                <small class="text-muted">Upload</small>
+            <div class="card-body">
+                <i class="bi bi-plus-circle" style="font-size: 3rem;"></i>
+                <div class="mt-2">
+                    <small class="text-muted">Upload</small>
+                </div>
             </div>
         </div>
     </div>
@@ -188,11 +237,11 @@
                     }
                     <h6 class="card-title mb-0 text-truncate" title="@mediaFile.FileName">@mediaFile.FileName</h6>
                 </div>
-                <div class="card-footer p-1">
-                    <form asp-action="DeleteTeamMedia" asp-route-teamSlug="@Model.TeamSlug" asp-route-mediaId="@mediaFile.Id" method="post">
-                        <button type="submit" class="btn btn-sm btn-danger w-100" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">Διαγραφή</button>
-                    </form>
-                </div>
+                <form asp-action="DeleteTeamMedia" asp-route-teamSlug="@Model.TeamSlug" asp-route-mediaId="@mediaFile.Id" method="post">
+                    <button type="submit" class="delete-btn" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
             </div>
         </div>
     }

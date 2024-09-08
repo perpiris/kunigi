@@ -1,4 +1,6 @@
-﻿namespace Kunigi.ViewModels.Team;
+﻿using Kunigi.ViewModels.Common;
+
+namespace Kunigi.ViewModels.Team;
 
 public class TeamMediaViewModel
 {
@@ -8,5 +10,5 @@ public class TeamMediaViewModel
     
     public List<MediaFileViewModel> MediaFiles { get; set; } = [];
     
-    public List<IFormFile> NewMediaFiles { get; set; } // do not delete
+    public List<IFormFile> NewMediaFiles { get; set; }
 }

@@ -35,17 +35,21 @@ public class DataContext : IdentityDbContext<AppUser>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.Entity<Team>()
+            .Property(t => t.IsActive)
+            .HasConversion<int>();
 
         modelBuilder.Entity<ParentGame>()
-            .HasOne(g => g.Host)
-            .WithMany(t => t.HostedGames)
-            .HasForeignKey(g => g.HostId)
+            .HasOne(x => x.Host)
+            .WithMany(x => x.HostedGames)
+            .HasForeignKey(x => x.HostId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<ParentGame>()
-            .HasOne(g => g.Winner)
-            .WithMany(t => t.WonGames)
-            .HasForeignKey(g => g.WinnerId)
+            .HasOne(x => x.Winner)
+            .WithMany(x => x.WonGames)
+            .HasForeignKey(x => x.WinnerId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<TeamMedia>(entity =>
@@ -79,7 +83,7 @@ public class DataContext : IdentityDbContext<AppUser>
                 .HasForeignKey(d => d.MediaFileId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasIndex(e => new { GameYearId = e.ParentGameId, e.MediaFileId }).IsUnique();
+            entity.HasIndex(e => new { e.ParentGameId, e.MediaFileId }).IsUnique();
         });
 
         modelBuilder.Entity<PuzzleMedia>(entity =>

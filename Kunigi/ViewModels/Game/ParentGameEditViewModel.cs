@@ -7,7 +7,7 @@ public class ParentGameEditViewModel
 {
     [DisplayName("Τίτλος")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
-    public string Title { get; set; }
+    public string SubTitle { get; set; }
 
     [DisplayName("Περιγραφή")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]

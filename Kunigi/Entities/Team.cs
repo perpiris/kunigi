@@ -14,6 +14,10 @@ public class Team
     [Column(TypeName = "varchar(255)")]
     public string Slug { get; set; }
     
+    public short? CreatedYear { get; set; }
+    
+    public bool IsActive { get; set; }
+    
     [Column(TypeName = "varchar(255)")]
     public string Website { get; set; }
     

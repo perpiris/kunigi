@@ -11,7 +11,10 @@ public class ParentGame
     public short Order { get; set; }
     
     [Column(TypeName = "varchar(255)")]
-    public string Title { get; set; }
+    public string MainTitle { get; set; }
+    
+    [Column(TypeName = "varchar(255)")]
+    public string SubTitle { get; set; }
     
     public string Description { get; set; }
     

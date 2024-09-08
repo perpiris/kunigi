@@ -1,14 +1,17 @@
-﻿using Kunigi.ViewModels.Game;
+﻿using Kunigi.ViewModels.Common;
+using Kunigi.ViewModels.Game;
 
 namespace Kunigi.ViewModels.Team;
 
 public class TeamDetailsViewModel
 {
-    public int TeamId { get; set; }
-    
     public string Name { get; set; }
     
-    public string Slug { get; set; }
+    public string TeamSlug { get; set; }
+    
+    public short? CreatedYear { get; set; }
+    
+    public bool IsActive { get; set; }
     
     public string Description { get; set; }
     

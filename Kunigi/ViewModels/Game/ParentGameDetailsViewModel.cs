@@ -1,4 +1,6 @@
-﻿namespace Kunigi.ViewModels.Game;
+﻿using Kunigi.ViewModels.Common;
+
+namespace Kunigi.ViewModels.Game;
 
 public class ParentGameDetailsViewModel
 {
@@ -6,7 +8,9 @@ public class ParentGameDetailsViewModel
 
     public short Order { get; set; }
     
-    public string Title { get; set; }
+    public string MainTitle { get; set; }
+    
+    public string SubTitle { get; set; }
 
     public string Description { get; set; }
     

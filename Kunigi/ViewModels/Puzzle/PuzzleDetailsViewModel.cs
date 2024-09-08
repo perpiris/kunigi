@@ -1,4 +1,6 @@
-﻿namespace Kunigi.ViewModels.Puzzle;
+﻿using Kunigi.ViewModels.Common;
+
+namespace Kunigi.ViewModels.Puzzle;
 
 public class PuzzleDetailsViewModel
 {

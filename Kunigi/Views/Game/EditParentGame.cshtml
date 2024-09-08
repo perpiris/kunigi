@@ -1,19 +1,19 @@
 ﻿@model ParentGameEditViewModel
 
 @{
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = Model.SubTitle;
 }
 
-<h2 class="mb-4 text-center">@Model.Title</h2>
+<h2 class="mb-4 text-center">@Model.SubTitle</h2>
 
 <div class="form-container-large">
     @using (Html.BeginForm("EditParentGame", "Game", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         <div class="row">
             <div class="col-12 mb-4 form-group">
-                <label asp-for="Title" class="form-label mt-4"></label>
-                <input asp-for="Title" class="form-control"/>
-                <span asp-validation-for="Title" class="text-danger"></span>
+                <label asp-for="SubTitle" class="form-label mt-4"></label>
+                <input asp-for="SubTitle" class="form-control"/>
+                <span asp-validation-for="SubTitle" class="text-danger"></span>
             </div>
             <div class="col-12 mb-4 form-group">
                 <label asp-for="Description" class="form-label"></label>

@@ -1,5 +1,5 @@
 ﻿using Kunigi.Entities;
-using Kunigi.ViewModels;
+using Kunigi.ViewModels.Common;
 using Kunigi.ViewModels.Game;
 using Kunigi.ViewModels.Puzzle;
 
@@ -14,7 +14,8 @@ public static class GameMappings
         {
             Year = parentGameDetails.Year,
             Order = parentGameDetails.Order,
-            Title = parentGameDetails.Title,
+            MainTitle = parentGameDetails.MainTitle,
+            SubTitle = parentGameDetails.SubTitle,
             Description = parentGameDetails.Description,
             Slug = parentGameDetails.Slug,
             ProfileImageUrl = parentGameDetails.ParentGameProfileImagePath
@@ -39,7 +40,7 @@ public static class GameMappings
     {
         var viewModel = new GameDetailsViewModel
         {
-            Title = gameDetails.ParentGame.Title,
+            Title = gameDetails.ParentGame.MainTitle,
             Description = gameDetails.Description,
             Year = gameDetails.ParentGame.Year,
             Type = gameDetails.GameType.Description,

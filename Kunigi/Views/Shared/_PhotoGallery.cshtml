@@ -142,7 +142,7 @@
                     @if (IsVideo(mediaFile.FileName))
                     {
                         <div class="video-thumbnail" onclick="openMediaPreview('/@mediaFile.Path', 'video')">
-                            <video preload="metadata" class="card-img-top mb-2">
+                            <video preload="metadata" class="card-img-top">
                                 <source src="~/@mediaFile.Path" type="video/mp4">
                             </video>
                             <i class="bi bi-play-circle-fill play-icon"></i>
@@ -150,7 +150,7 @@
                     }
                     else
                     {
-                        <img src="~/@Url.Content(mediaFile.Path)" class="card-img-top mb-2" alt="@mediaFile.FileName"
+                        <img src="~/@Url.Content(mediaFile.Path)" class="card-img-top" alt="@mediaFile.FileName"
                              onclick="openMediaPreview('/@Url.Content(mediaFile.Path)', 'image')">
                     }
                 </div>

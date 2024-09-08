@@ -1,4 +1,6 @@
-﻿namespace Kunigi.ViewModels.Game;
+﻿using Kunigi.ViewModels.Common;
+
+namespace Kunigi.ViewModels.Game;
 
 public class ParentGameMediaViewModel
 {

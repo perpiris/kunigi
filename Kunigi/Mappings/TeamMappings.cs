@@ -1,5 +1,5 @@
 ﻿using Kunigi.Entities;
-using Kunigi.ViewModels;
+using Kunigi.ViewModels.Common;
 using Kunigi.ViewModels.Game;
 using Kunigi.ViewModels.Team;
 
@@ -12,8 +12,10 @@ public static class TeamMappings
         var viewModel = new TeamDetailsViewModel
         {
             Name = teamDetails.Name,
-            Slug = teamDetails.Slug,
+            TeamSlug = teamDetails.Slug,
             Description = teamDetails.Description,
+            CreatedYear = teamDetails.CreatedYear,
+            IsActive = teamDetails.IsActive,
             ProfileImageUrl = teamDetails.TeamProfileImagePath,
             Facebook = teamDetails.Facebook,
             Youtube = teamDetails.Youtube,
@@ -26,7 +28,7 @@ public static class TeamMappings
             viewModel.GamesWon = teamDetails.WonGames?
                 .Select(year => new ParentGameDetailsViewModel
                 {
-                    Title = year.Title,
+                    MainTitle = year.MainTitle,
                     Year = year.Year
                 })
                 .ToList() ?? [];
@@ -34,7 +36,7 @@ public static class TeamMappings
             viewModel.GamesHosted = teamDetails.HostedGames?
                 .Select(year => new ParentGameDetailsViewModel
                 {
-                    Title = year.Title,
+                    MainTitle = year.MainTitle,
                     Year = year.Year
                 })
                 .ToList() ?? [];
@@ -57,13 +59,31 @@ public static class TeamMappings
         var viewModel = new TeamEditViewModel
         {
             Name = teamDetails.Name,
-            Slug = teamDetails.Slug,
+            TeamSlug = teamDetails.Slug,
+            CreatedYear = teamDetails.CreatedYear,
+            IsActive = teamDetails.IsActive,
             Description = teamDetails.Description,
             ProfileImageUrl = teamDetails.TeamProfileImagePath,
             Facebook = teamDetails.Facebook,
             Youtube = teamDetails.Youtube,
             Instagram = teamDetails.Instagram,
             Website = teamDetails.Website
+        };
+
+        return viewModel;
+    }
+    
+    public static TeamManagerEditViewModel ToTeamManagerEditViewModel(this Team teamDetails)
+    {
+        var viewModel = new TeamManagerEditViewModel
+        {
+            Name = teamDetails.Name,
+            TeamSlug = teamDetails.Slug,
+            ManagerList = teamDetails.Managers.Select(m => new TeamManagerDetailsViewModel
+            {
+                Id = m.Id,
+                Email = m.Email
+            }).ToList()
         };
 
         return viewModel;

@@ -1,4 +1,4 @@
-﻿namespace Kunigi.ViewModels;
+﻿namespace Kunigi.ViewModels.Common;
 
 public class MediaFileViewModel
 {

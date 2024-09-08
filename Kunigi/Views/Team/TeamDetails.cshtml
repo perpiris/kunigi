@@ -27,6 +27,27 @@
                                 {
                                     <img src="~/@Url.Content(Model.ProfileImageUrl)" class="card-img-top" alt="@Model.Name">
                                 }
+
+                                <ul class="list-group list-group-flush mt-4">
+                                    @if (Model.CreatedYear.HasValue)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <h6 class="m-0">Έτος Ίδρυσης</h6>
+                                            <span>@Model.CreatedYear</span>
+                                        </li>
+                                    }
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <h6 class="m-0">Κατάσταση</h6>
+                                        @if (Model.IsActive)
+                                        {
+                                            <span class="text-success">Ενεργή</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">Ανενεργή</span>
+                                        }
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -42,28 +63,28 @@
 
                                 @if (!string.IsNullOrEmpty(Model.Website))
                                 {
-                                    <a href="@Model.Website" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                    <a href="@Model.Website" class="d-inline-block bg-dark link-light lh-1 p-2 rounded" target="_blank">
                                         <i class="bi bi-globe"></i>
                                     </a>
                                 }
 
                                 @if (!string.IsNullOrEmpty(Model.Facebook))
                                 {
-                                    <a href="@Model.Facebook" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                    <a href="@Model.Facebook" class="d-inline-block bg-dark link-light lh-1 p-2 rounded" target="_blank">
                                         <i class="bi bi-facebook"></i>
                                     </a>
                                 }
 
                                 @if (!string.IsNullOrEmpty(Model.Youtube))
                                 {
-                                    <a href="@Model.Youtube" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                    <a href="@Model.Youtube" class="d-inline-block bg-dark link-light lh-1 p-2 rounded" target="_blank">
                                         <i class="bi bi-youtube"></i>
                                     </a>
                                 }
 
                                 @if (!string.IsNullOrEmpty(Model.Instagram))
                                 {
-                                    <a href="@Model.Instagram" class="d-inline-block bg-dark link-light lh-1 p-2 rounded">
+                                    <a href="@Model.Instagram" class="d-inline-block bg-dark link-light lh-1 p-2 rounded" target="_blank">
                                         <i class="bi bi-instagram"></i>
                                     </a>
                                 }
@@ -86,7 +107,7 @@
                             <button class="nav-link" id="games-tab" data-bs-toggle="tab" data-bs-target="#games-tab-pane" type="button" role="tab" aria-controls="photos-tab-pane" aria-selected="true">Παιχνίδια</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos-tab-pane" type="button" role="tab" aria-controls="photos-tab-pane" aria-selected="true">Υλικό</button>
+                            <button class="nav-link @(Model.MediaFiles == null || !Model.MediaFiles.Any() ? "disabled" : "")" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos-tab-pane" type="button" role="tab" aria-controls="photos-tab-pane" aria-selected="true">Υλικό</button>
                         </li>
                     </ul>
                     <div class="tab-content pt-4" id="profileTabContent">
@@ -108,7 +129,7 @@
                                                 @foreach (var game in Model.GamesWon)
                                                 {
                                                     <li>
-                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@($"{game.Title} ({game.Year})")</a>
+                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@($"{game.MainTitle} ({game.Year})")</a>
                                                     </li>
                                                 }
                                             </ul>
@@ -131,7 +152,7 @@
                                                 @foreach (var game in Model.GamesHosted)
                                                 {
                                                     <li>
-                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@($"{game.Title} ({game.Year})")</a>
+                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@($"{game.MainTitle} ({game.Year})")</a>
                                                     </li>
                                                 }
                                             </ul>
@@ -145,11 +166,7 @@
                             </div>
                         </div>
                         <div class="tab-pane" id="photos-tab-pane" role="tabpanel" aria-labelledby="photos-tab" tabindex="0">
-                            @if (!Model.MediaFiles.Any())
-                            {
-                                <h4 class="mb-4 text-center">Δεν υπάρχει υλικό</h4>
-                            }
-                            else
+                            @if (Model.MediaFiles != null && Model.MediaFiles.Any())
                             {
                                 @await Html.PartialAsync("_PhotoGallery", Model.MediaFiles)
                             }

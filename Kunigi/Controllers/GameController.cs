@@ -17,9 +17,9 @@ public class GameController : Controller
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> ParentGameList()
+    public async Task<IActionResult> ParentGameList(int pageNumber = 1, int pageSize = 10)
     {
-        var viewModel = await _gameService.GetAllGames();
+        var viewModel = await _gameService.GetPaginatedGame(pageNumber, pageSize);
         return View(viewModel);
     }
 
@@ -37,7 +37,7 @@ public class GameController : Controller
         }
     }
 
-    [HttpGet("{gameYear}/{gameTypeSlug}/puzzle-list")]
+    [HttpGet("puzzle-list/{gameYear}/{gameTypeSlug}")]
     public async Task<IActionResult> GamePuzzleList(short gameYear, string gameTypeSlug)
     {
         try
@@ -50,7 +50,6 @@ public class GameController : Controller
             return RedirectToAction("ParentGameList", "Game");
         }
     }
-
 
     [Authorize(Roles = "Admin")]
     [HttpGet("create-parent-game")]
@@ -65,29 +64,6 @@ public class GameController : Controller
     public async Task<IActionResult> CreateParentGame(
         ParentGameCreateViewModel viewModel)
     {
-        var parentGameList = await _gameService.GetAllGames();
-        var exists = parentGameList.Any(x => x.Year == viewModel.Year);
-        if (exists)
-        {
-            ModelState.AddModelError("Year",
-                "Έχει ήδη καταχωρηθεί παιχνίδι για αυτή τη χρονιά.");
-        }
-        else
-        {
-            ModelState.Remove("Year");
-        }
-
-        exists = parentGameList.Any(x => x.Order == viewModel.Order);
-        if (exists)
-        {
-            ModelState.AddModelError("Order",
-                "Έχει ήδη καταχωρηθεί παιχνίδι για αυτή τη σειρά.");
-        }
-        else
-        {
-            ModelState.Remove("Order");
-        }
-        
         if (viewModel.HostId <= 0)
         {
             ModelState.AddModelError("HostId", "Το πεδίο απαιτείται.");
@@ -126,7 +102,6 @@ public class GameController : Controller
         return RedirectToAction("ParentGameList");
     }
 
-
     [Authorize(Roles = "Admin,Manager")]
     [HttpGet("edit-parent-game/{gameYear}")]
     public async Task<IActionResult> EditParentGame(short gameYear)
@@ -147,7 +122,6 @@ public class GameController : Controller
 
         return RedirectToAction("ParentGameList");
     }
-
 
     [Authorize(Roles = "Admin,Manager")]
     [HttpPost("edit-parent-game/{gameYear}")]
@@ -171,17 +145,15 @@ public class GameController : Controller
 
         return RedirectToAction("Dashboard", "Home");
     }
-
-
+    
     [Authorize(Roles = "Admin")]
     [HttpGet("manage-parent-gaems")]
-    public async Task<IActionResult> ParentGameManagement(int pageIndex = 1)
+    public async Task<IActionResult> ParentGameManagement(int pageNumber = 1, int pageSize = 10)
     {
-        var viewModel = await _gameService.GetAllGames();
+        var viewModel = await _gameService.GetPaginatedGame(pageNumber, pageSize);
         return View(viewModel);
     }
-
-
+    
     [Authorize(Roles = "Admin,Manager")]
     [HttpGet("manage-parent-game/{gameYear}")]
     public async Task<IActionResult> ParentGameActions(short gameYear)
@@ -196,8 +168,7 @@ public class GameController : Controller
             return RedirectToAction("ParentGameList");
         }
     }
-
-
+    
     [Authorize(Roles = "Admin,Manager")]
     [HttpGet("manage-game/{gameYear}/{gameTypeSlug}")]
     public async Task<IActionResult> GameActions(short gameYear, string gameTypeSlug)
