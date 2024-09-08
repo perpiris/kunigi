@@ -55,7 +55,7 @@
                                 @foreach (var game in Model.GameList)
                                 {
                                     <li class="list-group-item">
-                                        <a asp-controller="Game" asp-action="GamePuzzleList" asp-route-gameYear="@game.Year" asp-route-gameTypeSlug="@game.TypeSlug">@game.Type</a>
+                                        <a asp-controller="Game" asp-action="GamePuzzleList" asp-route-gameYear="@game.Year" asp-route-gameTypeSlug="@game.TypeSlug">@game.GameType</a>
                                     </li>
                                 }
                             </ul>

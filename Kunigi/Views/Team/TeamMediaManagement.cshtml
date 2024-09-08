@@ -1,7 +1,6 @@
 ﻿@model TeamMediaViewModel
 
 <style>
-
     .card {
         max-width: 200px;
         margin: 0 auto;
@@ -48,10 +47,9 @@
         box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.5);
     }
 
-    /* Add this new style for the icon */
     .delete-btn i {
         position: relative;
-        top: 1px; /* Adjust this value to center the icon vertically if needed */
+        top: 1px;
     }
 
     .upload-card .card-body {
@@ -98,31 +96,6 @@
         display: block;
     }
 
-    .nav-button {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background-color: rgba(0, 0, 0, 0.5);
-        color: white;
-        border: none;
-        font-size: 24px;
-        padding: 10px 15px;
-        cursor: pointer;
-        z-index: 1050;
-    }
-
-    .nav-button:hover {
-        background-color: rgba(0, 0, 0, 0.8);
-    }
-
-    .prev-button {
-        left: 10px;
-    }
-
-    .next-button {
-        right: 10px;
-    }
-
     .modal-content {
         background-color: #fff;
         border: 1px solid rgba(0,0,0,.2);
@@ -163,31 +136,6 @@
         opacity: 1;
         background: rgba(0, 0, 0, 0.9);
     }
-
-    .close {
-        position: absolute;
-        right: 15px;
-        top: 15px;
-        color: white;
-        font-size: 30px;
-        font-weight: bold;
-        z-index: 1050;
-        background: rgba(0, 0, 0, 0.5);
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-    }
-
-    .close:hover,
-    .close:focus {
-        color: #fff;
-        text-decoration: none;
-        opacity: 0.75;
-    }
 </style>
 
 @{
@@ -205,13 +153,12 @@
 </ol>
 
 <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
-
     <div class="col">
         <div class="card h-100 upload-card" data-bs-toggle="modal" data-bs-target="#uploadModal">
             <div class="card-body">
                 <i class="bi bi-plus-circle" style="font-size: 3rem;"></i>
                 <div class="mt-2">
-                    <small class="text-muted">Upload</small>
+                    <small class="text-muted">Προσθήκη</small>
                 </div>
             </div>
         </div>
@@ -229,6 +176,18 @@
                                 <source src="~/@mediaFile.Path" type="video/mp4">
                             </video>
                             <i class="bi bi-play-circle-fill play-icon"></i>
+                        </div>
+                    }
+                    else if (IsAudio(mediaFile.FileName))
+                    {
+                        <div class="audio-thumbnail" onclick="openMediaPreview('/@mediaFile.Path', 'audio')">
+                            <i class="bi bi-file-earmark-music"></i>
+                        </div>
+                    }
+                    else if (IsPdf(mediaFile.FileName))
+                    {
+                        <div class="pdf-thumbnail" onclick="openMediaPreview('/@mediaFile.Path', 'pdf')">
+                            <i class="bi bi-file-earmark-pdf"></i>
                         </div>
                     }
                     else
@@ -252,18 +211,18 @@
         <div class="modal-content">
             <form asp-action="UploadTeamMedia" asp-route-teamSlug="@Model.TeamSlug" method="post" enctype="multipart/form-data">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="uploadModalLabel">Ανέβασμα Υλικού</h5>
+                    <h5 class="modal-title" id="uploadModalLabel">Προσθήκη Υλικού</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="NewMediaFiles" class="form-label">Select files to upload:</label>
-                        <input type="file" class="form-control" id="NewMediaFiles" name="NewMediaFiles" multiple accept="image/*" required>
+                        <label for="NewMediaFiles" class="form-label">Επιλογή Αρχείων</label>
+                        <input type="file" class="form-control" id="NewMediaFiles" name="NewMediaFiles" multiple required>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Πίσω</button>
-                    <button type="submit" class="btn btn-primary">Upload</button>
+                    <button type="submit" class="btn btn-primary">Προσθήκη</button>
                 </div>
             </form>
         </div>
@@ -280,9 +239,11 @@
                     <source src="" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
+                <audio id="previewAudio" controls style="display: none; width: 100%;">
+                    Your browser does not support the audio element.
+                </audio>
+                <iframe id="previewPdf" style="display: none; width: 100%; height: 80vh; border: none;"></iframe>
             </div>
-            <button id="prevButton" class="nav-button prev-button">&lt;</button>
-            <button id="nextButton" class="nav-button next-button">&gt;</button>
         </div>
     </div>
 </div>
@@ -291,82 +252,79 @@
     let currentIndex = 0;
     const mediaItems = [];
 
-    document.querySelectorAll(".video-thumbnail, .card-img-top").forEach(item => {
+    document.querySelectorAll(".video-thumbnail, .card-img-top, .audio-thumbnail, .pdf-thumbnail").forEach(item => {
+        let type, src;
         if (item.classList.contains("video-thumbnail")) {
-            const videoSrc = item.querySelector("source").getAttribute("src");
-            mediaItems.push({ src: videoSrc, type: "video" });
+            src = item.querySelector("source").getAttribute("src");
+            type = "video";
+        } else if (item.classList.contains("audio-thumbnail")) {
+            src = item.closest('.card').querySelector('.card-title').getAttribute('title');
+            type = "audio";
+        } else if (item.classList.contains("pdf-thumbnail")) {
+            src = item.closest('.card').querySelector('.card-title').getAttribute('title');
+            type = "pdf";
         } else {
-            const imgSrc = item.getAttribute("src");
-            mediaItems.push({ src: imgSrc, type: "image" });
+            src = item.getAttribute("src");
+            type = "image";
         }
+        mediaItems.push({ src, type });
     });
 
     function openMediaPreview(src, type) {
         currentIndex = mediaItems.findIndex(item => item.src === src);
-        updatePreviewModal(type,src);
+        updatePreviewModal(type, src);
     }
 
     function updatePreviewModal(type, src) {
         const modal = document.getElementById('mediaPreviewModal');
         const previewImage = document.getElementById('previewImage');
         const previewVideo = document.getElementById('previewVideo');
+        const previewAudio = document.getElementById('previewAudio');
+        const previewPdf = document.getElementById('previewPdf');
 
-        if (type === 'image') {
-            previewImage.src = src;
-            previewImage.style.display = 'block';
-            previewVideo.style.display = 'none';
-            previewVideo.pause();
-        } else if (type === 'video') {
-            previewVideo.innerHTML = '';
-            let source = document.createElement('source');
-            source.src = src;
-            source.type = 'video/mp4';
-            previewVideo.appendChild(source);
-            previewVideo.style.display = 'block';
-            previewImage.style.display = 'none';
-            previewVideo.load();
-            previewVideo.play();
+        [previewImage, previewVideo, previewAudio, previewPdf].forEach(el => el.style.display = 'none');
+
+        switch (type) {
+            case 'image':
+                previewImage.src = src;
+                previewImage.style.display = 'block';
+                break;
+            case 'video':
+                previewVideo.innerHTML = '';
+                let videoSource = document.createElement('source');
+                videoSource.src = src;
+                videoSource.type = 'video/mp4';
+                previewVideo.appendChild(videoSource);
+                previewVideo.style.display = 'block';
+                previewVideo.load();
+                break;
+            case 'audio':
+                previewAudio.src = src;
+                previewAudio.style.display = 'block';
+                break;
+            case 'pdf':
+                previewPdf.src = src;
+                previewPdf.style.display = 'block';
+                break;
         }
 
-        if (!modal.classList.contains('show')) {
-            const modalInstance = new bootstrap.Modal(modal);
-            modalInstance.show();
-        }
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const prevButton = document.getElementById('prevButton');
-        const nextButton = document.getElementById('nextButton');
+    document.getElementById('mediaPreviewModal').addEventListener('hidden.bs.modal', function () {
+        const previewVideo = document.getElementById('previewVideo');
+        const previewAudio = document.getElementById('previewAudio');
 
-        if (mediaItems.length <= 1) {
-            prevButton.style.display = 'none';
-            nextButton.style.display = 'none';
-        } else {
-            prevButton.style.display = 'block';
-            nextButton.style.display = 'block';
+        if (previewVideo) {
+            previewVideo.pause();
+            previewVideo.currentTime = 0;
         }
-    });
 
-    document.getElementById('mediaPreviewModal').addEventListener('hidden.bs.modal', function () {
-        document.getElementById('previewVideo').pause();
-    });
-
-    document.getElementById('prevButton').addEventListener('click', function() {
-        document.getElementById('previewVideo').pause();
-        currentIndex = (currentIndex - 1 + mediaItems.length) % mediaItems.length;
-        const { type, src } = mediaItems[currentIndex];
-        updatePreviewModal(type, src);
-    });
-
-    document.getElementById('nextButton').addEventListener('click', function() {
-        document.getElementById('previewVideo').pause();
-        currentIndex = (currentIndex + 1) % mediaItems.length;
-        const { type, src } = mediaItems[currentIndex];
-        updatePreviewModal(type, src);
-    });
-
-    document.getElementById('mediaPreviewModal').addEventListener('hidden.bs.modal', function () {
-        document.getElementById('previewVideo').pause();
+        if (previewAudio) {
+            previewAudio.pause();
+            previewAudio.currentTime = 0;
+        }
     });
 </script>
 
@@ -376,6 +334,17 @@
     {
         string[] videoExtensions = [".mp4", ".avi", ".mov", ".wmv"];
         return videoExtensions.Any(ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
+
+    static bool IsAudio(string fileName)
+    {
+        string[] audioExtensions = [".mp3", ".wav", ".ogg", ".m4a"];
+        return audioExtensions.Any(ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
+
+    static bool IsPdf(string fileName)
+    {
+        return fileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase);
     }
 
 }

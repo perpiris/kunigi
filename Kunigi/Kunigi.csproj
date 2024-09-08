@@ -17,6 +17,7 @@
 
     <ItemGroup>
       <Folder Include="CustomAttributes\" />
+      <Folder Include="ViewModels\Puzzle\" />
       <Folder Include="wwwroot\media\" />
     </ItemGroup>
 

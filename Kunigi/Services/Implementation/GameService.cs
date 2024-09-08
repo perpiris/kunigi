@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Kunigi.Data;
 using Kunigi.Entities;
+using Kunigi.Enums;
 using Kunigi.Exceptions;
 using Kunigi.Mappings;
 using Kunigi.ViewModels.Common;
@@ -14,13 +15,11 @@ public class GameService : IGameService
 {
     private readonly DataContext _context;
     private readonly IMediaService _mediaService;
-    private readonly IPuzzleService _puzzleService;
 
-    public GameService(DataContext context, IMediaService mediaService, IPuzzleService puzzleService)
+    public GameService(DataContext context, IMediaService mediaService)
     {
         _context = context;
         _mediaService = mediaService;
-        _puzzleService = puzzleService;
     }
 
     public async Task<PaginatedViewModel<ParentGameDetailsViewModel>> GetPaginatedGame(int pageNumber = 1, int pageSize = 10)
@@ -112,7 +111,7 @@ public class GameService : IGameService
         {
             throw new NotFoundException();
         }
-        
+
         return gameDetails.ToGamePuzzleDetailsViewModel();
     }
 
@@ -166,7 +165,8 @@ public class GameService : IGameService
 
     public async Task<ParentGameEditViewModel> PrepareEditParentGameViewModel(short gameYear, ClaimsPrincipal user)
     {
-        throw new NotImplementedException();
+        var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
+        return parentGameDetails.ToParentGameEditViewModel();
     }
 
     public async Task EditParentGame(short gameYear, ParentGameEditViewModel viewModel, IFormFile profileImage, ClaimsPrincipal user)
@@ -222,6 +222,81 @@ public class GameService : IGameService
     {
         await CheckGameAndOwneship(gameYear, user);
         await _mediaService.DeleteMediaFile(mediafileId);
+    }
+
+    public async Task<GamePuzzleCreateViewModel> PrepareCreateGamePuzzleViewModel(short gameYear, string gameTypeSlug)
+    {
+        var gameDetails = await _context.Games
+            .Include(x => x.ParentGame)
+            .Include(x => x.GameType)
+            .FirstOrDefaultAsync(x => x.GameType.Slug == gameTypeSlug && x.ParentGame.Year == gameYear);
+
+        return new GamePuzzleCreateViewModel
+        {
+            GameId = gameDetails.GameId
+        };
+    }
+
+    public async Task CreateGamePuzzle(GamePuzzleCreateViewModel viewModel)
+    {
+        var gameDetails = await _context.Games
+            .Include(x => x.ParentGame)
+            .FirstOrDefaultAsync(x => viewModel.GameId == x.GameId);
+        
+        if (gameDetails == null)
+        {
+            throw new NotFoundException();
+        }
+
+        var maxOrder = await _context.Puzzles
+            .Where(x => x.GameId == viewModel.GameId)
+            .MaxAsync(x => (int?)x.Order) ?? 0;
+
+        var puzzle = new Puzzle
+        {
+            Game = gameDetails,
+            Question = viewModel.Question,
+            Answer = viewModel.Answer,
+            Order = maxOrder + 1,
+            MediaFiles = new List<PuzzleMedia>()
+        };
+
+        if (viewModel.QuestionMediaFiles is { Count: > 0 })
+        {
+            foreach (var mediaFile in viewModel.QuestionMediaFiles)
+            {
+                var mediaFilePath = await _mediaService.SaveMediaFile(mediaFile, $"games/{gameDetails.ParentGame.Year}", false);
+                
+                puzzle.MediaFiles.Add(new PuzzleMedia
+                {
+                    MediaType = PuzzleMediaType.Question,
+                    MediaFile = new MediaFile
+                    {
+                        Path = mediaFilePath
+                    }
+                });
+            }
+        }
+
+        if (viewModel.AnswerMediaFiles is { Count: > 0 })
+        {
+            foreach (var mediaFile in viewModel.AnswerMediaFiles)
+            {
+                var mediaFilePath = await _mediaService.SaveMediaFile(mediaFile, $"games/{gameDetails.ParentGame.Year}", false);
+                
+                puzzle.MediaFiles.Add(new PuzzleMedia
+                {
+                    MediaType = PuzzleMediaType.Answer,
+                    MediaFile = new MediaFile
+                    {
+                        Path = mediaFilePath
+                    }
+                });
+            }
+        }
+
+        _context.Puzzles.Add(puzzle);
+        await _context.SaveChangesAsync();
     }
 
     private async Task<ParentGame> CheckGameAndOwneship(short gameYear, ClaimsPrincipal user)

@@ -50,6 +50,59 @@ public class GameController : Controller
             return RedirectToAction("ParentGameList", "Game");
         }
     }
+    
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("manage-puzzle-list/{gameYear}/{gameTypeSlug}")]
+    public async Task<IActionResult> ManageGamePuzzleList(short gameYear, string gameTypeSlug)
+    {
+        try
+        {
+            var viewModel = await _gameService.GetGamePuzzleList(gameYear, gameTypeSlug);
+            return View(viewModel);
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("ParentGameList", "Game");
+        }
+    }
+    
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("create-puzzle-list/{gameYear}/{gameTypeSlug}")]
+    public async Task<IActionResult> CreateGamePuzzle(short gameYear, string gameTypeSlug)
+    {
+        try
+        {
+            var viewModel = await _gameService.PrepareCreateGamePuzzleViewModel(gameYear, gameTypeSlug);
+            return View(viewModel);
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("ParentGameList", "Game");
+        }
+    }
+    
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpPost("create-puzzle-list/{gameYear}/{gameTypeSlug}")]
+    public async Task<IActionResult> CreateGamePuzzle(short gameYear, string gameTypeSlug, GamePuzzleCreateViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+
+            return View(viewModel);
+        }
+
+        try
+        {
+            await _gameService.CreateGamePuzzle(viewModel);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+
+        return View();
+    }
 
     [Authorize(Roles = "Admin")]
     [HttpGet("create-parent-game")]

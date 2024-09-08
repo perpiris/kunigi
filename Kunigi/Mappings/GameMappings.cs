@@ -1,7 +1,7 @@
 ﻿using Kunigi.Entities;
+using Kunigi.Enums;
 using Kunigi.ViewModels.Common;
 using Kunigi.ViewModels.Game;
-using Kunigi.ViewModels.Puzzle;
 
 namespace Kunigi.Mappings;
 
@@ -35,6 +35,17 @@ public static class GameMappings
 
         return viewModel;
     }
+    
+    public static ParentGameEditViewModel ToParentGameEditViewModel(this ParentGame parentGameDetails)
+    {
+        var viewModel = new ParentGameEditViewModel
+        {
+            SubTitle = parentGameDetails.SubTitle,
+            Description = parentGameDetails.Description
+        };
+
+        return viewModel;
+    }
 
     public static GameDetailsViewModel ToGameDetailsViewModel(this Game gameDetails)
     {
@@ -43,7 +54,7 @@ public static class GameMappings
             Title = gameDetails.ParentGame.MainTitle,
             Description = gameDetails.Description,
             Year = gameDetails.ParentGame.Year,
-            Type = gameDetails.GameType.Description,
+            GameType = gameDetails.GameType.Description,
             TypeSlug = gameDetails.GameType.Slug
         };
 
@@ -74,7 +85,8 @@ public static class GameMappings
             PuzzleList = gameDetails.PuzzleList.Select(ToPuzzleDetailsViewModel).ToList()
         };
 
-        viewModel.PuzzleList = gameDetails.PuzzleList.Select(ToPuzzleDetailsViewModel).ToList();
+        viewModel.PuzzleList = gameDetails.PuzzleList.Select(ToPuzzleDetailsViewModel)
+            .OrderBy(x => x.Order).ToList();
 
         return viewModel;
     }
@@ -87,14 +99,13 @@ public static class GameMappings
             Order = puzzleDetails.Order,
             Question = puzzleDetails.Question,
             Answer = puzzleDetails.Answer,
-            Type = puzzleDetails.Type.ToString(),
-            QuestionMedia = puzzleDetails.MediaFiles?.Select(m => new MediaFileViewModel
+            QuestionMedia = puzzleDetails.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Question).Select(m => new MediaFileViewModel
             {
                 Id = m.MediaFile.MediaFileId,
                 FileName = Path.GetFileName(m.MediaFile.Path),
                 Path = m.MediaFile.Path
             }).ToList() ?? [],
-            AnswerMedia = puzzleDetails.MediaFiles?.Select(m => new MediaFileViewModel
+            AnswerMedia = puzzleDetails.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Answer).Select(m => new MediaFileViewModel
             {
                 Id = m.MediaFile.MediaFileId,
                 FileName = Path.GetFileName(m.MediaFile.Path),

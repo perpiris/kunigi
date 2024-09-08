@@ -1,6 +1,6 @@
 ﻿using Kunigi.ViewModels.Common;
 
-namespace Kunigi.ViewModels.Puzzle;
+namespace Kunigi.ViewModels.Game;
 
 public class PuzzleDetailsViewModel
 {

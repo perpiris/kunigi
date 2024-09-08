@@ -16,7 +16,6 @@ builder.Services.AddDbContext<DataContext>(opt =>
 
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IGameService, GameService>();
-builder.Services.AddScoped<IPuzzleService, PuzzleService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>

@@ -27,4 +27,8 @@ public interface IGameService
     Task AddGameMedia(short gameYear, List<IFormFile> files, ClaimsPrincipal user);
 
     Task DeleteGameMedia(short gameYear, int mediafileId, ClaimsPrincipal user);
+
+    Task<GamePuzzleCreateViewModel> PrepareCreateGamePuzzleViewModel(short gameYear, string gameTypeSlug);
+
+    Task CreateGamePuzzle(GamePuzzleCreateViewModel viewModel);
 }

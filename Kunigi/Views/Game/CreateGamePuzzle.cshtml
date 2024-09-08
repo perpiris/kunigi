@@ -1,0 +1,41 @@
+﻿@model GamePuzzleCreateViewModel
+
+@{
+    ViewData["Title"] = "Δημιουργία νέου Γρίφου";
+}
+
+<h2 class="mb-4 text-center">@ViewData["Title"]</h2>
+
+<div class="form-container-large">
+    @using (Html.BeginForm("CreateGamePuzzle", "Game", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.HiddenFor(x => x.GameId)
+        <div class="row">
+            <div class="col-12 mb-4">
+                <label asp-for="Question" class="form-label"></label>
+                <textarea asp-for="Question" class="form-control mb-2" rows="6"></textarea>
+                <span asp-validation-for="Question" class="text-danger"></span>
+            </div>
+            <div class="col-12 mb-4">
+                <label asp-for="Answer" class="form-label"></label>
+                <textarea asp-for="Answer" class="form-control mb-2" rows="6"></textarea>
+                <span asp-validation-for="Answer" class="text-danger"></span>
+            </div>
+            <div class="col-12 col-md-6 mb-4">
+                <label asp-for="QuestionMediaFiles" class="form-label mb-2"></label>
+                <input type="file" name="questionMediaFiles" class="form-control" multiple/>
+            </div>
+            <div class="col-12 col-md-6 mb-4">
+                <label asp-for="AnswerMediaFiles" class="form-label mb-2"></label>
+                <input type="file" name="answerMediaFiles" class="form-control" multiple/>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+        <a asp-controller="Team" asp-action="TeamManagement" class="btn btn-secondary">Πίσω</a>
+    }
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

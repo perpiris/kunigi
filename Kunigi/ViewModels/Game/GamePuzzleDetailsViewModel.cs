@@ -1,6 +1,4 @@
-﻿using Kunigi.ViewModels.Puzzle;
-
-namespace Kunigi.ViewModels.Game;
+﻿namespace Kunigi.ViewModels.Game;
 
 public class GamePuzzleDetailsViewModel
 {

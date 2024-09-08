@@ -11,8 +11,6 @@ public class Puzzle
     public string Answer { get; set; }
 
     public int GameId { get; set; }
-    
-    public PuzzleType Type { get; set; } = PuzzleType.Main;
 
     public int Order { get; set; }
     

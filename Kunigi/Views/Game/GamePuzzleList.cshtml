@@ -1,7 +1,8 @@
-﻿@model GamePuzzleDetailsViewModel
+﻿@using Kunigi.Enums
+@model GamePuzzleDetailsViewModel
 
 @{
-    ViewData["Title"] = Model.GameDetails.Type;
+    ViewData["Title"] = Model.GameDetails.GameType;
 }
 
 <ol class="breadcrumb mb-4">
@@ -11,39 +12,38 @@
     <li class="breadcrumb-item">
         <a asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@Model.GameDetails.Year">@($"{Model.GameDetails.Title} ({Model.GameDetails.Year})")</a>
     </li>
-    <li class="breadcrumb-item active">@Model.GameDetails.Type</li>
+    <li class="breadcrumb-item active">@Model.GameDetails.GameType</li>
 </ol>
 
 
-<div class="accordion">
-    @foreach (var puzzle in Model.PuzzleList)
-    {
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="mainHeading@(puzzle.Id)">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mainCollapse@(puzzle.Id)" aria-expanded="false" aria-controls="mainCollapse@(puzzle.Id)">
-                    @($"{puzzle.Order}ος Γρίφος")
-                </button>
-            </h2>
-            <div id="mainCollapse@(puzzle.Id)" class="accordion-collapse collapse" aria-labelledby="mainHeading@(puzzle.Id)" data-bs-parent="#mainPuzzleAccordion">
-                <div class="accordion-body">
-                    <div class="mb-3">
-                        <h5>Γρίφοος:</h5>
-                        <p>@puzzle.Question</p>
-                        @if (puzzle.QuestionMedia.Any())
-                        {
-                            <p>Question Media Files: @puzzle.QuestionMedia.Count</p>
-                        }
-                    </div>
-                    <div>
-                        <h5>Απάντηση:</h5>
-                        <p>@puzzle.Answer</p>
-                        @if (puzzle.AnswerMedia.Any())
-                        {
-                            <p>Answer Media Files: @puzzle.AnswerMedia.Count</p>
-                        }
-                    </div>
+@foreach (var puzzle in Model.PuzzleList)
+{
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">@($"{puzzle.Order}ος Γρίφος")</h5>
+            <span class="badge bg-secondary">@puzzle.Type</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 border-end">
+                    <h6 class="card-subtitle mb-2 text-muted">Γρίφος:</h6>
+                    <p class="card-text">@puzzle.Question</p>
+
+                    @if (puzzle.QuestionMedia.Any())
+                    {
+                        @await Html.PartialAsync("_MediaGallery", puzzle.QuestionMedia)
+                    }
+                </div>
+                <div class="col-md-6">
+                    <h6 class="card-subtitle mb-2 text-muted">Απάντηση:</h6>
+                    <p class="card-text">@puzzle.Answer</p>
+
+                    @if (puzzle.AnswerMedia.Any())
+                    {
+                        @await Html.PartialAsync("_MediaGallery", puzzle.AnswerMedia)
+                    }
                 </div>
             </div>
         </div>
-    }
-</div>
+    </div>
+}

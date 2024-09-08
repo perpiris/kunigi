@@ -4,7 +4,7 @@ public class GameDetailsViewModel
 {
     public short Year { get; set; }
     
-    public string Type { get; set; }
+    public string GameType { get; set; }
 
     public string TypeSlug { get; set; }
     

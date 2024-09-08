@@ -1,15 +1,15 @@
-﻿@model PuzzleListViewModel
+﻿@model GamePuzzleDetailsViewModel
 
 @{
     ViewData["Title"] = "Λίστα Γρίφων";
 }
 
 <div class="container mt-4">
-    <h3 class="text-center mb-4">Λίστα Γρίφων - @Model.GameType (@Model.ParentGameYear)</h3>
+    <h3 class="text-center mb-4">Λίστα Γρίφων - @Model.GameDetails.GameType (@Model.GameDetails.Year)</h3>
 
     <div class="mb-3">
         <a class="btn btn-primary"
-           asp-controller="Puzzle" asp-action="CreatePuzzle" asp-route-gameId="@Model.GameId">
+           asp-controller="Game" asp-action="CreateGamePuzzle" asp-route-gameTypeSlug="@Model.GameDetails.TypeSlug" asp-route-gameYear="@Model.GameDetails.Year">
             Δημιουργία νέου Γρίφου
         </a>
     </div>
@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    @if (Model.Puzzles.Count == 0)
+    @if (Model.PuzzleList.Count == 0)
     {
         <p class="text-center">Δεν υπάρχουν γρίφοι για αυτό το παιχνίδι.</p>
     }
@@ -43,9 +43,9 @@
                 </tr>
                 </thead>
                 <tbody>
-                @foreach (var puzzle in Model.Puzzles.OrderBy(p => p.Order))
+                @foreach (var puzzle in Model.PuzzleList)
                 {
-                    <tr class="puzzle-row" data-type="@puzzle.Type.ToLower()">
+                    <tr class="puzzle-row">
                         <td>@puzzle.Order</td>
                         <td>@puzzle.Type</td>
                         <td>
