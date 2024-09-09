@@ -46,11 +46,18 @@ public class TeamService : ITeamService
         };
     }
 
-    public async Task<TeamDetailsViewModel> GetTeamDetails(string teamSlug)
+    public async Task<TeamDetailsViewModel> GetTeamDetails(string teamSlug, ClaimsPrincipal user = null)
     {
-        if (string.IsNullOrEmpty(teamSlug))
+        if (user is not null)
         {
-            throw new ArgumentNullException(nameof(teamSlug));
+            await CheckTeamAndOwneship(teamSlug, user);
+        }
+        else
+        {
+            if (string.IsNullOrEmpty(teamSlug))
+            {
+                throw new ArgumentNullException(nameof(teamSlug));
+            }
         }
 
         teamSlug = teamSlug.Trim();
@@ -261,6 +268,8 @@ public class TeamService : ITeamService
         {
             throw new ArgumentNullException(nameof(teamSlug));
         }
+
+        ArgumentNullException.ThrowIfNull(user);
 
         teamSlug = teamSlug.Trim();
         var teamDetails = await _context.Teams

@@ -1,4 +1,4 @@
-﻿@model TeamMediaViewModel
+﻿@model ParentGameMediaViewModel
 
 <style>
     .card {
@@ -139,7 +139,7 @@
 </style>
 
 @{
-    ViewData["Title"] = $"{Model.Name}";
+    ViewData["Title"] = $"{Model.Ttitle} ({Model.YearSlug})";
 }
 
 <h2 class="mb-4">@ViewData["Title"]</h2>
@@ -189,7 +189,7 @@
                     }
                     <h6 class="card-title mb-0 text-truncate" title="@mediaFile.FileName">@mediaFile.FileName</h6>
                 </div>
-                <form asp-action="DeleteTeamMedia" asp-route-teamSlug="@Model.TeamSlug" asp-route-mediaId="@mediaFile.Id" method="post">
+                <form asp-action="DeleteParentGameMedia" asp-route-gameYear="@Model.YearSlug" asp-route-mediaId="@mediaFile.Id" method="post">
                     <button type="submit" class="delete-btn" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">
                         <i class="bi bi-trash"></i>
                     </button>
@@ -202,7 +202,7 @@
 <div class="modal" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form asp-action="UploadTeamMedia" asp-route-teamSlug="@Model.TeamSlug" method="post" enctype="multipart/form-data">
+            <form asp-action="UploadParentGameMedia" asp-route-gameYear="@Model.YearSlug" method="post" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h5 class="modal-title" id="uploadModalLabel">Προσθήκη Υλικού</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

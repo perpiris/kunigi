@@ -8,7 +8,7 @@ public interface ITeamService
 {
     Task<PaginatedViewModel<TeamDetailsViewModel>> GetPaginatedTeams(int pageNumber, int pageSize);
     
-    Task<TeamDetailsViewModel> GetTeamDetails(string teamSlug);
+    Task<TeamDetailsViewModel> GetTeamDetails(string teamSlug, ClaimsPrincipal user = null);
     
     Task CreateTeam(TeamCreateViewModel viewModel);
 

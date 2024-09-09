@@ -31,6 +31,14 @@ public class GameController : Controller
             var viewModel = await _gameService.GetParentGameDetails(gameYear);
             return View(viewModel);
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("ParentGameList");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("ParentGameList");
+        }
         catch (Exception)
         {
             return RedirectToAction("ParentGameList");
@@ -45,9 +53,17 @@ public class GameController : Controller
             var viewModel = await _gameService.GetGamePuzzleList(gameYear, gameTypeSlug);
             return View(viewModel);
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("ParentGameList");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("ParentGameList");
+        }
         catch (Exception)
         {
-            return RedirectToAction("ParentGameList", "Game");
+            return RedirectToAction("ParentGameList");
         }
     }
     
@@ -60,6 +76,19 @@ public class GameController : Controller
             var viewModel = await _gameService.GetGamePuzzleList(gameYear, gameTypeSlug);
             return View(viewModel);
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("ParentGameList");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("ParentGameList");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
         catch (Exception)
         {
             return RedirectToAction("ParentGameList", "Game");
@@ -67,7 +96,7 @@ public class GameController : Controller
     }
     
     [Authorize(Roles = "Admin,Manager")]
-    [HttpGet("create-puzzle-list/{gameYear}/{gameTypeSlug}")]
+    [HttpGet("create-game-puzzle/{gameYear}/{gameTypeSlug}")]
     public async Task<IActionResult> CreateGamePuzzle(short gameYear, string gameTypeSlug)
     {
         try
@@ -75,6 +104,19 @@ public class GameController : Controller
             var viewModel = await _gameService.PrepareCreateGamePuzzleViewModel(gameYear, gameTypeSlug);
             return View(viewModel);
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("ParentGameList");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
         catch (Exception)
         {
             return RedirectToAction("ParentGameList", "Game");
@@ -82,26 +124,37 @@ public class GameController : Controller
     }
     
     [Authorize(Roles = "Admin,Manager")]
-    [HttpPost("create-puzzle-list/{gameYear}/{gameTypeSlug}")]
+    [HttpPost("create-game-puzzle/{gameYear}/{gameTypeSlug}")]
     public async Task<IActionResult> CreateGamePuzzle(short gameYear, string gameTypeSlug, GamePuzzleCreateViewModel viewModel)
     {
         if (!ModelState.IsValid)
         {
-
             return View(viewModel);
         }
 
         try
         {
             await _gameService.CreateGamePuzzle(viewModel);
+            TempData["success"] = "Το παιχνίδι δημιουργήθηκε επιτυχώς.";
+            return RedirectToAction("GameActions", new { gameYear, gameTypeSlug });            
         }
-        catch (Exception e)
+        catch (NotFoundException)
         {
-            Console.WriteLine(e);
-            throw;
+            return RedirectToAction("ParentGameList");
         }
-
-        return View();
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("ParentGameList");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception)
+        {
+            return View(viewModel);
+        }
     }
 
     [Authorize(Roles = "Admin")]
@@ -144,15 +197,22 @@ public class GameController : Controller
         try
         {
             await _gameService.CreateParentGame(viewModel);
-            TempData["success"] = "Το παιχνίδι δημιουργήθηκε.";
+            TempData["success"] = "Το παιχνίδι δημιουργήθηκε επιτυχώς.";
+            return RedirectToAction("ParentGameManagement");
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("ParentGameManagement");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("ParentGameManagement");
         }
         catch (Exception)
         {
             viewModel = await _gameService.PrepareCreateParentGameViewModel(viewModel);
             return View(viewModel);
         }
-        
-        return RedirectToAction("ParentGameList");
     }
 
     [Authorize(Roles = "Admin,Manager")]
@@ -164,16 +224,23 @@ public class GameController : Controller
             var viewModel = await _gameService.PrepareEditParentGameViewModel(gameYear, User);
             return View(viewModel);
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
         catch (UnauthorizedOperationException)
         {
-            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού.";
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)
         {
-            return RedirectToAction("ParentGameList");
+            return RedirectToAction("Dashboard", "Home");
         }
-
-        return RedirectToAction("ParentGameList");
     }
 
     [Authorize(Roles = "Admin,Manager")]
@@ -181,27 +248,93 @@ public class GameController : Controller
     public async Task<IActionResult> EditParentGame(short gameYear,
         ParentGameEditViewModel viewModel, IFormFile profileImage)
     {
+        if (!ModelState.IsValid) return View(viewModel);
+        
         try
         {
             await _gameService.EditParentGame(gameYear, viewModel, profileImage, User);
             TempData["success"] = "Το παιχνίδι επεξεργάστηκε επιτυχώς.";
             return RedirectToAction("ParentGameActions", new { gameYear });
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
         catch (UnauthorizedOperationException)
         {
-            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception)
+        {
+            return View(viewModel);
+        }
+    }
+    
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("edit-game/{gameYear}/{gameTypeSlug}")]
+    public async Task<IActionResult> EditGame(short gameYear, string gameTypeSlug)
+    {
+        try
+        {
+            var viewModel = await _gameService.PrepareEditGameViewModel(gameYear, gameTypeSlug, User);
+            return View(viewModel);
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-
-        return RedirectToAction("Dashboard", "Home");
+    }
+    
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpPost("edit-game/{gameYear}/{gameTypeSlug}")]
+    public async Task<IActionResult> EditGame(short gameYear, string gameTypeSlug, GameEditViewModel viewModel)
+    {
+        try
+        {
+            await _gameService.EditGame(gameYear, gameTypeSlug, viewModel, User);
+            TempData["success"] = "Το παιχνίδι επεξεργάστηκε επιτυχώς.";
+            return RedirectToAction("GameActions", new { gameYear, gameTypeSlug });
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception)
+        {
+            return View(viewModel);
+        }
     }
     
     [Authorize(Roles = "Admin")]
     [HttpGet("manage-parent-gaems")]
-    public async Task<IActionResult> ParentGameManagement(int pageNumber = 1, int pageSize = 10)
+    public async Task<IActionResult> ParentGameManagement(int pageNumber = 1, int pageSize = 15)
     {
         var viewModel = await _gameService.GetPaginatedGame(pageNumber, pageSize);
         return View(viewModel);
@@ -213,12 +346,107 @@ public class GameController : Controller
     {
         try
         {
-            var viewModel = await _gameService.GetParentGameDetails(gameYear);
+            var viewModel = await _gameService.GetParentGameDetails(gameYear, User);
             return View(viewModel);
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
+    }
+    
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("manage-parent-game-media/{gameYear}")]
+    public async Task<IActionResult> ParentGameMediaManagement(short gameYear)
+    {
+        try
+        {
+            var viewModel = await _gameService.GetParentGameMEdia(gameYear, User);
+            return View(viewModel);
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)
         {
-            return RedirectToAction("ParentGameList");
+            return RedirectToAction("Dashboard", "Home");
+        }
+    }
+
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpPost("upload-team-media/{gameYear}")]
+    public async Task<IActionResult> UploadParentGameMedia(short gameYear, ParentGameMediaViewModel viewModel)
+    {
+        try
+        {
+            await _gameService.AddParentGameMedia(gameYear, viewModel.NewMediaFiles, User);
+            TempData["success"] = "Τα αρχεία ανέβηκαν επιτυχώς.";
+            return RedirectToAction("ParentGameMediaManagement", new { gameYear });
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+    }
+
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpPost("delete-parent-game-media/{gameYear}")]
+    public async Task<IActionResult> DeleteParentGameMedia(short gameYear, int mediaId)
+    {
+        try
+        {
+            await _gameService.DeleteParentGameMedia(gameYear, mediaId, User);
+            TempData["success"] = "Τα αρχείο διαγράφηκε επιτυχώς.";
+            return RedirectToAction("ParentGameMediaManagement", new { gameYear });
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("Dashboard", "Home");
         }
     }
     
@@ -228,12 +456,21 @@ public class GameController : Controller
     {
         try
         {
-            var viewModel = await _gameService.GetGameDetails(gameYear, gameTypeSlug);
+            var viewModel = await _gameService.GetGameDetails(gameYear, gameTypeSlug, User);
             return View(viewModel);
         }
-        catch (Exception)
+        catch (NotFoundException)
         {
-            return RedirectToAction("ParentGameList");
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
         }
     }
 }

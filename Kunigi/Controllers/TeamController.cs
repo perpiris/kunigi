@@ -31,6 +31,14 @@ public class TeamController : Controller
             var viewModel = await _teamService.GetTeamDetails(teamSlug);
             return View(viewModel);
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("TeamList");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("TeamList");
+        }
         catch (Exception)
         {
             return RedirectToAction("TeamList");
@@ -50,10 +58,16 @@ public class TeamController : Controller
     {
         if (!ModelState.IsValid) return View(viewModel);
 
-        await _teamService.CreateTeam(viewModel);
-        TempData["success"] = "Η ομάδα δημιουργήθηκε.";
-
-        return RedirectToAction("TeamManagement");
+        try
+        {
+            await _teamService.CreateTeam(viewModel);
+            TempData["success"] = "Η ομάδα δημιουργήθηκε.";
+            return RedirectToAction("TeamManagement");
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("TeamManagement");
+        }
     }
 
     [Authorize(Roles = "Admin,Manager")]
@@ -65,6 +79,14 @@ public class TeamController : Controller
             var viewModel = await _teamService.PrepareEditTeamViewModel(teamSlug, User);
             return View(viewModel);
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
         catch (UnauthorizedOperationException)
         {
             TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
@@ -72,7 +94,7 @@ public class TeamController : Controller
         }
         catch (Exception)
         {
-            return RedirectToAction("TeamActions", new { teamSlug });
+            return RedirectToAction("Dashboard", "Home");
         }
     }
 
@@ -80,11 +102,21 @@ public class TeamController : Controller
     [HttpPost("edit-team/{teamSlug}")]
     public async Task<IActionResult> EditTeam(string teamSlug, TeamEditViewModel viewModel, IFormFile profileImage)
     {
+        if (!ModelState.IsValid) return View(viewModel);
+        
         try
         {
             await _teamService.EditTeam(teamSlug, viewModel, profileImage, User);
             TempData["success"] = "Η ομάδα επεξεργάστηκε επιτυχώς.";
             return RedirectToAction("TeamActions", new { teamSlug });
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (UnauthorizedOperationException)
         {
@@ -93,13 +125,13 @@ public class TeamController : Controller
         }
         catch (Exception)
         {
-            return RedirectToAction("TeamActions", new { teamSlug });
+            return View(viewModel);
         }
     }
     
     [Authorize(Roles = "Admin")]
     [HttpGet("manage-teams")]
-    public async Task<IActionResult> TeamManagement(int pageNumber = 1, int pageSize = 10)
+    public async Task<IActionResult> TeamManagement(int pageNumber = 1, int pageSize = 15)
     {
         var viewModel = await _teamService.GetPaginatedTeams(pageNumber, pageSize);
         return View(viewModel);
@@ -113,6 +145,14 @@ public class TeamController : Controller
         {
             var viewModel = await _teamService.PrepareTeamManagerEditViewModel(teamSlug, User);
             return View(viewModel);
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (UnauthorizedOperationException)
         {
@@ -136,6 +176,14 @@ public class TeamController : Controller
             TempData["success"] = "Ο χρήστης προστέθηκε με επιτυχία.";
             return RedirectToAction("EditTeamManagers", new { teamSlug });
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
         catch (UnauthorizedOperationException)
         {
             TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
@@ -157,6 +205,14 @@ public class TeamController : Controller
             TempData["success"] = "Ο χρήστης αφαιρέθηκε με επιτυχία.";
             return RedirectToAction("EditTeamManagers", new { teamSlug });
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
         catch (UnauthorizedOperationException)
         {
             TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
@@ -164,7 +220,7 @@ public class TeamController : Controller
         }
         catch (Exception)
         {
-            return RedirectToAction("EditTeamManagers", new { teamSlug });
+            return RedirectToAction("Dashboard", "Home");
         }
     }
 
@@ -177,6 +233,14 @@ public class TeamController : Controller
             var viewModel = await _teamService.GetTeamMedia(teamSlug, User);
             return View(viewModel);
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
         catch (UnauthorizedOperationException)
         {
             TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
@@ -184,7 +248,7 @@ public class TeamController : Controller
         }
         catch (Exception)
         {
-            return RedirectToAction("TeamMediaManagement", new { teamSlug });
+            return RedirectToAction("Dashboard", "Home");
         }
     }
 
@@ -198,6 +262,14 @@ public class TeamController : Controller
             TempData["success"] = "Τα αρχεία ανέβηκαν επιτυχώς.";
             return RedirectToAction("TeamMediaManagement", new { teamSlug });
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
         catch (UnauthorizedOperationException)
         {
             TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
@@ -205,7 +277,7 @@ public class TeamController : Controller
         }
         catch (Exception)
         {
-            return RedirectToAction("TeamMediaManagement", new { teamSlug });
+            return RedirectToAction("Dashboard", "Home");
         }
     }
 
@@ -219,6 +291,14 @@ public class TeamController : Controller
             TempData["success"] = "Τα αρχείο διαγράφηκε επιτυχώς.";
             return RedirectToAction("TeamMediaManagement", new { teamSlug });
         }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
         catch (UnauthorizedOperationException)
         {
             TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
@@ -226,7 +306,7 @@ public class TeamController : Controller
         }
         catch (Exception)
         {
-            return RedirectToAction("TeamMediaManagement", new { teamSlug });
+            return RedirectToAction("Dashboard", "Home");
         }
     }
 
@@ -236,10 +316,23 @@ public class TeamController : Controller
     {
         try
         {
-            var viewModel = await _teamService.GetTeamDetails(teamSlug);
+            var viewModel = await _teamService.GetTeamDetails(teamSlug, User);
             return View(viewModel);
         }
         catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }

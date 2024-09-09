@@ -32,7 +32,8 @@ public class GameService : IGameService
             .Take(pageSize)
             .ToListAsync();
 
-        var gameViewModels = games.Select(x => x.ToParentGameDetailsViewModel()).ToList();
+        var gameViewModels = games.Select(x => x.ToParentGameDetailsViewModel())
+            .OrderByDescending(x => x.Year).ToList();
 
         return new PaginatedViewModel<ParentGameDetailsViewModel>
         {
@@ -43,21 +44,22 @@ public class GameService : IGameService
         };
     }
 
-    public async Task<ParentGameDetailsViewModel> GetParentGameDetails(short gameYear)
+    public async Task<ParentGameDetailsViewModel> GetParentGameDetails(short gameYear, ClaimsPrincipal user = null)
     {
-        if (gameYear <= default(short))
+        ParentGame parentGameDetails;
+        if (user is not null)
         {
-            throw new ArgumentNullException(nameof(gameYear));
+            parentGameDetails = await CheckGameAndOwneship(gameYear, user);
         }
+        else
+        {
+            if (gameYear <= default(short))
+            {
+                throw new ArgumentNullException(nameof(gameYear));
+            }
 
-        var parentGameDetails = await _context.ParentGames
-            .Include(x => x.Host)
-            .Include(x => x.Winner)
-            .Include(x => x.Games)
-            .ThenInclude(x => x.GameType)
-            .Include(x => x.MediaFiles)
-            .ThenInclude(x => x.MediaFile)
-            .FirstOrDefaultAsync(x => x.Year == gameYear);
+            parentGameDetails = await GetFullParentGameDetails(gameYear);
+        }
 
         if (parentGameDetails is null)
         {
@@ -67,23 +69,29 @@ public class GameService : IGameService
         return parentGameDetails.ToParentGameDetailsViewModel(true);
     }
 
-    public async Task<GameDetailsViewModel> GetGameDetails(short gameYear, string gameTypeSlug)
+    public async Task<GameDetailsViewModel> GetGameDetails(short gameYear, string gameTypeSlug, ClaimsPrincipal user = null)
     {
-        if (gameYear <= default(short))
+        ParentGame parentGameDetails;
+        if (user is not null)
         {
-            throw new ArgumentNullException(nameof(gameYear));
+            parentGameDetails = await CheckGameAndOwneship(gameYear, user);
         }
-
-        if (string.IsNullOrEmpty(gameTypeSlug))
+        else
         {
-            throw new ArgumentNullException(nameof(gameTypeSlug));
+            if (gameYear <= default(short))
+            {
+                throw new ArgumentNullException(nameof(gameYear));
+            }
+            
+            if (string.IsNullOrEmpty(gameTypeSlug))
+            {
+                throw new ArgumentNullException(nameof(gameTypeSlug));
+            }
+            
+            parentGameDetails = await GetFullParentGameDetails(gameYear);
         }
-
-        var gameDetails = await _context.Games
-            .Include(x => x.ParentGame)
-            .Include(x => x.GameType)
-            .FirstOrDefaultAsync(x => x.ParentGame.Year == gameYear && x.GameType.Slug == gameTypeSlug.Trim());
-
+        
+        var gameDetails = parentGameDetails.Games.SingleOrDefault(x => x.GameType.Slug == gameTypeSlug);
         return gameDetails.ToGameDetailsViewModel();
     }
 
@@ -168,6 +176,13 @@ public class GameService : IGameService
         var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
         return parentGameDetails.ToParentGameEditViewModel();
     }
+    
+    public async Task<GameEditViewModel> PrepareEditGameViewModel(short gameYear, string gameTypeSlug, ClaimsPrincipal user)
+    {
+        var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
+        var gameDetails = parentGameDetails.Games.FirstOrDefault(x => x.GameType.Slug == gameTypeSlug.Trim());
+        return gameDetails.ToGameEditViewModel();
+    }
 
     public async Task EditParentGame(short gameYear, ParentGameEditViewModel viewModel, IFormFile profileImage, ClaimsPrincipal user)
     {
@@ -186,18 +201,30 @@ public class GameService : IGameService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<ParentGameMediaViewModel> GetTeamMedia(short gameYear, ClaimsPrincipal user)
+    public async Task EditGame(short gameYear, string gameTypeSlug, GameEditViewModel viewModel, ClaimsPrincipal user)
     {
         var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
-        var parentGameMedia = await _context.ParentGameMediaFiles
-            .Include(x => x.MediaFile)
-            .Where(x => x.ParentGameId == parentGameDetails.ParentGameId).ToListAsync();
+        var gameDetails = parentGameDetails.Games.FirstOrDefault(x => x.GameType.Slug == gameTypeSlug.Trim());
+        
+        if (gameDetails == null)
+        {
+            throw new NotFoundException();
+        }
+        
+        gameDetails.Description = viewModel.Description;
+        
+        _context.Games.Update(gameDetails);
+        await _context.SaveChangesAsync();
+    }
 
-        var viewModel = GameMappings.ToGameMediaViewModel(gameYear, parentGameMedia);
+    public async Task<ParentGameMediaViewModel> GetParentGameMEdia(short gameYear, ClaimsPrincipal user)
+    {
+        var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
+        var viewModel = parentGameDetails.ToParentGameMediaViewModel();
         return viewModel;
     }
 
-    public async Task AddGameMedia(short gameYear, List<IFormFile> files, ClaimsPrincipal user)
+    public async Task AddParentGameMedia(short gameYear, List<IFormFile> files, ClaimsPrincipal user)
     {
         var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
 
@@ -218,7 +245,7 @@ public class GameService : IGameService
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteGameMedia(short gameYear, int mediafileId, ClaimsPrincipal user)
+    public async Task DeleteParentGameMedia(short gameYear, int mediafileId, ClaimsPrincipal user)
     {
         await CheckGameAndOwneship(gameYear, user);
         await _mediaService.DeleteMediaFile(mediafileId);
@@ -305,12 +332,10 @@ public class GameService : IGameService
         {
             throw new ArgumentNullException(nameof(gameYear));
         }
+        
+        ArgumentNullException.ThrowIfNull(user);
 
-        var parentGameDetails = await _context.ParentGames
-            .Include(x => x.Host)
-            .ThenInclude(x => x.Managers)
-            .FirstOrDefaultAsync(x => x.Year == gameYear);
-
+        var parentGameDetails = await GetFullParentGameDetails(gameYear);
         if (parentGameDetails is null)
         {
             throw new NotFoundException();
@@ -326,5 +351,18 @@ public class GameService : IGameService
         }
 
         return parentGameDetails;
+    }
+
+    private async Task<ParentGame> GetFullParentGameDetails(short gameYear)
+    {
+        return await _context.ParentGames
+            .Include(x => x.Host)
+            .ThenInclude(team => team.Managers)
+            .Include(x => x.Winner)
+            .Include(x => x.Games)
+            .ThenInclude(x => x.GameType)
+            .Include(x => x.MediaFiles)
+            .ThenInclude(x => x.MediaFile)
+            .FirstOrDefaultAsync(x => x.Year == gameYear);
     }
 }

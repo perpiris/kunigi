@@ -1,5 +1,4 @@
-﻿@using Kunigi.Enums
-@model GamePuzzleDetailsViewModel
+﻿@model GamePuzzleDetailsViewModel
 
 @{
     ViewData["Title"] = Model.GameDetails.GameType;
@@ -15,6 +14,7 @@
     <li class="breadcrumb-item active">@Model.GameDetails.GameType</li>
 </ol>
 
+<p class="lead mb-4">@Model.GameDetails.Description</p>
 
 @foreach (var puzzle in Model.PuzzleList)
 {

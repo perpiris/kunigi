@@ -36,17 +36,6 @@ public static class GameMappings
         return viewModel;
     }
     
-    public static ParentGameEditViewModel ToParentGameEditViewModel(this ParentGame parentGameDetails)
-    {
-        var viewModel = new ParentGameEditViewModel
-        {
-            SubTitle = parentGameDetails.SubTitle,
-            Description = parentGameDetails.Description
-        };
-
-        return viewModel;
-    }
-
     public static GameDetailsViewModel ToGameDetailsViewModel(this Game gameDetails)
     {
         var viewModel = new GameDetailsViewModel
@@ -56,22 +45,6 @@ public static class GameMappings
             Year = gameDetails.ParentGame.Year,
             GameType = gameDetails.GameType.Description,
             TypeSlug = gameDetails.GameType.Slug
-        };
-
-        return viewModel;
-    }
-
-    public static ParentGameMediaViewModel ToGameMediaViewModel(short gameYear, List<ParentGameMedia> parentGameMedia)
-    {
-        var viewModel = new ParentGameMediaViewModel
-        {
-            Year = gameYear,
-            MediaFiles = parentGameMedia.Select(x => new MediaFileViewModel
-            {
-                Id = x.MediaFile.MediaFileId,
-                FileName = Path.GetFileName(x.MediaFile.Path),
-                Path = x.MediaFile.Path
-            }).ToList()
         };
 
         return viewModel;
@@ -87,6 +60,47 @@ public static class GameMappings
 
         viewModel.PuzzleList = gameDetails.PuzzleList.Select(ToPuzzleDetailsViewModel)
             .OrderBy(x => x.Order).ToList();
+
+        return viewModel;
+    }
+
+    public static ParentGameEditViewModel ToParentGameEditViewModel(this ParentGame parentGameDetails)
+    {
+        var viewModel = new ParentGameEditViewModel
+        {
+            SubTitle = parentGameDetails.SubTitle,
+            Description = parentGameDetails.Description
+        };
+
+        return viewModel;
+    }
+
+    public static GameEditViewModel ToGameEditViewModel(this Game gameDetails)
+    {
+        var viewModel = new GameEditViewModel
+        {
+            Description = gameDetails.Description,
+            GameType = gameDetails.GameType.Description,
+            GameTypeSlug = gameDetails.GameType?.Slug,
+            GameYear = gameDetails.ParentGame.Year
+        };
+
+        return viewModel;
+    }
+
+    public static ParentGameMediaViewModel ToParentGameMediaViewModel(this ParentGame parentGameDetails)
+    {
+        var viewModel = new ParentGameMediaViewModel
+        {
+            YearSlug = parentGameDetails.Year.ToString(),
+            Ttitle = parentGameDetails.MainTitle,
+            MediaFiles = parentGameDetails.MediaFiles.Select(x => new MediaFileViewModel
+            {
+                Id = x.MediaFile.MediaFileId,
+                FileName = Path.GetFileName(x.MediaFile.Path),
+                Path = x.MediaFile.Path
+            }).ToList()
+        };
 
         return viewModel;
     }

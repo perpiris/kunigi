@@ -1,1 +1,27 @@
-﻿
+﻿@model GameEditViewModel
+
+@{
+    ViewData["Title"] = Model.GameType;
+}
+
+<h2 class="mb-4 text-center">@ViewData["Title"]</h2>
+
+<div class="form-container-large">
+    @using (Html.BeginForm("EditGame", "Game", FormMethod.Post))
+    {
+        <div class="row">
+            <div class="col-12 mb-4 form-group">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="6"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+        <a asp-controller="Game" asp-action="GameActions" asp-route-gameYear="@Model.GameYear" asp-route-gameTypeSlug="@Model.GameTypeSlug" class="btn btn-secondary">Πίσω</a>
+    }
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

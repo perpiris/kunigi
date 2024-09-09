@@ -47,9 +47,6 @@ else
                 <a asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year"
                    class="text-decoration-none">
                     <div class="card h-100 game-card">
-                        <div class="card-body">
-                            <h6 class="card-title text-center">@($"{game.MainTitle} ({game.Year})")</h6>
-                        </div>
                         <div class="card-img-top-wrapper">
                             @if (string.IsNullOrEmpty(game.ProfileImageUrl))
                             {
@@ -61,7 +58,7 @@ else
                             }
                         </div>
                         <div class="card-body">
-                            <h6 class="card-title text-center">@game.SubTitle</h6>
+                            <h6 class="card-title text-center">@($"{game.MainTitle} ({game.Year})")</h6>
                         </div>
                     </div>
                 </a>

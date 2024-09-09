@@ -1,7 +1,7 @@
 ﻿@model GameDetailsViewModel
 
 @{
-    ViewData["Title"] = Model.Year;
+    ViewData["Title"] = $"{Model.Title} ({Model.Year}) - {Model.GameType}";
 }
 
 <style>
@@ -17,30 +17,12 @@
     }
 </style>
 
-<ol class="breadcrumb mb-4">
-    <li class="breadcrumb-item">
-        <a asp-controller="Home" asp-action="Dashboard">Διαχείριση</a>
-    </li>
-    <li class="breadcrumb-item">
-        <a asp-controller="Game" asp-action="ParentGameActions" asp-route-gameYear="@Model.Year">@($"{Model.Title} ({Model.Year})")</a>
-    </li>
-    <li class="breadcrumb-item active">@Model.GameType</li>
-</ol>
+<h2 class="mb-4">@ViewData["Title"]</h2>
+<h4 class="mb-4">Ενέργειες</h4>
 
 <div class="row row-cols-1 row-cols-md-4 g-4 mb-4">
     <div class="col">
-        <a asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@Model.Year"
-           class="card-link">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Προβολή</h5>
-                    <i class="bi bi-eye"></i>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col">
-        <a asp-controller="Game" asp-action="EditParentGame" asp-route-gameYear="@Model.Year"
+        <a asp-controller="Game" asp-action="EditGame" asp-route-gameYear="@Model.Year" asp-route-gameTypeSlug="@Model.TypeSlug"
            class="card-link">
             <div class="card h-100">
                 <div class="card-body">
@@ -57,17 +39,6 @@
                 <div class="card-body">
                     <h5 class="card-title">Γρίφοι</h5>
                     <i class="bi bi-puzzle"></i>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col">
-        <a asp-controller="Game" asp-action="GameMediaManagement" asp-route-gameYear="@Model.Year"
-           class="card-link">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Υλικό</h5>
-                    <i class="bi bi-card-image"></i>
                 </div>
             </div>
         </a>
