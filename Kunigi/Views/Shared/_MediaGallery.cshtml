@@ -3,60 +3,241 @@
 <div class="media-gallery">
     @foreach (var item in Model)
     {
-        <div class="media-item" data-id="@item.Id" data-type="@(IsImage(item.FileName) ? "image" : "video")" data-path="@Url.Content($"~/{item.Path}")">
-            @if (IsImage(item.FileName))
+        <div class="media-item" data-id="@item.Id" data-type="@GetMediaType(item.FileName)" data-path="@Url.Content($"~/{item.Path}")">
+            @switch (GetMediaType(item.FileName))
             {
-                <img src="@Url.Content($"~/{item.Path}")" alt="@item.FileName" class="thumbnail"/>
-            }
-            else if (IsVideo(item.FileName))
-            {
-                <div class="video-thumbnail">
-                    <video preload="metadata" muted>
-                        <source src="@Url.Content($"~/{item.Path}")" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                    <i class="fas fa-play-circle"></i>
-                </div>
+                case "image":
+                    <img src="@Url.Content($"~/{item.Path}")" alt="@item.FileName" class="thumbnail"/>
+                    break;
+                case "video":
+                    <div class="video-thumbnail">
+                        <video preload="metadata" muted>
+                            <source src="@Url.Content($"~/{item.Path}")" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    break;
+                case "audio":
+                    <div class="audio-thumbnail">
+                        <i class="bi bi-file-music"></i>
+                    </div>
+                    break;
+                case "pdf":
+                    <div class="pdf-thumbnail">
+                        <i class="bi bi-filetype-pdf"></i>
+                    </div>
+                    break;
             }
         </div>
     }
 </div>
 
 <div id="mediaModal" class="modal">
-    <span class="close">&times;</span>
-    <div class="modal-content">
-        <img id="modalImage" src="" alt="" style="display: none;">
-        <video id="modalVideo" controls style="display: none;">
-            <source src="" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
+    <div class="modal-container">
+        <span class="close">&times;</span>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="" style="display: none;">
+            <video id="modalVideo" controls style="display: none;">
+                <source src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <audio id="modalAudio" controls style="display: none;">
+                <source src="" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            <iframe id="modalPdf" src="" style="display: none;"></iframe>
+        </div>
+        <button id="prevBtn" class="nav-btn">&lt;</button>
+        <button id="nextBtn" class="nav-btn">&gt;</button>
     </div>
-    <button id="prevBtn" class="nav-btn">&lt;</button>
-    <button id="nextBtn" class="nav-btn">&gt;</button>
 </div>
 
 @functions {
 
-    static bool IsImage(string fileName)
+    string GetMediaType(string fileName)
     {
-        string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
-        return imageExtensions.Any(ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
-    }
-
-    static bool IsVideo(string fileName)
-    {
-        string[] videoExtensions = { ".mp4", ".avi", ".mov", ".wmv" };
-        return videoExtensions.Any(ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+        string extension = fileName.Substring(fileName.LastIndexOf('.') + 1).ToLowerInvariant();
+        switch (extension)
+        {
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "gif":
+            case "bmp":
+                return "image";
+            case "mp4":
+            case "avi":
+            case "mov":
+            case "wmv":
+                return "video";
+            case "mp3":
+            case "wav":
+            case "ogg":
+                return "audio";
+            case "pdf":
+                return "pdf";
+            default:
+                return "unknown";
+        }
     }
 
 }
+
+<style>
+    .media-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .media-item {
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .thumbnail {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .video-thumbnail, .audio-thumbnail, .pdf-thumbnail {
+        position: relative;
+        width: 100%;
+        height: 150px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f0f0f0;
+    }
+
+    .video-thumbnail video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .video-thumbnail i, .audio-thumbnail i, .pdf-thumbnail i {
+        font-size: 3em;
+        color: #333;
+    }
+
+    .audio-thumbnail span, .pdf-thumbnail span {
+        position: absolute;
+        bottom: 5px;
+        left: 5px;
+        right: 5px;
+        font-size: 0.8em;
+        background-color: rgba(255,255,255,0.7);
+        padding: 2px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.9);
+        overflow: auto;
+    }
+
+    .modal-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: auto;
+        height: auto;
+        max-width: 90vw;
+        max-height: 90vh;
+    }
+
+    .modal-content img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .modal-content video {
+        max-width: 100%;
+        max-height: 80vh;
+        object-fit: contain;
+    }
+
+    .modal-content audio {
+        width: 300px;
+    }
+
+    .modal-content iframe {
+        width: 80vw;
+        height: 80vh;
+        border: none;
+    }
+
+    .close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+        z-index: 1002;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: #bbb;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .nav-btn {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(0,0,0,0.5);
+        color: white;
+        border: none;
+        padding: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        transition: 0.3s;
+        z-index: 1001;
+    }
+
+    #prevBtn {
+        left: 20px;
+    }
+
+    #nextBtn {
+        right: 20px;
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let modal = document.getElementById('mediaModal');
         let modalImg = document.getElementById('modalImage');
         let modalVideo = document.getElementById('modalVideo');
-        let modalVideoSource = modalVideo.querySelector('source');
+        let modalAudio = document.getElementById('modalAudio');
+        let modalPdf = document.getElementById('modalPdf');
         let closeBtn = document.getElementsByClassName('close')[0];
         let prevBtn = document.getElementById('prevBtn');
         let nextBtn = document.getElementById('nextBtn');
@@ -66,18 +247,55 @@
         function showMedia(index) {
             let item = mediaItems[index];
             let path = item.dataset.path;
-            let isVideo = item.dataset.type === 'video';
+            let type = item.dataset.type;
 
-            if (isVideo) {
-                modalVideoSource.src = path;
-                modalVideo.load();
-                modalVideo.style.display = 'block';
-                modalImg.style.display = 'none';
-            } else {
-                modalImg.src = path;
-                modalImg.style.display = 'block';
-                modalVideo.style.display = 'none';
-                modalVideo.pause();
+            modalImg.style.display = 'none';
+            modalVideo.style.display = 'none';
+            modalAudio.style.display = 'none';
+            modalPdf.style.display = 'none';
+
+            let modalContent = document.querySelector('.modal-content');
+            modalContent.style.width = 'auto';
+            modalContent.style.height = 'auto';
+
+            switch (type) {
+                case 'image':
+                    modalImg.src = path;
+                    modalImg.style.display = 'block';
+                    modalImg.onload = function() {
+                        let aspectRatio = this.naturalWidth / this.naturalHeight;
+                        let maxWidth = Math.min(this.naturalWidth, window.innerWidth * 0.9);
+                        let maxHeight = Math.min(this.naturalHeight, window.innerHeight * 0.9);
+
+                        if (aspectRatio > maxWidth / maxHeight) {
+                            modalContent.style.width = maxWidth + 'px';
+                            modalContent.style.height = (maxWidth / aspectRatio) + 'px';
+                        } else {
+                            modalContent.style.width = (maxHeight * aspectRatio) + 'px';
+                            modalContent.style.height = maxHeight + 'px';
+                        }
+                    };
+                    break;
+                case 'video':
+                    modalVideo.querySelector('source').src = path;
+                    modalVideo.load();
+                    modalVideo.style.display = 'block';
+                    modalContent.style.width = '80vw';
+                    modalContent.style.height = 'auto';
+                    break;
+                case 'audio':
+                    modalAudio.querySelector('source').src = path;
+                    modalAudio.load();
+                    modalAudio.style.display = 'block';
+                    modalContent.style.width = '300px';
+                    modalContent.style.height = 'auto';
+                    break;
+                case 'pdf':
+                    modalPdf.src = path;
+                    modalPdf.style.display = 'block';
+                    modalContent.style.width = '80vw';
+                    modalContent.style.height = '80vh';
+                    break;
             }
 
             currentIndex = index;
@@ -103,6 +321,7 @@
         closeBtn.onclick = function() {
             modal.style.display = 'none';
             modalVideo.pause();
+            modalAudio.pause();
         }
 
         // Keyboard navigation
@@ -131,111 +350,3 @@
         });
     });
 </script>
-
-<style>
-    .media-gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 20px;
-    }
-
-    .media-item {
-        cursor: pointer;
-        text-align: center;
-    }
-
-    .thumbnail {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-    }
-
-    .video-thumbnail {
-        position: relative;
-        width: 100%;
-        height: 150px;
-        overflow: hidden;
-    }
-
-    .video-thumbnail video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .video-thumbnail i {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 3em;
-        color: white;
-        pointer-events: none;
-    }
-
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.9);
-    }
-
-    .modal-content {
-        margin: auto;
-        display: block;
-        width: 80%;
-        max-width: 700px;
-    }
-
-    .modal-content img, .modal-content video {
-        width: 100%;
-        max-height: 80vh;
-        object-fit: contain;
-    }
-
-    .close {
-        position: absolute;
-        top: 15px;
-        right: 35px;
-        color: #f1f1f1;
-        font-size: 40px;
-        font-weight: bold;
-        transition: 0.3s;
-    }
-
-    .close:hover,
-    .close:focus {
-        color: #bbb;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .nav-btn {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background-color: rgba(0,0,0,0.5);
-        color: white;
-        border: none;
-        padding: 15px;
-        font-size: 24px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-    .nav-btn:hover {
-        background-color: rgba(0,0,0,0.8);
-    }
-
-    #prevBtn {
-        left: 20px;
-    }
-
-    #nextBtn {
-        right: 20px;
-    }
-</style>
