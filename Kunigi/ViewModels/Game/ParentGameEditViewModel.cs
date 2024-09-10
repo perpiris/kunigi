@@ -15,4 +15,6 @@ public class ParentGameEditViewModel
     
     [DisplayName("Αφίσα")]
     public string ProfileImageUrl { get; set; }
+    
+    public short GameYear { get; set; }
 }

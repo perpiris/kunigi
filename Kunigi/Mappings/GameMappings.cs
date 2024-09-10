@@ -31,6 +31,15 @@ public static class GameMappings
             viewModel.GameList = parentGameDetails.Games?
                 .Select(gameDetails => gameDetails.ToGameDetailsViewModel())
                 .ToList() ?? [];
+            
+            viewModel.MediaFiles = parentGameDetails.MediaFiles?
+                .Select(teamMedia => new MediaFileViewModel
+                {
+                    Id = teamMedia.MediaFile.MediaFileId,
+                    FileName = Path.GetFileName(teamMedia.MediaFile.Path),
+                    Path = teamMedia.MediaFile.Path
+                })
+                .ToList() ?? [];
         }
 
         return viewModel;
@@ -69,7 +78,8 @@ public static class GameMappings
         var viewModel = new ParentGameEditViewModel
         {
             SubTitle = parentGameDetails.SubTitle,
-            Description = parentGameDetails.Description
+            Description = parentGameDetails.Description,
+            GameYear = parentGameDetails.Year
         };
 
         return viewModel;

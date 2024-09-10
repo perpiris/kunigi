@@ -171,13 +171,13 @@ public class GameService : IGameService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<ParentGameEditViewModel> PrepareEditParentGameViewModel(short gameYear, ClaimsPrincipal user)
+    public async Task<ParentGameEditViewModel> PrepareParentGameEditViewModel(short gameYear, ClaimsPrincipal user)
     {
         var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
         return parentGameDetails.ToParentGameEditViewModel();
     }
     
-    public async Task<GameEditViewModel> PrepareEditGameViewModel(short gameYear, string gameTypeSlug, ClaimsPrincipal user)
+    public async Task<GameEditViewModel> PrepareGameEditViewModel(short gameYear, string gameTypeSlug, ClaimsPrincipal user)
     {
         var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
         var gameDetails = parentGameDetails.Games.FirstOrDefault(x => x.GameType.Slug == gameTypeSlug.Trim());

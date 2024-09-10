@@ -168,7 +168,7 @@
                         <div class="tab-pane" id="photos-tab-pane" role="tabpanel" aria-labelledby="photos-tab" tabindex="0">
                             @if (Model.MediaFiles != null && Model.MediaFiles.Any())
                             {
-                                @await Html.PartialAsync("_PhotoGallery", Model.MediaFiles)
+                                @await Html.PartialAsync("_MediaGallery", Model.MediaFiles)
                             }
                         </div>
                     </div>

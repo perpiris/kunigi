@@ -135,8 +135,8 @@ public class GameController : Controller
         try
         {
             await _gameService.CreateGamePuzzle(viewModel);
-            TempData["success"] = "Το παιχνίδι δημιουργήθηκε επιτυχώς.";
-            return RedirectToAction("GameActions", new { gameYear, gameTypeSlug });            
+            TempData["success"] = "Το γρίφος δημιουργήθηκε επιτυχώς.";
+            return RedirectToAction("ManageGamePuzzleList", new { gameYear, gameTypeSlug });            
         }
         catch (NotFoundException)
         {
@@ -221,7 +221,7 @@ public class GameController : Controller
     {
         try
         {
-            var viewModel = await _gameService.PrepareEditParentGameViewModel(gameYear, User);
+            var viewModel = await _gameService.PrepareParentGameEditViewModel(gameYear, User);
             return View(viewModel);
         }
         catch (NotFoundException)
@@ -281,7 +281,7 @@ public class GameController : Controller
     {
         try
         {
-            var viewModel = await _gameService.PrepareEditGameViewModel(gameYear, gameTypeSlug, User);
+            var viewModel = await _gameService.PrepareGameEditViewModel(gameYear, gameTypeSlug, User);
             return View(viewModel);
         }
         catch (NotFoundException)

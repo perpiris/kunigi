@@ -18,9 +18,9 @@ public interface IGameService
 
     Task CreateParentGame(ParentGameCreateViewModel viewModel);
     
-    Task<ParentGameEditViewModel> PrepareEditParentGameViewModel(short gameYear, ClaimsPrincipal user);
+    Task<ParentGameEditViewModel> PrepareParentGameEditViewModel(short gameYear, ClaimsPrincipal user);
     
-    Task<GameEditViewModel> PrepareEditGameViewModel(short gameYear, string gameTypeSlug, ClaimsPrincipal user);
+    Task<GameEditViewModel> PrepareGameEditViewModel(short gameYear, string gameTypeSlug, ClaimsPrincipal user);
 
     Task EditParentGame(short gameYear, ParentGameEditViewModel viewModel, IFormFile profileImage, ClaimsPrincipal user);
     

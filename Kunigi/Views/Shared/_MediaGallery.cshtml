@@ -1,167 +1,249 @@
 ﻿@model List<MediaFileViewModel>
 
+<div class="media-gallery">
+    @foreach (var item in Model)
+    {
+        <div class="media-item" data-id="@item.Id" data-type="@(IsImage(item.FileName) ? "image" : "video")" data-path="@Url.Content($"~/{item.Path}")">
+            @if (IsImage(item.FileName))
+            {
+                <img src="@Url.Content($"~/{item.Path}")" alt="@item.FileName" class="thumbnail"/>
+            }
+            else if (IsVideo(item.FileName))
+            {
+                <div class="video-thumbnail">
+                    <video preload="metadata" muted>
+                        <source src="@Url.Content($"~/{item.Path}")" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <i class="fas fa-play-circle"></i>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<div id="mediaModal" class="modal">
+    <span class="close">&times;</span>
+    <div class="modal-content">
+        <img id="modalImage" src="" alt="" style="display: none;">
+        <video id="modalVideo" controls style="display: none;">
+            <source src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <button id="prevBtn" class="nav-btn">&lt;</button>
+    <button id="nextBtn" class="nav-btn">&gt;</button>
+</div>
+
+@functions {
+
+    static bool IsImage(string fileName)
+    {
+        string[] imageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+        return imageExtensions.Any(ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
+
+    static bool IsVideo(string fileName)
+    {
+        string[] videoExtensions = { ".mp4", ".avi", ".mov", ".wmv" };
+        return videoExtensions.Any(ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+    }
+
+}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let modal = document.getElementById('mediaModal');
+        let modalImg = document.getElementById('modalImage');
+        let modalVideo = document.getElementById('modalVideo');
+        let modalVideoSource = modalVideo.querySelector('source');
+        let closeBtn = document.getElementsByClassName('close')[0];
+        let prevBtn = document.getElementById('prevBtn');
+        let nextBtn = document.getElementById('nextBtn');
+        let mediaItems = document.querySelectorAll('.media-item');
+        let currentIndex = 0;
+
+        function showMedia(index) {
+            let item = mediaItems[index];
+            let path = item.dataset.path;
+            let isVideo = item.dataset.type === 'video';
+
+            if (isVideo) {
+                modalVideoSource.src = path;
+                modalVideo.load();
+                modalVideo.style.display = 'block';
+                modalImg.style.display = 'none';
+            } else {
+                modalImg.src = path;
+                modalImg.style.display = 'block';
+                modalVideo.style.display = 'none';
+                modalVideo.pause();
+            }
+
+            currentIndex = index;
+            updateNavButtons();
+        }
+
+        function updateNavButtons() {
+            prevBtn.style.display = currentIndex > 0 ? 'block' : 'none';
+            nextBtn.style.display = currentIndex < mediaItems.length - 1 ? 'block' : 'none';
+        }
+
+        mediaItems.forEach(function(item, index) {
+            item.addEventListener('click', function() {
+                showMedia(index);
+                modal.style.display = 'block';
+            });
+        });
+
+        prevBtn.onclick = function() {
+            if (currentIndex > 0) {
+                showMedia(currentIndex - 1);
+            }
+        }
+
+        nextBtn.onclick = function() {
+            if (currentIndex < mediaItems.length - 1) {
+                showMedia(currentIndex + 1);
+            }
+        }
+
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+            modalVideo.pause();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (modal.style.display === 'block') {
+                if (e.key === 'ArrowLeft' && currentIndex > 0) {
+                    showMedia(currentIndex - 1);
+                } else if (e.key === 'ArrowRight' && currentIndex < mediaItems.length - 1) {
+                    showMedia(currentIndex + 1);
+                } else if (e.key === 'Escape') {
+                    closeBtn.click();
+                }
+            }
+        });
+
+        // Video thumbnail hover effect
+        document.querySelectorAll('.video-thumbnail').forEach(function(thumbnail) {
+            let video = thumbnail.querySelector('video');
+            thumbnail.addEventListener('mouseenter', function() {
+                video.play();
+            });
+            thumbnail.addEventListener('mouseleave', function() {
+                video.pause();
+                video.currentTime = 0;
+            });
+        });
+    });
+</script>
+
 <style>
-    #mediaGallery .card {
-        max-width: 200px;
-        margin: 0 auto;
+    .media-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
     }
 
-    #mediaGallery .card-img-top,
-    #mediaGallery .video-thumbnail {
-        height: 200px;
-        object-fit: cover;
+    .media-item {
         cursor: pointer;
-        position: relative;
+        text-align: center;
     }
 
-    #mediaGallery .video-thumbnail,
-    #mediaGallery .play-icon {
+    .thumbnail {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .video-thumbnail {
+        position: relative;
+        width: 100%;
+        height: 150px;
+        overflow: hidden;
+    }
+
+    .video-thumbnail video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .video-thumbnail i {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        font-size: 2rem;
+        font-size: 3em;
         color: white;
-        text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
     }
 
-    #mediaGallery {
-        position: relative;
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
         width: 100%;
-        max-height: 80vh;
-        overflow: hidden;
+        height: 100%;
+        background-color: rgba(0,0,0,0.9);
     }
 
-    #previewImage,
-    #previewVideo {
-        max-width: 100%;
-        max-height: 100%;
+    .modal-content {
         margin: auto;
         display: block;
+        width: 80%;
+        max-width: 700px;
     }
 
-    #mediaGallery .modal-content {
-        background-color: #fff;
-        border: 1px solid rgba(0, 0, 0, .2);
-        border-radius: .3rem;
-        outline: 0;
-    }
-
-    #mediaGallery .video-thumbnail video {
-        object-fit: cover;
+    .modal-content img, .modal-content video {
         width: 100%;
-        height: 100px;
+        max-height: 80vh;
+        object-fit: contain;
     }
 
     .close {
         position: absolute;
-        right: 15px;
         top: 15px;
-        color: white;
-        font-size: 30px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
         font-weight: bold;
-        z-index: 1050;
-        background: rgba(0, 0, 0, 0.5);
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
+        transition: 0.3s;
     }
 
     .close:hover,
     .close:focus {
-        color: #fff;
+        color: #bbb;
         text-decoration: none;
-        opacity: 0.75;
+        cursor: pointer;
+    }
+
+    .nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(0,0,0,0.5);
+        color: white;
+        border: none;
+        padding: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .nav-btn:hover {
+        background-color: rgba(0,0,0,0.8);
+    }
+
+    #prevBtn {
+        left: 20px;
+    }
+
+    #nextBtn {
+        right: 20px;
     }
 </style>
-
-<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-1" id="mediaGallery">
-    @foreach (var mediaFile in Model)
-    {
-        <div class="col">
-            <div class="card h-100">
-                <div class="card-body">
-                    @if (IsVideo(mediaFile.FileName))
-                    {
-                        <div class="video-thumbnail" onclick="openMediaPreview('@Url.Content(mediaFile.Path)', 'video')">
-                            <video preload="metadata" class="card-img-top">
-                                <source src="@Url.Content(mediaFile.Path)" type="video/mp4">
-                            </video>
-                            <i class="bi bi-play-circle-fill play-icon"></i>
-                        </div>
-                    }
-                    else
-                    {
-                        <img src="@Url.Content(mediaFile.Path)" class="card-img-top" alt="@mediaFile.FileName"
-                             onclick="openMediaPreview('@Url.Content(mediaFile.Path)', 'image')">
-                    }
-                </div>
-            </div>
-        </div>
-    }
-</div>
-
-<div class="modal" id="mediaPreviewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
-            <div class="media-container">
-                <img id="previewImage" src="" alt="Preview" style="display: none;">
-                <video id="previewVideo" controls style="display: none;">
-                    <source src="" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function openMediaPreview(src, type) {
-        updatePreviewModal(type, src);
-    }
-
-    function updatePreviewModal(type, src) {
-        const modal = document.getElementById('mediaPreviewModal');
-        const previewImage = document.getElementById('previewImage');
-        const previewVideo = document.getElementById('previewVideo');
-
-        if (type === 'image') {
-            previewImage.src = src;
-            previewImage.style.display = 'block';
-            previewVideo.style.display = 'none';
-            previewVideo.pause();
-        } else if (type === 'video') {
-            previewVideo.innerHTML = '';
-            let source = document.createElement('source');
-            source.src = src;
-            source.type = 'video/mp4';
-            previewVideo.appendChild(source);
-            previewVideo.style.display = 'block';
-            previewImage.style.display = 'none';
-            previewVideo.load();
-            previewVideo.play();
-        }
-
-        if (!modal.classList.contains('show')) {
-            const modalInstance = new bootstrap.Modal(modal);
-            modalInstance.show();
-        }
-    }
-
-    document.getElementById('mediaPreviewModal').addEventListener('hidden.bs.modal', function () {
-        document.getElementById('previewVideo').pause();
-    });
-</script>
-
-@functions {
-    static bool IsVideo(string fileName)
-    {
-        string[] videoExtensions = [".mp4", ".avi", ".mov", ".wmv"];
-        return videoExtensions.Any(ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
-    }
-}}
