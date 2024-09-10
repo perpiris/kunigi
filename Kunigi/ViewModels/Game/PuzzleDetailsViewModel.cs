@@ -12,7 +12,9 @@ public class PuzzleDetailsViewModel
     
     public string Type { get; set; }
     
-    public int Order { get; set; }
+    public short Order { get; set; }
+
+    public short Group { get; set; }
     
     public List<MediaFileViewModel> QuestionMedia { get; set; }
     

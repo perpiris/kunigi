@@ -1,54 +1,47 @@
-﻿@model List<MediaFileViewModel>
+﻿@model MediaFileViewModel
 
-<div class="media-gallery">
-    @foreach (var item in Model)
+<div class="media-item" data-id="@Model.Id" data-type="@GetMediaType(Model.FileName)" data-path="@Url.Content($"~/{Model.Path}")">
+    @switch (GetMediaType(Model.FileName))
     {
-        <div class="media-item" data-id="@item.Id" data-type="@GetMediaType(item.FileName)" data-path="@Url.Content($"~/{item.Path}")">
-            @switch (GetMediaType(item.FileName))
-            {
-                case "image":
-                    <img src="@Url.Content($"~/{item.Path}")" alt="@item.FileName" class="thumbnail"/>
-                    break;
-                case "video":
-                    <div class="video-thumbnail">
-                        <video preload="metadata" muted>
-                            <source src="@Url.Content($"~/{item.Path}")" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
-                    break;
-                case "audio":
-                    <div class="audio-thumbnail">
-                        <i class="bi bi-file-music"></i>
-                    </div>
-                    break;
-                case "pdf":
-                    <div class="pdf-thumbnail">
-                        <i class="bi bi-filetype-pdf"></i>
-                    </div>
-                    break;
-            }
-        </div>
+        case "image":
+            <img src="@Url.Content($"~/{Model.Path}")" alt="@Model.FileName" class="thumbnail"/>
+            break;
+        case "video":
+            <div class="video-thumbnail">
+                <video preload="metadata" muted>
+                    <source src="@Url.Content($"~/{Model.Path}")" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            break;
+        case "audio":
+            <div class="audio-thumbnail">
+                <i class="bi bi-file-music"></i>
+            </div>
+            break;
+        case "pdf":
+            <div class="pdf-thumbnail">
+                <i class="bi bi-filetype-pdf"></i>
+            </div>
+            break;
     }
 </div>
 
-<div id="mediaModal" class="modal">
+<div id="mediaModal_@Model.Id" class="modal">
     <div class="modal-container">
         <span class="close">&times;</span>
         <div class="modal-content">
-            <img id="modalImage" src="" alt="" style="display: none;">
-            <video id="modalVideo" controls style="display: none;">
+            <img id="modalImage_@Model.Id" src="" alt="" style="display: none;">
+            <video id="modalVideo_@Model.Id" controls style="display: none;">
                 <source src="" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-            <audio id="modalAudio" controls style="display: none;">
+            <audio id="modalAudio_@Model.Id" controls style="display: none;">
                 <source src="" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
-            <iframe id="modalPdf" src="" style="display: none;"></iframe>
+            <iframe id="modalPdf_@Model.Id" src="" style="display: none;"></iframe>
         </div>
-        <button id="prevBtn" class="nav-btn">&lt;</button>
-        <button id="nextBtn" class="nav-btn">&gt;</button>
     </div>
 </div>
 
@@ -66,16 +59,10 @@
             _ => "unknown"
         };
     }
-    
+
 }
 
 <style>
-    .media-gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 20px;
-    }
-
     .media-item {
         cursor: pointer;
         text-align: center;
@@ -193,57 +180,28 @@
         text-decoration: none;
         cursor: pointer;
     }
-
-    .nav-btn {
-        position: fixed;
-        top: 50%;
-        transform: translateY(-50%);
-        background-color: rgba(0,0,0,0.5);
-        color: white;
-        border: none;
-        padding: 15px;
-        font-size: 24px;
-        cursor: pointer;
-        transition: 0.3s;
-        z-index: 1001;
-    }
-
-    #prevBtn {
-        left: 20px;
-    }
-
-    #nextBtn {
-        right: 20px;
-    }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        let modal = document.getElementById('mediaModal');
-        let modalImg = document.getElementById('modalImage');
-        let modalVideo = document.getElementById('modalVideo');
-        let modalAudio = document.getElementById('modalAudio');
-        let modalPdf = document.getElementById('modalPdf');
-        let closeBtn = document.getElementsByClassName('close')[0];
-        let prevBtn = document.getElementById('prevBtn');
-        let nextBtn = document.getElementById('nextBtn');
-        let mediaItems = document.querySelectorAll('.media-item');
-        let currentIndex = 0;
+        let mediaItem = document.querySelector('.media-item[data-id="@Model.Id"]');
+        let modal = document.getElementById('mediaModal_@Model.Id');
+        let modalImg = document.getElementById('modalImage_@Model.Id');
+        let modalVideo = document.getElementById('modalVideo_@Model.Id');
+        let modalAudio = document.getElementById('modalAudio_@Model.Id');
+        let modalPdf = document.getElementById('modalPdf_@Model.Id');
+        let closeBtn = modal.querySelector('.close');
 
-        function showMedia(index) {
-            modalVideo.pause();
-            modalAudio.pause();
-            
-            let item = mediaItems[index];
-            let path = item.dataset.path;
-            let type = item.dataset.type;
+        function showMedia() {
+            let path = mediaItem.dataset.path;
+            let type = mediaItem.dataset.type;
 
             modalImg.style.display = 'none';
             modalVideo.style.display = 'none';
             modalAudio.style.display = 'none';
             modalPdf.style.display = 'none';
 
-            let modalContent = document.querySelector('.modal-content');
+            let modalContent = modal.querySelector('.modal-content');
             modalContent.style.width = 'auto';
             modalContent.style.height = 'auto';
 
@@ -287,37 +245,12 @@
                     modalContent.style.height = '80vh';
                     break;
             }
-
-            currentIndex = index;
         }
 
-        function updateNavigationButtons() {
-            if (mediaItems.length <= 1) {
-                prevBtn.style.display = 'none';
-                nextBtn.style.display = 'none';
-            } else {
-                prevBtn.style.display = 'block';
-                nextBtn.style.display = 'block';
-            }
-        }
-
-        mediaItems.forEach(function(item, index) {
-            item.addEventListener('click', function() {
-                showMedia(index);
-                modal.style.display = 'block';
-                updateNavigationButtons();
-            });
+        mediaItem.addEventListener('click', function() {
+            showMedia();
+            modal.style.display = 'block';
         });
-
-        prevBtn.onclick = function() {
-            currentIndex = (currentIndex - 1 + mediaItems.length) % mediaItems.length;
-            showMedia(currentIndex);
-        }
-
-        nextBtn.onclick = function() {
-            currentIndex = (currentIndex + 1) % mediaItems.length;
-            showMedia(currentIndex);
-        }
 
         closeBtn.onclick = function() {
             modal.style.display = 'none';
@@ -325,18 +258,18 @@
             modalAudio.pause();
         }
 
-        document.addEventListener('keydown', function(e) {
-            if (modal.style.display === 'block') {
-                if (e.key === 'ArrowLeft') {
-                    prevBtn.click();
-                } else if (e.key === 'ArrowRight') {
-                    nextBtn.click();
-                } else if (e.key === 'Escape') {
-                    closeBtn.click();
-                }
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                modalVideo.pause();
+                modalAudio.pause();
             }
         });
 
-        updateNavigationButtons();
+        document.addEventListener('keydown', function(e) {
+            if (modal.style.display === 'block' && e.key === 'Escape') {
+                closeBtn.click();
+            }
+        });
     });
 </script>

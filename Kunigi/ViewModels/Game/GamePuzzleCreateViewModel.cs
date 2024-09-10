@@ -15,10 +15,17 @@ public class GamePuzzleCreateViewModel
     [DisplayName("Περιγραφή Απάντησης")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
     public string Answer { get; set; }
+    
+    [DisplayName("Σειρά-Πακέτο Γρίφου")]
+    public short Group { get; set; }
 
     [DisplayName("Υλικό Γρίφου")]
     public List<IFormFile> QuestionMediaFiles { get; set; }
 
     [DisplayName("Υλικό Απάντησης")]
     public List<IFormFile> AnswerMediaFiles { get; set; }
+    
+    public string GameTypeSlug { get; set; }
+    
+    public short GameYear { get; set; }
 }

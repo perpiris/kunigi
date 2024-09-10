@@ -256,18 +256,20 @@ public class GameService : IGameService
         var gameDetails = await _context.Games
             .Include(x => x.ParentGame)
             .Include(x => x.GameType)
+            .Include(x => x.PuzzleList)
             .FirstOrDefaultAsync(x => x.GameType.Slug == gameTypeSlug && x.ParentGame.Year == gameYear);
-
-        return new GamePuzzleCreateViewModel
-        {
-            GameId = gameDetails.GameId
-        };
+        
+        var maxOrder = gameDetails.PuzzleList.Max(x => (short?)x.Order) ?? 0;
+        
+        var viewModel = gameDetails.ToGamePuzzleCreateViewModel((short)(maxOrder + 1));
+        return viewModel;
     }
 
     public async Task CreateGamePuzzle(GamePuzzleCreateViewModel viewModel)
     {
         var gameDetails = await _context.Games
             .Include(x => x.ParentGame)
+            .Include(x => x.PuzzleList)
             .FirstOrDefaultAsync(x => viewModel.GameId == x.GameId);
         
         if (gameDetails == null)
@@ -275,16 +277,15 @@ public class GameService : IGameService
             throw new NotFoundException();
         }
 
-        var maxOrder = await _context.Puzzles
-            .Where(x => x.GameId == viewModel.GameId)
-            .MaxAsync(x => (int?)x.Order) ?? 0;
-
+        var maxOrder = gameDetails.PuzzleList.Max(x => (short?)x.Order) ?? 0;
+        
         var puzzle = new Puzzle
         {
             Game = gameDetails,
             Question = viewModel.Question,
             Answer = viewModel.Answer,
-            Order = maxOrder + 1,
+            Order = maxOrder,
+            Group = viewModel.Group != maxOrder ? viewModel.Group : maxOrder,
             MediaFiles = new List<PuzzleMedia>()
         };
 

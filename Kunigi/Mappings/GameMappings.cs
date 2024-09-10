@@ -31,7 +31,7 @@ public static class GameMappings
             viewModel.GameList = parentGameDetails.Games?
                 .Select(gameDetails => gameDetails.ToGameDetailsViewModel())
                 .ToList() ?? [];
-            
+
             viewModel.MediaFiles = parentGameDetails.MediaFiles?
                 .Select(teamMedia => new MediaFileViewModel
                 {
@@ -44,7 +44,7 @@ public static class GameMappings
 
         return viewModel;
     }
-    
+
     public static GameDetailsViewModel ToGameDetailsViewModel(this Game gameDetails)
     {
         var viewModel = new GameDetailsViewModel
@@ -61,18 +61,51 @@ public static class GameMappings
 
     public static GamePuzzleDetailsViewModel ToGamePuzzleDetailsViewModel(this Game gameDetails)
     {
+        var puzzles = gameDetails.PuzzleList
+            .Select(p =>
+            {
+                return new PuzzleDetailsViewModel
+                {
+                    Id = p.PuzzleId,
+                    Order = p.Order,
+                    Question = p.Question,
+                    Answer = p.Answer,
+                    QuestionMedia = p.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Question).Select(m => new MediaFileViewModel
+                    {
+                        Id = m.MediaFile.MediaFileId,
+                        FileName = Path.GetFileName(m.MediaFile.Path),
+                        Path = m.MediaFile.Path
+                    }).ToList() ?? [],
+                    AnswerMedia = p.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Answer).Select(m => new MediaFileViewModel
+                    {
+                        Id = m.MediaFile.MediaFileId,
+                        FileName = Path.GetFileName(m.MediaFile.Path),
+                        Path = m.MediaFile.Path
+                    }).ToList() ?? [],
+                    Group = p.Group
+                };
+            })
+            .ToList();
+
+        var groupedPuzzles = puzzles
+            .GroupBy(p => p.Group)
+            .Select(g => new GamePuzzleGroupViewModel
+            {
+                GroupName = g.Key.ToString(),
+                Puzzles = g.OrderBy(p => p.Order).ToList()
+            })
+            .ToList();
+
         var viewModel = new GamePuzzleDetailsViewModel
         {
             GameDetails = gameDetails.ToGameDetailsViewModel(),
-            PuzzleList = gameDetails.PuzzleList.Select(ToPuzzleDetailsViewModel).ToList()
+            PuzzleList = puzzles.OrderBy(p => p.Order).ToList(),
+            GroupedPuzzles = groupedPuzzles
         };
-
-        viewModel.PuzzleList = gameDetails.PuzzleList.Select(ToPuzzleDetailsViewModel)
-            .OrderBy(x => x.Order).ToList();
 
         return viewModel;
     }
-
+    
     public static ParentGameEditViewModel ToParentGameEditViewModel(this ParentGame parentGameDetails)
     {
         var viewModel = new ParentGameEditViewModel
@@ -98,6 +131,19 @@ public static class GameMappings
         return viewModel;
     }
 
+    public static GamePuzzleCreateViewModel ToGamePuzzleCreateViewModel(this Game gameDetails, short order)
+    {
+        var viewModel = new GamePuzzleCreateViewModel
+        {
+            GameId = gameDetails.GameId,
+            Group = order,
+            GameTypeSlug = gameDetails.GameType.Slug,
+            GameYear = gameDetails.ParentGame.Year
+        };
+
+        return viewModel;
+    }
+
     public static ParentGameMediaViewModel ToParentGameMediaViewModel(this ParentGame parentGameDetails)
     {
         var viewModel = new ParentGameMediaViewModel
@@ -110,31 +156,6 @@ public static class GameMappings
                 FileName = Path.GetFileName(x.MediaFile.Path),
                 Path = x.MediaFile.Path
             }).ToList()
-        };
-
-        return viewModel;
-    }
-
-    private static PuzzleDetailsViewModel ToPuzzleDetailsViewModel(this Puzzle puzzleDetails)
-    {
-        var viewModel = new PuzzleDetailsViewModel
-        {
-            Id = puzzleDetails.PuzzleId,
-            Order = puzzleDetails.Order,
-            Question = puzzleDetails.Question,
-            Answer = puzzleDetails.Answer,
-            QuestionMedia = puzzleDetails.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Question).Select(m => new MediaFileViewModel
-            {
-                Id = m.MediaFile.MediaFileId,
-                FileName = Path.GetFileName(m.MediaFile.Path),
-                Path = m.MediaFile.Path
-            }).ToList() ?? [],
-            AnswerMedia = puzzleDetails.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Answer).Select(m => new MediaFileViewModel
-            {
-                Id = m.MediaFile.MediaFileId,
-                FileName = Path.GetFileName(m.MediaFile.Path),
-                Path = m.MediaFile.Path
-            }).ToList() ?? []
         };
 
         return viewModel;

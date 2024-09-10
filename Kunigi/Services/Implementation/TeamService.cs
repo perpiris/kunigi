@@ -82,7 +82,6 @@ public class TeamService : ITeamService
         var newTeam = new Team
         {
             Name = viewModel.Name.Trim(),
-            Description = "Δεν υπάρχει περιγραφή.",
             Slug = slug,
             IsActive = viewModel.IsActive
         };

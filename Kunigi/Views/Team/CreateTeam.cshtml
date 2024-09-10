@@ -9,13 +9,13 @@
 <div class="form-container">
     <form asp-action="CreateTeam" asp-controller="Team" method="post">
         <div class="form-group mb-4">
-            <label asp-for="Name"></label>
+            <label asp-for="Name" class="form-label"></label>
             <input asp-for="Name" class="form-control mb-2" maxlength="255"/>
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
         <div class="form-group mb-4">
             <div class="form-check">
-                <label asp-for="IsActive"></label>
+                <label asp-for="IsActive" class="form-label"></label>
                 <input asp-for="IsActive" class="form-check-input mb-2" type="checkbox"/>
                 <span asp-validation-for="IsActive" class="text-danger"></span>
             </div>
