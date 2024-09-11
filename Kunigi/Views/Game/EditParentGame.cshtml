@@ -5,10 +5,8 @@
 }
 
 <h2 class="mb-4 text-center">@ViewData["Title"]</h2>
-
 <div class="form-container-large">
-    @using (Html.BeginForm("EditParentGame", "Game", FormMethod.Post, new { enctype = "multipart/form-data" }))
-    {
+    <form asp-action="EditParentGame" asp-controller="Game" method="post" enctype="multipart/form-data">
         <div class="row">
             <div class="col-12 mb-4 form-group">
                 <label asp-for="SubTitle" class="form-label"></label>
@@ -25,10 +23,9 @@
                 <input type="file" name="profileImage" class="form-control" accept="image/png, image/jpeg"/>
             </div>
         </div>
-
         <button type="submit" class="btn btn-primary">Αποθήκευση</button>
         <a asp-controller="Game" asp-action="ParentGameActions" asp-route-gameYear="@Model.GameYear" class="btn btn-secondary">Πίσω</a>
-    }
+    </form>
 </div>
 
 @section Scripts {

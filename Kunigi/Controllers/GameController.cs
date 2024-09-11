@@ -156,6 +156,68 @@ public class GameController : Controller
             return View(viewModel);
         }
     }
+    
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("edit-game-puzzle/{puzzleId:int}")]
+    public async Task<IActionResult> EditGamePuzzle(int puzzleId)
+    {
+        try
+        {
+            var viewModel = await _gameService.PrepareEditGamePuzzleViewModel(puzzleId);
+            return View(viewModel);
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("ParentGameList");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("ParentGameList", "Game");
+        }
+    }
+    
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpPost("edit-game-puzzle/{puzzleId:int}")]
+    public async Task<IActionResult> EditGamePuzzle(int puzzleId, GamePuzzleEditViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(viewModel);
+        }
+
+        try
+        {
+            await _gameService.EditGamePuzzle(viewModel);
+            TempData["success"] = "Το γρίφος επεξεργάστηκε επιτυχώς.";
+            return RedirectToAction("ManageGamePuzzleList", new { viewModel.GameYear, viewModel.GameTypeSlug });            
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("ParentGameList");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("ParentGameList");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception)
+        {
+            return View(viewModel);
+        }
+    }
 
     [Authorize(Roles = "Admin")]
     [HttpGet("create-parent-game")]

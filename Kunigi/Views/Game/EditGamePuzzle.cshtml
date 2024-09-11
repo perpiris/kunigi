@@ -1,13 +1,15 @@
-﻿@model GamePuzzleCreateViewModel
+﻿@model GamePuzzleEditViewModel
 
 @{
-    ViewData["Title"] = "Δημιουργία νέου Γρίφου";
+    ViewData["Title"] = "επεξεργασία Γρίφου";
 }
 
 <h2 class="mb-4 text-center">@ViewData["Title"]</h2>
 <div class="form-container-large">
-    <form asp-action="CreateGamePuzzle" asp-controller="Game" method="post" enctype="multipart/form-data">
-        <input type="hidden" asp-for="GameId"/>
+    <form asp-action="EditGamePuzzle" asp-controller="Game" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="PuzzleId"/>
+        <input type="hidden" asp-for="GameYear"/>
+        <input type="hidden" asp-for="GameTypeSlug"/>
         <div class="row">
             <div class="col-12 mb-4 form-group">
                 <label asp-for="Question" class="form-label"></label>

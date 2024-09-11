@@ -5,10 +5,8 @@
 }
 
 <h2 class="mb-4 text-center">Δημιουργία νέου παιχνιδιού</h2>
-
 <div class="form-container-large">
-    @using (Html.BeginForm("CreateParentGame", "Game", FormMethod.Post))
-    {
+    <form asp-action="CreateParentGame" asp-controller="Game" method="post">
         <div class="row">
             <div class="col-12 col-md-6 mb-4 form-group">
                 <label asp-for="Year" class="form-label"></label>
@@ -45,10 +43,9 @@
                 }
             </div>
         </div>
-
         <button type="submit" class="btn btn-primary">Αποθήκευση</button>
         <button class="btn btn-secondary" id="previous-page-button">Πίσω</button>
-    }
+    </form>
 </div>
 
 @section Scripts {

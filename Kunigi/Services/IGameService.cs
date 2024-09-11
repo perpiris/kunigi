@@ -35,4 +35,8 @@ public interface IGameService
     Task<GamePuzzleCreateViewModel> PrepareCreateGamePuzzleViewModel(short gameYear, string gameTypeSlug);
 
     Task CreateGamePuzzle(GamePuzzleCreateViewModel viewModel);
+    
+    Task<GamePuzzleEditViewModel> PrepareEditGamePuzzleViewModel(int puzzleId);
+
+    Task EditGamePuzzle(GamePuzzleEditViewModel viewModel);
 }

@@ -6,7 +6,6 @@
 
 <form asp-action="EditRoles" asp-controller="Account" method="post">
     <input type="hidden" asp-for="Id"/>
-
     <div class="card">
         <div class="card-header">
             <h4>@Model.Email</h4>
@@ -24,7 +23,6 @@
             }
         </div>
     </div>
-
     <div class="mt-4">
         <button type="submit" class="btn btn-primary">Αποθήκευση</button>
         <a asp-action="UserManagement" class="btn btn-secondary">Πίσω</a>

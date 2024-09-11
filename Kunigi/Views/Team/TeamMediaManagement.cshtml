@@ -147,13 +147,10 @@
         <h2 class="mb-4">@ViewData["Title"]</h2>
         <h4 class="mb-4">Υλικό</h4>
     </div>
-
     <div class="d-flex justify-content-between align-items-center">
         <a asp-controller="Team" asp-action="TeamActions" asp-route-teamSlug="@Model.TeamSlug" class="btn btn-secondary">Πίσω</a>
     </div>
 </div>
-
-
 <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
     <div class="col">
         <div class="card h-100 upload-card" data-bs-toggle="modal" data-bs-target="#uploadModal">
@@ -165,7 +162,6 @@
             </div>
         </div>
     </div>
-
     @foreach (var mediaFile in Model.MediaFiles)
     {
         <div class="col">

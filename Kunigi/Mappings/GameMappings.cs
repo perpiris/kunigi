@@ -143,6 +143,21 @@ public static class GameMappings
 
         return viewModel;
     }
+    
+    public static GamePuzzleEditViewModel ToGamePuzzleEditViewModel(this Puzzle puzzleDetails)
+    {
+        var viewModel = new GamePuzzleEditViewModel
+        {
+            PuzzleId = puzzleDetails.PuzzleId,
+            Group = puzzleDetails.Group,
+            Question = puzzleDetails.Question,
+            Answer = puzzleDetails.Answer,
+            GameTypeSlug = puzzleDetails.Game.GameType.Slug,
+            GameYear = puzzleDetails.Game.ParentGame.Year
+        };
+
+        return viewModel;
+    }
 
     public static ParentGameMediaViewModel ToParentGameMediaViewModel(this ParentGame parentGameDetails)
     {

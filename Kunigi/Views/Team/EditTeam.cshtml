@@ -5,29 +5,17 @@
 }
 
 <h2 class="mb-4 text-center">@ViewData["Title"]</h2>
-
 <div class="form-container-large">
-    @using (Html.BeginForm("EditTeam", "Team", FormMethod.Post, new { enctype = "multipart/form-data" }))
-    {
+    <form asp-action="EditTeam" asp-controller="Team" method="post" enctype="multipart/form-data">
         <div class="row">
             <div class="col-12 col-md-6 mb-4 form-group">
-                <label asp-for="TeamSlug" class="form-label"></label>
-                <input asp-for="TeamSlug" class="form-control"/>
-                <span asp-validation-for="TeamSlug" class="text-danger"></span>
-            </div>
-            <div class="col-12 col-md-6 mb-4 form-group">
                 <label asp-for="ProfileImageUrl" class="form-label"></label>
-                <input type="file" name="profileImage" class="form-control" accept="image/png, image/jpeg"/>
+                <input type="file" name="profileImage" class="form-control mb-2" accept="image/png, image/jpeg"/>
             </div>
             <div class="col-12 col-md-6 mb-4 form-group">
-                <label asp-for="CreatedYear"></label>
-                <input asp-for="CreatedYear" class="form-control" type="number" min="1900" max="2100"/>
+                <label asp-for="CreatedYear" class="form-label"></label>
+                <input asp-for="CreatedYear" class="form-control mb-2" type="number" min="1900" max="2100"/>
                 <span asp-validation-for="CreatedYear" class="text-danger"></span>
-            </div>
-            <div class="col-12 col-md-6 mb-4 form-group">
-                <label asp-for="IsActive" class="form-label"></label>
-                <input asp-for="IsActive" class="form-check-input mb-2" type="checkbox"/>
-                <span asp-validation-for="IsActive" class="text-danger"></span>
             </div>
             <div class="col-12 col-md-6 mb-4 form-group">
                 <label asp-for="Facebook" class="form-label"></label>
@@ -49,16 +37,20 @@
                 <input asp-for="Website" class="form-control mb-2"/>
                 <span asp-validation-for="Website" class="text-danger"></span>
             </div>
+            <div class="col-12 col-md-6 mb-4 form-group">
+                <label asp-for="IsActive" class="form-label"></label>
+                <input asp-for="IsActive" class="form-check-input mb-2" type="checkbox"/>
+                <span asp-validation-for="IsActive" class="text-danger"></span>
+            </div>
             <div class="col-12 mb-4 form-group">
                 <label asp-for="Description" class="form-label"></label>
                 <textarea asp-for="Description" class="form-control mb-2" rows="6"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
         </div>
-
         <button type="submit" class="btn btn-primary">Αποθήκευση</button>
         <a asp-controller="Team" asp-action="TeamActions" asp-route-teamSlug="@Model.TeamSlug" class="btn btn-secondary">Πίσω</a>
-    }
+    </form>
 </div>
 
 @section Scripts {

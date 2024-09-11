@@ -30,3 +30,18 @@
     }
 });
 
+$(document).ready(function () {
+    function applyValidationClasses() {
+        $('.field-validation-error').each(function () {
+            let inputElement = $(this).prev('input, select, textarea');
+            inputElement.addClass('is-invalid');
+        });
+    }
+    
+    applyValidationClasses();
+    
+    $('form').submit(function () {
+        setTimeout(applyValidationClasses, 0);
+    });
+});
+

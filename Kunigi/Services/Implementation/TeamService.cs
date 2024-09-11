@@ -95,7 +95,6 @@ public class TeamService : ITeamService
 
     public async Task EditTeam(string teamSlug, TeamEditViewModel viewModel, IFormFile profileImage, ClaimsPrincipal user)
     {
-        teamSlug = teamSlug.Trim();
         var teamDetails = await CheckTeamAndOwneship(teamSlug, user);
 
         teamDetails.CreatedYear = viewModel.CreatedYear;
@@ -118,7 +117,6 @@ public class TeamService : ITeamService
 
     public async Task<TeamManagerEditViewModel> PrepareTeamManagerEditViewModel(string teamSlug, ClaimsPrincipal user)
     {
-        teamSlug = teamSlug.Trim();
         var teamDetails = await CheckTeamAndOwneship(teamSlug, user);
 
         var users = await _context.AppUsers.ToListAsync();

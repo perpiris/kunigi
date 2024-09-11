@@ -160,7 +160,8 @@ public class GameService : IGameService
         {
             newParentGame.Games.Add(new Game
             {
-                GameTypeId = gameTypeId
+                GameTypeId = gameTypeId,
+                Description = "Δεν υπάρχουν πληροφορίες"
             });
         }
 
@@ -294,7 +295,6 @@ public class GameService : IGameService
             foreach (var mediaFile in viewModel.QuestionMediaFiles)
             {
                 var mediaFilePath = await _mediaService.SaveMediaFile(mediaFile, $"games/{gameDetails.ParentGame.Year}", false);
-                
                 puzzle.MediaFiles.Add(new PuzzleMedia
                 {
                     MediaType = PuzzleMediaType.Question,
@@ -311,7 +311,6 @@ public class GameService : IGameService
             foreach (var mediaFile in viewModel.AnswerMediaFiles)
             {
                 var mediaFilePath = await _mediaService.SaveMediaFile(mediaFile, $"games/{gameDetails.ParentGame.Year}", false);
-                
                 puzzle.MediaFiles.Add(new PuzzleMedia
                 {
                     MediaType = PuzzleMediaType.Answer,
@@ -324,6 +323,65 @@ public class GameService : IGameService
         }
 
         _context.Puzzles.Add(puzzle);
+        await _context.SaveChangesAsync();
+    }
+    
+    public async Task<GamePuzzleEditViewModel> PrepareEditGamePuzzleViewModel(int puzzleId)
+    {
+        var puzzleDetails = await _context.Puzzles
+            .Include(x => x.Game.GameType)
+            .Include(x => x.Game.ParentGame)
+            .FirstOrDefaultAsync(x => x.PuzzleId == puzzleId);
+        
+        var viewModel = puzzleDetails.ToGamePuzzleEditViewModel();
+        return viewModel;
+    }
+
+    public async Task EditGamePuzzle(GamePuzzleEditViewModel viewModel)
+    {
+        var puzzleDetails = await _context.Puzzles
+            .Include(x => x.Game)
+            .ThenInclude(x => x.ParentGame)
+            .Include(x => x.MediaFiles)
+            .FirstOrDefaultAsync(x => x.PuzzleId == viewModel.PuzzleId);
+
+        puzzleDetails.Question = viewModel.Question;
+        puzzleDetails.Answer = viewModel.Answer;
+        puzzleDetails.Group = viewModel.Group is > 0 ? viewModel.Group.Value : puzzleDetails.Order;
+        
+        if (viewModel.QuestionMediaFiles is { Count: > 0 })
+        {
+            foreach (var mediaFile in viewModel.QuestionMediaFiles)
+            {
+                var mediaFilePath = await _mediaService.SaveMediaFile(mediaFile, $"games/{puzzleDetails.Game.ParentGame.Year}", false);
+                puzzleDetails.MediaFiles.Add(new PuzzleMedia
+                {
+                    MediaType = PuzzleMediaType.Question,
+                    MediaFile = new MediaFile
+                    {
+                        Path = mediaFilePath
+                    }
+                });
+            }
+        }
+
+        if (viewModel.AnswerMediaFiles is { Count: > 0 })
+        {
+            foreach (var mediaFile in viewModel.AnswerMediaFiles)
+            {
+                var mediaFilePath = await _mediaService.SaveMediaFile(mediaFile, $"games/{puzzleDetails.Game.ParentGame.Year}", false);
+                puzzleDetails.MediaFiles.Add(new PuzzleMedia
+                {
+                    MediaType = PuzzleMediaType.Answer,
+                    MediaFile = new MediaFile
+                    {
+                        Path = mediaFilePath
+                    }
+                });
+            }
+        }
+        
+        _context.Puzzles.Update(puzzleDetails);
         await _context.SaveChangesAsync();
     }
 

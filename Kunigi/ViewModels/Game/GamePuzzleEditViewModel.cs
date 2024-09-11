@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Kunigi.ViewModels.Game;
 
-public class GamePuzzleCreateViewModel
+public class GamePuzzleEditViewModel
 {
     [Required]
-    public int GameId { get; set; }
+    public int PuzzleId { get; set; }
 
     [DisplayName("Περιγραφή Γρίφου")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
@@ -17,7 +17,7 @@ public class GamePuzzleCreateViewModel
     public string Answer { get; set; }
     
     [DisplayName("Πακέτο Γρίφου")]
-    public short Group { get; set; }
+    public short? Group { get; set; }
 
     [DisplayName("Υλικό Γρίφου")]
     public List<IFormFile> QuestionMediaFiles { get; set; }

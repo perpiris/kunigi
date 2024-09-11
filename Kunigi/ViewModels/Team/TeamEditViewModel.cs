@@ -5,7 +5,6 @@ namespace Kunigi.ViewModels.Team;
 
 public class TeamEditViewModel
 {
-    [DisplayName("Slug")]
     public string TeamSlug { get; set; }
     
     [DisplayName("Όνομα Ομάδας")]

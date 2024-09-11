@@ -7,24 +7,26 @@
 <div class="form-container">
     <h2 class="text-center">Εγγραφή</h2>
     <h6 class="text-center mb-4">Μόνο για διαχειριστές ομάδων</h6>
-
-    @using (Html.BeginForm("Register", "Auth", FormMethod.Post))
-    {
+    <form asp-action="Register" asp-controller="Auth" method="post">
         <div class="form-group mb-4">
             <label asp-for="Email"></label>
-            <input asp-for="Email" class="form-control @(ViewData.ModelState["Email"] != null ? "is-invalid" : "")"/>
+            <input asp-for="Email" class="form-control"/>
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
         <div class="form-group mb-4">
             <label asp-for="Password"></label>
-            <input asp-for="Password" class="form-control @(ViewData.ModelState["Password"] != null ? "is-invalid" : "")"/>
+            <input asp-for="Password" class="form-control"/>
             <span asp-validation-for="Password" class="text-danger"></span>
         </div>
         <div class="form-group mb-4">
             <label asp-for="ConfirmPassword"></label>
-            <input asp-for="ConfirmPassword" class="form-control @(ViewData.ModelState["ConfirmPassword"] != null ? "is-invalid" : "")"/>
+            <input asp-for="ConfirmPassword" class="form-control"/>
             <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
         </div>
         <button type="submit" class="btn btn-primary w-100">Εγγραφή</button>
-    }
+    </form>
 </div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

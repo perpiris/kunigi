@@ -33,7 +33,6 @@
 <ol class="breadcrumb mb-4">
     <li class="breadcrumb-item active">Ομάδες</li>
 </ol>
-
 @if (Model == null || !Model.Items.Any())
 {
     <h4 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h4>
@@ -64,17 +63,17 @@ else
             </div>
         }
     </div>
-
-    <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-
-            @for (var i = 1; i <= Model.TotalPages; i++)
-            {
-                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                    <a class="page-link" asp-action="TeamList" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
-                </li>
-            }
-
-        </ul>
-    </nav>
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" asp-action="TeamList" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
 }
