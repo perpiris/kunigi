@@ -2,10 +2,12 @@
 
 @{
     ViewData["Title"] = Model.GameDetails.GameType;
-    var groupedPuzzles = Model.PuzzleList.GroupBy(p => p.Group).ToList();
 }
 
 <style>
+    .py-8{padding-bottom:4.5rem!important;padding-top:4.5rem!important}
+    .bsb-timeline-3{--bsb-tl-color:var(--bs-primary-bg-subtle);--bsb-tl-circle-color:var(--bs-primary);--bsb-tl-circle-border-color:var(--bs-warning);--bsb-tl-circle-size:26px;--bsb-tl-circle-border-size:4px;--bsb-tl-circle-offset:13px;--bsb-tl-indicator-color:var(--bs-white)}.bsb-timeline-3 .timeline{list-style:none;margin:0;padding:0;position:relative}.bsb-timeline-3 .timeline:after{background-color:var(--bsb-tl-color);bottom:0;content:"";left:0;margin-left:-1px;position:absolute;top:0;width:2px}@@media(min - width:768px){.bsb-timeline-3 .timeline:after{left:50%}}.bsb-timeline-3 .timeline>.timeline-item{margin:0;padding:0;position:relative}.bsb-timeline-3 .timeline>.timeline-item:after{background:var(--bsb-tl-circle-color);border:var(--bsb-tl-circle-border-size) solid var(--bsb-tl-circle-border-color);border-radius:50%;content:"";height:var(--bsb-tl-circle-size);left:calc(var(--bsb-tl-circle-offset)*-1);position:absolute;top:calc(30% - var(--bsb-tl-circle-offset));width:var(--bsb-tl-circle-size);z-index:1}.bsb-timeline-3 .timeline>.timeline-item .timeline-body{margin:0;padding:0;position:relative}.bsb-timeline-3 .timeline>.timeline-item .timeline-content{padding:0 0 2.5rem 2.5rem;position:relative}.bsb-timeline-3 .timeline>.timeline-item .timeline-indicator{position:relative}.bsb-timeline-3 .timeline>.timeline-item .timeline-indicator:after{border-width:1px;border:10px solid var(--bsb-tl-indicator-color);border-color:transparent var(--bsb-tl-indicator-color) transparent transparent;border-left-width:0;content:"";left:calc(2.5rem - 10px);position:absolute;top:calc(30% - var(--bsb-tl-circle-offset));z-index:2}@@media(min - width:768px){.bsb-timeline-3 .timeline>.timeline-item{overflow:hidden;width:50%}.bsb-timeline-3 .timeline>.timeline-item .timeline-content{padding:2.5rem}.bsb-timeline-3 .timeline>.timeline-item.left{left:0}.bsb-timeline-3 .timeline>.timeline-item.left:after{left:auto;right:calc(var(--bsb-tl-circle-offset)*-1)}.bsb-timeline-3 .timeline>.timeline-item.left .timeline-indicator:after{border-width:1px;border:10px solid var(--bsb-tl-indicator-color);border-color:transparent transparent transparent var(--bsb-tl-indicator-color);border-right-width:0;left:auto;right:calc(2.5rem - 10px)}.bsb-timeline-3 .timeline>.timeline-item.right{left:50%}}
+
     .media-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -25,8 +27,11 @@
         grid-template-columns: repeat(2, minmax(150px, 1fr));
     }
 
-    .nested-accordion .accordion-button {
-        padding-left: 2rem;
+    .group-indicator {
+        background-color: #f8f9fa;
+        border-left: 3px solid #007bff;
+        padding: 10px;
+        margin-bottom: 15px;
     }
 </style>
 
@@ -39,121 +44,70 @@
     </li>
     <li class="breadcrumb-item active">@Model.GameDetails.GameType</li>
 </ol>
-<p class="lead mb-4">@Model.GameDetails.Description</p>
-<div class="accordion" id="puzzleAccordion">
-    @{
-        var groupNumber = 1;
-    }
 
-    @foreach (var group in groupedPuzzles)
-    {
-        var isMultiPuzzleGroup = group.Count() > 1;
-        if (isMultiPuzzleGroup)
-        {
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingGroup@(group.Key)">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGroup@(group.Key)">
-                        <span class="me-2">@($"Πακέτο {groupNumber++} - Γρίφοι {string.Join(",", group.OrderBy(p => p.Order).Select(p => p.Order))}")</span>
-                    </button>
-                </h2>
-                <div id="collapseGroup@(group.Key)" class="accordion-collapse collapse" data-bs-parent="#puzzleAccordion">
-                    <div class="accordion-body">
-                        <div class="accordion nested-accordion" id="groupAccordion@(group.Key)">
-                            @foreach (var puzzle in group.OrderBy(p => p.Order))
-                            {
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="headingPuzzle@(puzzle.Id)">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePuzzle@(puzzle.Id)">
-                                            <span class="me-2">@($"{puzzle.Order}ος Γρίφος")</span>
-                                            <span class="badge bg-secondary">@puzzle.Type</span>
-                                        </button>
-                                    </h2>
-                                    <div id="collapsePuzzle@(puzzle.Id)" class="accordion-collapse collapse" data-bs-parent="#groupAccordion@(group.Key)">
-                                        <div class="accordion-body">
-                                            <div class="row">
-                                                <div class="col-md-6 border-end">
-                                                    <h6 class="mb-2 text-muted">Γρίφος:</h6>
-                                                    <p>@puzzle.Question</p>
-                                                    @if (puzzle.QuestionMedia.Any())
-                                                    {
-                                                        var questionMediaClass = puzzle.QuestionMedia.Count() == 1 ? "media-grid single-item" : "media-grid";
-                                                        <div class="@questionMediaClass">
-                                                            @foreach (var media in puzzle.QuestionMedia)
-                                                            {
-                                                                @await Html.PartialAsync("_MediaPreview", media)
-                                                            }
-                                                        </div>
-                                                    }
+<p class="lead mb-4">@Model.GameDetails.Description</p>
+
+<section class="bsb-timeline-3 bg-light py-3 py-md-5 py-xl-8">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-10 col-md-12 col-xl-10 col-xxl-9">
+                <ul class="timeline">
+                    @{
+                        var isLeft = true;
+                        var currentGroup = (short?)-1;
+                        var groupNumber = 1;
+                    }
+                    @foreach (var puzzle in Model.PuzzleList)
+                    {
+                        var orientation = isLeft ? "left" : "right";
+
+                        if (puzzle.Group.HasValue && puzzle.Group != currentGroup)
+                        {
+                            currentGroup = puzzle.Group;
+                            <li class="timeline-item @orientation">
+                                <div class="timeline-body">
+                                    <div class="timeline-content timeline-indicator">
+                                        <div class="card border-0 shadow">
+                                            <div class="card-body p-xl-4">
+                                                <div class="group-indicator">
+                                                    <h5 class="card-subtitle text-primary mb-1">Πακέτο @(groupNumber++)</h5>
+                                                    <p class="m-0">Γρίφοι: @string.Join(", ", Model.GroupedPuzzles.First(g => g.GroupName == puzzle.Group.ToString()).Puzzles.Select(p => p.Order))</p>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <h6 class="mb-2 text-muted">Απάντηση:</h6>
-                                                    <p>@puzzle.Answer</p>
-                                                    @if (puzzle.AnswerMedia.Any())
-                                                    {
-                                                        var answerMediaClass = puzzle.AnswerMedia.Count() == 1 ? "media-grid single-item" : "media-grid";
-                                                        <div class="@answerMediaClass">
-                                                            @foreach (var media in puzzle.AnswerMedia)
-                                                            {
-                                                                @await Html.PartialAsync("_MediaPreview", media)
-                                                            }
-                                                        </div>
-                                                    }
-                                                </div>
+                                                @foreach (var groupPuzzle in Model.GroupedPuzzles.First(g => g.GroupName == puzzle.Group.ToString()).Puzzles)
+                                                {
+                                                    <div class="mb-4">
+                                                        <h5 class="card-subtitle text-secondary mb-1">@($"{groupPuzzle.Order}ος Γρίφος")</h5>
+                                                        <h2 class="card-title mb-3">@groupPuzzle.Type</h2>
+                                                        @await Html.PartialAsync("_PuzzleContent", groupPuzzle)
+                                                    </div>
+                                                }
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-        else
-        {
-            var puzzle = group.First();
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingPuzzle@(puzzle.Id)">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePuzzle@(puzzle.Id)">
-                        <span class="me-2">@($"{puzzle.Order}ος Γρίφος")</span>
-                        <span class="badge bg-secondary">@puzzle.Type</span>
-                    </button>
-                </h2>
-                <div id="collapsePuzzle@(puzzle.Id)" class="accordion-collapse collapse" data-bs-parent="#puzzleAccordion">
-                    <div class="accordion-body">
-                        <div class="row">
-                            <div class="col-md-6 border-end">
-                                <h6 class="mb-2 text-muted">Γρίφος:</h6>
-                                <p>@puzzle.Question</p>
-                                @if (puzzle.QuestionMedia.Any())
-                                {
-                                    var questionMediaClass = puzzle.QuestionMedia.Count() == 1 ? "media-grid single-item" : "media-grid";
-                                    <div class="@questionMediaClass">
-                                        @foreach (var media in puzzle.QuestionMedia)
-                                        {
-                                            @await Html.PartialAsync("_MediaPreview", media)
-                                        }
+                            </li>
+                        }
+                        else if (!puzzle.Group.HasValue)
+                        {
+                            <li class="timeline-item @orientation">
+                                <div class="timeline-body">
+                                    <div class="timeline-content timeline-indicator">
+                                        <div class="card border-0 shadow">
+                                            <div class="card-body p-xl-4">
+                                                <h5 class="card-subtitle text-secondary mb-1">@($"{puzzle.Order}ος Γρίφος")</h5>
+                                                <h2 class="card-title mb-3">@puzzle.Type</h2>
+                                                @await Html.PartialAsync("_PuzzleContent", puzzle)
+                                            </div>
+                                        </div>
                                     </div>
-                                }
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="mb-2 text-muted">Απάντηση:</h6>
-                                <p>@puzzle.Answer</p>
-                                @if (puzzle.AnswerMedia.Any())
-                                {
-                                    var answerMediaClass = puzzle.AnswerMedia.Count() == 1 ? "media-grid single-item" : "media-grid";
-                                    <div class="@answerMediaClass">
-                                        @foreach (var media in puzzle.AnswerMedia)
-                                        {
-                                            @await Html.PartialAsync("_MediaPreview", media)
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                </div>
+                            </li>
+                        }
+
+                        isLeft = !isLeft;
+                    }
+                </ul>
             </div>
-        }
-    }
-</div>
+        </div>
+    </div>
+</section>

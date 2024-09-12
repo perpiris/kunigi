@@ -39,4 +39,8 @@ public interface IGameService
     Task<GamePuzzleEditViewModel> PrepareEditGamePuzzleViewModel(int puzzleId);
 
     Task EditGamePuzzle(GamePuzzleEditViewModel viewModel);
+    
+    Task DeleteGamePuzzle(int puzzleId);
+
+    Task DeleteGamePuzzleMedia(int puzzleId, int mediaId);
 }

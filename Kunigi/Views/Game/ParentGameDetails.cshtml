@@ -1,14 +1,14 @@
 ﻿@model ParentGameDetailsViewModel
 
 @{
-    ViewData["Title"] = Model.MainTitle;
+    ViewData["Title"] = FullGameTitle(Model.MainTitle, Model.SubTitle, Model.Year);
 }
 
 <ol class="breadcrumb mb-4">
     <li class="breadcrumb-item">
         <a asp-controller="Game" asp-action="ParentGameList">Παιχνίδια</a>
     </li>
-    <li class="breadcrumb-item active">@FullGameTitle(Model.MainTitle, Model.SubTitle, Model.Year)</li>
+    <li class="breadcrumb-item active">@ViewData["Title"]</li>
 </ol>
 <div class="container">
     <div class="row gy-4 gy-lg-0">

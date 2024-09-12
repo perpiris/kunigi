@@ -14,7 +14,7 @@ public class PuzzleDetailsViewModel
     
     public short Order { get; set; }
 
-    public short Group { get; set; }
+    public short? Group { get; set; }
     
     public List<MediaFileViewModel> QuestionMedia { get; set; }
     

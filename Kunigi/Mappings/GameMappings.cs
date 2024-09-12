@@ -62,28 +62,27 @@ public static class GameMappings
     public static GamePuzzleDetailsViewModel ToGamePuzzleDetailsViewModel(this Game gameDetails)
     {
         var puzzles = gameDetails.PuzzleList
-            .Select(p =>
+            .Select(p => new PuzzleDetailsViewModel
             {
-                return new PuzzleDetailsViewModel
-                {
-                    Id = p.PuzzleId,
-                    Order = p.Order,
-                    Question = p.Question,
-                    Answer = p.Answer,
-                    QuestionMedia = p.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Question).Select(m => new MediaFileViewModel
+                Id = p.PuzzleId,
+                Order = p.Order,
+                Question = p.Question,
+                Answer = p.Answer,
+                QuestionMedia = p.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Question)
+                    .Select(m => new MediaFileViewModel
                     {
                         Id = m.MediaFile.MediaFileId,
                         FileName = Path.GetFileName(m.MediaFile.Path),
                         Path = m.MediaFile.Path
                     }).ToList() ?? [],
-                    AnswerMedia = p.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Answer).Select(m => new MediaFileViewModel
+                AnswerMedia = p.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Answer)
+                    .Select(m => new MediaFileViewModel
                     {
                         Id = m.MediaFile.MediaFileId,
                         FileName = Path.GetFileName(m.MediaFile.Path),
                         Path = m.MediaFile.Path
                     }).ToList() ?? [],
-                    Group = p.Group
-                };
+                Group = p.Group
             })
             .ToList();
 
@@ -92,20 +91,42 @@ public static class GameMappings
             .Select(g => new GamePuzzleGroupViewModel
             {
                 GroupName = g.Key.ToString(),
-                Puzzles = g.OrderBy(p => p.Order).ToList()
+                Puzzles = g.OrderBy(p => p.Order).ToList(),
+                MinOrder = g.Min(p => p.Order)
             })
+            .OrderBy(g => g.MinOrder)
             .ToList();
+
+        var orderedPuzzles = new List<PuzzleDetailsViewModel>();
+        var groupedPuzzleIds = new HashSet<int>();
+
+        foreach (var puzzle in puzzles.OrderBy(p => p.Order))
+        {
+            if (groupedPuzzleIds.Contains(puzzle.Id))
+                continue;
+
+            if (!puzzle.Group.HasValue)
+            {
+                orderedPuzzles.Add(puzzle);
+            }
+            else
+            {
+                var group = groupedPuzzles.First(g => g.GroupName == puzzle.Group.ToString());
+                orderedPuzzles.AddRange(group.Puzzles);
+                groupedPuzzleIds.UnionWith(group.Puzzles.Select(p => p.Id));
+            }
+        }
 
         var viewModel = new GamePuzzleDetailsViewModel
         {
             GameDetails = gameDetails.ToGameDetailsViewModel(),
-            PuzzleList = puzzles.OrderBy(p => p.Order).ToList(),
+            PuzzleList = orderedPuzzles,
             GroupedPuzzles = groupedPuzzles
         };
 
         return viewModel;
     }
-    
+
     public static ParentGameEditViewModel ToParentGameEditViewModel(this ParentGame parentGameDetails)
     {
         var viewModel = new ParentGameEditViewModel
@@ -131,19 +152,18 @@ public static class GameMappings
         return viewModel;
     }
 
-    public static GamePuzzleCreateViewModel ToGamePuzzleCreateViewModel(this Game gameDetails, short order)
+    public static GamePuzzleCreateViewModel ToGamePuzzleCreateViewModel(this Game gameDetails)
     {
         var viewModel = new GamePuzzleCreateViewModel
         {
             GameId = gameDetails.GameId,
-            Group = order,
             GameTypeSlug = gameDetails.GameType.Slug,
             GameYear = gameDetails.ParentGame.Year
         };
 
         return viewModel;
     }
-    
+
     public static GamePuzzleEditViewModel ToGamePuzzleEditViewModel(this Puzzle puzzleDetails)
     {
         var viewModel = new GamePuzzleEditViewModel

@@ -30,9 +30,8 @@ public class AuthController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
-        var result =
-            await _signInManager
-                .PasswordSignInAsync(model.Email, model.Password, true, lockoutOnFailure: false);
+        var result = await _signInManager
+            .PasswordSignInAsync(model.Email, model.Password, true, lockoutOnFailure: false);
 
         if (result.Succeeded)
         {
@@ -54,6 +53,11 @@ public class AuthController : Controller
     [HttpGet("register")]
     public IActionResult Register()
     {
+        if (User.Identity is { IsAuthenticated: true })
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
         return View();
     }
 
@@ -66,6 +70,7 @@ public class AuthController : Controller
         }
 
         if (!ModelState.IsValid) return View(model);
+
         var user = new AppUser { UserName = model.Email, Email = model.Email };
         var result = await _userManager.CreateAsync(user, model.Password);
 

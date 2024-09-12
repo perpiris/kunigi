@@ -82,15 +82,15 @@ public class GameService : IGameService
             {
                 throw new ArgumentNullException(nameof(gameYear));
             }
-            
+
             if (string.IsNullOrEmpty(gameTypeSlug))
             {
                 throw new ArgumentNullException(nameof(gameTypeSlug));
             }
-            
+
             parentGameDetails = await GetFullParentGameDetails(gameYear);
         }
-        
+
         var gameDetails = parentGameDetails.Games.SingleOrDefault(x => x.GameType.Slug == gameTypeSlug);
         return gameDetails.ToGameDetailsViewModel();
     }
@@ -136,9 +136,6 @@ public class GameService : IGameService
 
         viewModel.GameTypes = gameTypes;
 
-        viewModel.Year = (short)DateTime.Now.Year;
-        viewModel.Order = 1;
-
         return viewModel;
     }
 
@@ -177,7 +174,7 @@ public class GameService : IGameService
         var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
         return parentGameDetails.ToParentGameEditViewModel();
     }
-    
+
     public async Task<GameEditViewModel> PrepareGameEditViewModel(short gameYear, string gameTypeSlug, ClaimsPrincipal user)
     {
         var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
@@ -206,14 +203,14 @@ public class GameService : IGameService
     {
         var parentGameDetails = await CheckGameAndOwneship(gameYear, user);
         var gameDetails = parentGameDetails.Games.FirstOrDefault(x => x.GameType.Slug == gameTypeSlug.Trim());
-        
+
         if (gameDetails == null)
         {
             throw new NotFoundException();
         }
-        
+
         gameDetails.Description = viewModel.Description;
-        
+
         _context.Games.Update(gameDetails);
         await _context.SaveChangesAsync();
     }
@@ -259,10 +256,8 @@ public class GameService : IGameService
             .Include(x => x.GameType)
             .Include(x => x.PuzzleList)
             .FirstOrDefaultAsync(x => x.GameType.Slug == gameTypeSlug && x.ParentGame.Year == gameYear);
-        
-        var maxOrder = gameDetails.PuzzleList.Max(x => (short?)x.Order) ?? 0;
-        
-        var viewModel = gameDetails.ToGamePuzzleCreateViewModel((short)(maxOrder + 1));
+
+        var viewModel = gameDetails.ToGamePuzzleCreateViewModel();
         return viewModel;
     }
 
@@ -272,21 +267,21 @@ public class GameService : IGameService
             .Include(x => x.ParentGame)
             .Include(x => x.PuzzleList)
             .FirstOrDefaultAsync(x => viewModel.GameId == x.GameId);
-        
+
         if (gameDetails == null)
         {
             throw new NotFoundException();
         }
 
         var maxOrder = gameDetails.PuzzleList.Max(x => (short?)x.Order) ?? 0;
-        
+
         var puzzle = new Puzzle
         {
             Game = gameDetails,
             Question = viewModel.Question,
             Answer = viewModel.Answer,
-            Order = maxOrder,
-            Group = viewModel.Group != maxOrder ? viewModel.Group : maxOrder,
+            Order = (short)(maxOrder + 1),
+            Group = viewModel.Group,
             MediaFiles = new List<PuzzleMedia>()
         };
 
@@ -325,14 +320,14 @@ public class GameService : IGameService
         _context.Puzzles.Add(puzzle);
         await _context.SaveChangesAsync();
     }
-    
+
     public async Task<GamePuzzleEditViewModel> PrepareEditGamePuzzleViewModel(int puzzleId)
     {
         var puzzleDetails = await _context.Puzzles
             .Include(x => x.Game.GameType)
             .Include(x => x.Game.ParentGame)
             .FirstOrDefaultAsync(x => x.PuzzleId == puzzleId);
-        
+
         var viewModel = puzzleDetails.ToGamePuzzleEditViewModel();
         return viewModel;
     }
@@ -348,7 +343,7 @@ public class GameService : IGameService
         puzzleDetails.Question = viewModel.Question;
         puzzleDetails.Answer = viewModel.Answer;
         puzzleDetails.Group = viewModel.Group is > 0 ? viewModel.Group.Value : puzzleDetails.Order;
-        
+
         if (viewModel.QuestionMediaFiles is { Count: > 0 })
         {
             foreach (var mediaFile in viewModel.QuestionMediaFiles)
@@ -380,9 +375,67 @@ public class GameService : IGameService
                 });
             }
         }
-        
+
         _context.Puzzles.Update(puzzleDetails);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteGamePuzzle(int puzzleId)
+    {
+        var puzzleToDelete = await _context.Puzzles
+            .Include(x => x.MediaFiles)
+            .FirstOrDefaultAsync(x => x.PuzzleId == puzzleId);
+
+        if (puzzleToDelete == null)
+            throw new NotFoundException();
+
+        var gameId = puzzleToDelete.GameId;
+        var orderToDelete = puzzleToDelete.Order;
+        var groupToDelete = puzzleToDelete.Group;
+        
+        foreach (var media in puzzleToDelete.MediaFiles)
+        {
+            await _mediaService.DeleteMediaFile(media.MediaFileId);
+        }
+        
+        _context.Puzzles.Remove(puzzleToDelete);
+        
+        var remainingPuzzles = await _context.Puzzles
+            .Where(p => p.GameId == gameId && p.Order > orderToDelete)
+            .ToListAsync();
+
+        foreach (var puzzle in remainingPuzzles)
+        {
+            puzzle.Order--;
+        }
+        
+        if (groupToDelete.HasValue)
+        {
+            var puzzlesInSameGroup = await _context.Puzzles
+                .Where(p => p.GameId == gameId && p.Group == groupToDelete && p.PuzzleId != puzzleId)
+                .ToListAsync();
+
+            if (puzzlesInSameGroup.Count == 1)
+            {
+                puzzlesInSameGroup[0].Group = null;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteGamePuzzleMedia(int puzzleId, int mediaId)
+    {
+        var puzzleDetails = await _context.Puzzles.Include(x => x.MediaFiles)
+            .FirstOrDefaultAsync(x => x.PuzzleId == puzzleId);
+
+        var mediaDetails = puzzleDetails.MediaFiles.FirstOrDefault(x => x.MediaFileId == mediaId);
+        if (mediaDetails != null)
+        {
+            await _mediaService.DeleteMediaFile(mediaDetails.MediaFileId);
+            _context.PuzzleMediaFiles.Remove(mediaDetails);
+            await _context.SaveChangesAsync();
+        }
     }
 
     private async Task<ParentGame> CheckGameAndOwneship(short gameYear, ClaimsPrincipal user)
@@ -391,7 +444,7 @@ public class GameService : IGameService
         {
             throw new ArgumentNullException(nameof(gameYear));
         }
-        
+
         ArgumentNullException.ThrowIfNull(user);
 
         var parentGameDetails = await GetFullParentGameDetails(gameYear);

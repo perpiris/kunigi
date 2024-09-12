@@ -17,7 +17,7 @@ public class GamePuzzleCreateViewModel
     public string Answer { get; set; }
     
     [DisplayName("Πακέτο Γρίφου")]
-    public short Group { get; set; }
+    public short? Group { get; set; }
 
     [DisplayName("Υλικό Γρίφου")]
     public List<IFormFile> QuestionMediaFiles { get; set; }
