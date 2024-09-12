@@ -1,0 +1,32 @@
+﻿@model PuzzleDetailsViewModel
+
+<div class="row">
+    <div class="col-md-6 border-end">
+        <h6 class="mb-2 text-muted">Γρίφος:</h6>
+        <p>@Model.Question</p>
+        @if (Model.QuestionMedia.Any())
+        {
+            var questionMediaClass = Model.QuestionMedia.Count() == 1 ? "media-grid single-item" : "media-grid";
+            <div class="@questionMediaClass">
+                @foreach (var media in Model.QuestionMedia)
+                {
+                    @await Html.PartialAsync("_MediaPreview", media)
+                }
+            </div>
+        }
+    </div>
+    <div class="col-md-6">
+        <h6 class="mb-2 text-muted">Απάντηση:</h6>
+        <p>@Model.Answer</p>
+        @if (Model.AnswerMedia.Any())
+        {
+            var answerMediaClass = Model.AnswerMedia.Count() == 1 ? "media-grid single-item" : "media-grid";
+            <div class="@answerMediaClass">
+                @foreach (var media in Model.AnswerMedia)
+                {
+                    @await Html.PartialAsync("_MediaPreview", media)
+                }
+            </div>
+        }
+    </div>
+</div>

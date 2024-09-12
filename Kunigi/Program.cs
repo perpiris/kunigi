@@ -47,11 +47,16 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 var imagePathSetting = builder.Configuration.GetSection("ImageStoragePath").Value;
-app.UseStaticFiles(new StaticFileOptions
+if (!string.IsNullOrEmpty(imagePathSetting))
 {
-    FileProvider = new PhysicalFileProvider(imagePathSetting!),
-    RequestPath = "/media"
-});
+    Directory.CreateDirectory(imagePathSetting);
+}
+app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(imagePathSetting),
+        RequestPath = "/media"
+    });
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

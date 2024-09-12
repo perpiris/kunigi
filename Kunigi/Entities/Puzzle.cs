@@ -12,7 +12,7 @@ public class Puzzle
 
     public short Order { get; set; }
 
-    public short Group { get; set; }
+    public short? Group { get; set; }
     
     public virtual Game Game { get; set; }
     

@@ -1,8 +1,13 @@
-﻿namespace Kunigi.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Kunigi.Entities;
 
 public class Game
 {
     public int GameId { get; set; }
+    
+    [Column(TypeName = "varchar(255)")]
+    public string Title { get; set; }
     
     public string Description { get; set; }
 

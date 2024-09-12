@@ -9,11 +9,9 @@ public class GamePuzzleEditViewModel
     public int PuzzleId { get; set; }
 
     [DisplayName("Περιγραφή Γρίφου")]
-    [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
     public string Question { get; set; }
 
     [DisplayName("Περιγραφή Απάντησης")]
-    [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
     public string Answer { get; set; }
     
     [DisplayName("Πακέτο Γρίφου")]

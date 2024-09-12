@@ -218,6 +218,62 @@ public class GameController : Controller
             return View(viewModel);
         }
     }
+    
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpPost("delete-game-puzzle/{puzzleId:int}")]
+    public async Task<IActionResult> DeleteGamePuzzle(short gameYear, string gameTypeSlug, int puzzleId)
+    {
+        try
+        {
+            await _gameService.DeleteGamePuzzle(puzzleId);
+            TempData["success"] = "Ο γρίφος διαγράφηκε επιτυχώς.";
+            return RedirectToAction("ManageGamePuzzleList", new { gameYear, gameTypeSlug });
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+    }
+    
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("delete-game-puzzle/{puzzleId:int}")]
+    public async Task<IActionResult> DeleteGamePuzzleMedia(int puzzleId)
+    {
+        try
+        {
+            return View();
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+    }
 
     [Authorize(Roles = "Admin")]
     [HttpGet("create-parent-game")]
@@ -432,7 +488,35 @@ public class GameController : Controller
     {
         try
         {
-            var viewModel = await _gameService.GetParentGameMEdia(gameYear, User);
+            var viewModel = await _gameService.GetParentGameMedia(gameYear, User);
+            return View(viewModel);
+        }
+        catch (NotFoundException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (ArgumentNullException)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (UnauthorizedOperationException)
+        {
+            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception)
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+    }
+    
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("manage-game-puzzle-media/{puzzleId:int}")]
+    public async Task<IActionResult> GamePuzzleMediaManagement(int puzzleId)
+    {
+        try
+        {
+            var viewModel = await _gameService.GetPuzzleMedia(puzzleId);
             return View(viewModel);
         }
         catch (NotFoundException)

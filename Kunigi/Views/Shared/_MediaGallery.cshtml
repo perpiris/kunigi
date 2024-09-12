@@ -59,7 +59,7 @@
         var extension = fileName[(fileName.LastIndexOf('.') + 1)..].ToLowerInvariant();
         return extension switch
         {
-            "jpg" or "jpeg" or "png" or "gif" or "bmp" => "image",
+            "jpg" or "jpeg" or "png" or "gif" or "bmp" or "svg" => "image",
             "mp4" or "avi" or "mov" or "wmv" => "video",
             "mp3" or "wav" or "ogg" => "audio",
             "pdf" => "pdf",

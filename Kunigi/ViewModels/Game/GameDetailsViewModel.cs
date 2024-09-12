@@ -8,7 +8,9 @@ public class GameDetailsViewModel
 
     public string TypeSlug { get; set; }
     
-    public string Title { get; set; }
+    public string ParentGameTitle { get; set; }
+    
+    public string GameTitle { get; set; }
 
     public string Description { get; set; }
 }

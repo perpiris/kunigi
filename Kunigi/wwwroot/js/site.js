@@ -32,16 +32,40 @@
 
 $(document).ready(function () {
     function applyValidationClasses() {
-        $('.field-validation-error').each(function () {
-            let inputElement = $(this).prev('input, select, textarea');
-            inputElement.addClass('is-invalid');
+        $('input, select, textarea').each(function () {
+            let inputElement = $(this);
+            let errorSpan = inputElement.next('.field-validation-error');
+
+            if (errorSpan.length > 0 && errorSpan.text().trim() !== '') {
+                inputElement.addClass('is-invalid');
+            } else {
+                inputElement.removeClass('is-invalid');
+            }
         });
     }
-    
+
     applyValidationClasses();
-    
+
     $('form').submit(function () {
         setTimeout(applyValidationClasses, 0);
+    });
+
+    // Remove is-invalid class on input change
+    $('form').on('change keyup', 'input, select, textarea', function() {
+        let inputElement = $(this);
+        let errorSpan = inputElement.next('.field-validation-error');
+
+        if (errorSpan.length === 0 || errorSpan.text().trim() === '') {
+            inputElement.removeClass('is-invalid');
+        }
+    });
+
+    // Re-validate on blur
+    $('form').on('blur', 'input, select, textarea', function() {
+        let form = $(this).closest('form');
+        $.validator.unobtrusive.parseElement(this);
+        $(this).valid();
+        applyValidationClasses();
     });
 });
 
