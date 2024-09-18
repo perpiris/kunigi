@@ -4,7 +4,7 @@ namespace Kunigi.ViewModels.Game;
 
 public class PuzzleDetailsViewModel
 {
-    public int Id { get; set; }
+    public Guid PuzzleId { get; set; }
     
     public string Question { get; set; }
     

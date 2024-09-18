@@ -10,6 +10,7 @@
     </li>
     <li class="breadcrumb-item active">@Model.Name</li>
 </ol>
+
 <div class="container">
     <div class="row gy-4 gy-lg-0">
         <div class="col-12 col-lg-4 col-xl-3">
@@ -18,13 +19,14 @@
                     <div class="card widget-card border-light shadow-sm">
                         <div class="card-body">
                             <div class="text-center mb-3">
-                                @if (string.IsNullOrEmpty(Model.ProfileImageUrl))
+                                
+                                @if (string.IsNullOrEmpty(Model.ProfileImagePath))
                                 {
                                     <img src="~/media/profile.jpg" class="img-fluid" alt="Default Team Image">
                                 }
                                 else
                                 {
-                                    <img src="~/@Url.Content(Model.ProfileImageUrl)" class="card-img-top" alt="@Model.Name">
+                                    <img src="~/@Url.Content(Model.ProfileImagePath)" class="card-img-top" alt="@Model.Name">
                                 }
 
                                 <ul class="list-group list-group-flush mt-4">
@@ -95,6 +97,7 @@
 
             </div>
         </div>
+        
         <div class="col-12 col-lg-8 col-xl-9">
             <div class="card widget-card border-light shadow-sm">
                 <div class="card-body p-4">
@@ -137,6 +140,7 @@
                                         {
                                             <span>Καμία</span>
                                         }
+                                        
                                     </div>
                                 </div>
                                 <div class="col-5 col-md-3 bg-light border-bottom border-white border-3">
@@ -145,6 +149,7 @@
                                 <div
                                     class="col-7 col-md-9 bg-light border-start border-bottom border-white border-3">
                                     <div class="p-2">
+                                        
                                         @if (Model.GamesHosted.Any())
                                         {
                                             <ul>
@@ -160,15 +165,18 @@
                                         {
                                             <span>Καμία</span>
                                         }
+                                        
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="tab-pane" id="photos-tab-pane" role="tabpanel" aria-labelledby="photos-tab" tabindex="0">
+                            
                             @if (Model.MediaFiles != null && Model.MediaFiles.Any())
                             {
                                 @await Html.PartialAsync("_MediaGallery", Model.MediaFiles)
                             }
+                            
                         </div>
                     </div>
                 </div>

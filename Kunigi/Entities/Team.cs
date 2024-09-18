@@ -1,10 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Kunigi.Entities;
 
 public class Team
 {
-    public int TeamId { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public Guid TeamId { get; set; }
     
     public string Description { get; set; }
     
@@ -36,7 +39,7 @@ public class Team
     
     public virtual ICollection<ParentGame> WonGames { get; set; }
     
-    public virtual ICollection<AppUser> Managers { get; set; }
+    public virtual ICollection<TeamManager> Managers { get; set; }
     
     public virtual ICollection<TeamMedia> MediaFiles { get; set; }
 }

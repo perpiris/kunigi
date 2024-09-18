@@ -34,7 +34,7 @@
                     <div class="card widget-card border-light shadow-sm">
                         <div class="card-header text-bg-primary">Διοργάνωση</div>
                         <div class="card-body">
-                            <a type="button" class="btn btn-link" asp-controller="Team" asp-action="TeamDetails" asp-route-teamSlug="@Model.HostSlug">@Model.Host</a>
+                            <a type="button" class="btn btn-link" asp-controller="Team" asp-action="TeamDetails" asp-route-teamId="@Model.HostId">@Model.Host</a>
                         </div>
                     </div>
                 </div>
@@ -42,7 +42,7 @@
                     <div class="card widget-card border-light shadow-sm">
                         <div class="card-header text-bg-primary">Νικητές</div>
                         <div class="card-body">
-                            <a type="button" class="btn btn-link" asp-controller="Team" asp-action="TeamDetails" asp-route-teamSlug="@Model.WinnerSlug">@Model.Winner</a>
+                            <a type="button" class="btn btn-link" asp-controller="Team" asp-action="TeamDetails" asp-route-teamId="@Model.WinnerId">@Model.Winner</a>
                         </div>
                     </div>
                 </div>

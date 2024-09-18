@@ -1,12 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Kunigi.Entities;
 
 public class MediaFile
 {
-    public int MediaFileId { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public Guid MediaFileId { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
     public string Path { get; set; }
     
     public virtual ICollection<TeamMedia> TeamMediaFiles { get; set; }

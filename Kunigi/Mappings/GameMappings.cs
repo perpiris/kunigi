@@ -12,6 +12,7 @@ public static class GameMappings
     {
         var viewModel = new ParentGameDetailsViewModel
         {
+            ParentGameId = parentGameDetails.ParentGameId,
             Year = parentGameDetails.Year,
             Order = parentGameDetails.Order,
             MainTitle = parentGameDetails.MainTitle,
@@ -23,10 +24,10 @@ public static class GameMappings
 
         if (includeFullDetails)
         {
-            viewModel.Winner = parentGameDetails.Winner?.Name;
-            viewModel.WinnerSlug = parentGameDetails.Winner?.Slug;
-            viewModel.Host = parentGameDetails.Host?.Name;
-            viewModel.HostSlug = parentGameDetails.Host?.Slug;
+            viewModel.Winner = parentGameDetails.Winner.Name;
+            viewModel.WinnerId = parentGameDetails.Winner.TeamId;
+            viewModel.Host = parentGameDetails.Host.Name;
+            viewModel.HostId = parentGameDetails.Host.TeamId;
 
             viewModel.GameList = parentGameDetails.Games?
                 .Select(gameDetails => gameDetails.ToGameDetailsViewModel())
@@ -35,7 +36,7 @@ public static class GameMappings
             viewModel.MediaFiles = parentGameDetails.MediaFiles?
                 .Select(teamMedia => new MediaFileViewModel
                 {
-                    Id = teamMedia.MediaFile.MediaFileId,
+                    MediaFileId = teamMedia.MediaFile.MediaFileId,
                     FileName = Path.GetFileName(teamMedia.MediaFile.Path),
                     Path = teamMedia.MediaFile.Path
                 })
@@ -49,6 +50,7 @@ public static class GameMappings
     {
         var viewModel = new GameDetailsViewModel
         {
+            GameId = gameDetails.GameId,
             ParentGameTitle = gameDetails.ParentGame.MainTitle,
             GameTitle = gameDetails.Title,
             Description = gameDetails.Description,
@@ -65,21 +67,21 @@ public static class GameMappings
         var puzzles = gameDetails.PuzzleList
             .Select(p => new PuzzleDetailsViewModel
             {
-                Id = p.PuzzleId,
+                PuzzleId = p.PuzzleId,
                 Order = p.Order,
                 Question = p.Question,
                 Answer = p.Answer,
                 QuestionMedia = p.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Question)
                     .Select(m => new MediaFileViewModel
                     {
-                        Id = m.MediaFile.MediaFileId,
+                        MediaFileId = m.MediaFile.MediaFileId,
                         FileName = Path.GetFileName(m.MediaFile.Path),
                         Path = m.MediaFile.Path
                     }).ToList() ?? [],
                 AnswerMedia = p.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Answer)
                     .Select(m => new MediaFileViewModel
                     {
-                        Id = m.MediaFile.MediaFileId,
+                        MediaFileId = m.MediaFile.MediaFileId,
                         FileName = Path.GetFileName(m.MediaFile.Path),
                         Path = m.MediaFile.Path
                     }).ToList() ?? [],
@@ -99,11 +101,11 @@ public static class GameMappings
             .ToList();
 
         var orderedPuzzles = new List<PuzzleDetailsViewModel>();
-        var groupedPuzzleIds = new HashSet<int>();
+        var groupedPuzzleIds = new HashSet<Guid>();
 
         foreach (var puzzle in puzzles.OrderBy(p => p.Order))
         {
-            if (groupedPuzzleIds.Contains(puzzle.Id))
+            if (groupedPuzzleIds.Contains(puzzle.PuzzleId))
                 continue;
 
             if (!puzzle.Group.HasValue)
@@ -114,7 +116,7 @@ public static class GameMappings
             {
                 var group = groupedPuzzles.First(g => g.GroupName == puzzle.Group.ToString());
                 orderedPuzzles.AddRange(group.Puzzles);
-                groupedPuzzleIds.UnionWith(group.Puzzles.Select(p => p.Id));
+                groupedPuzzleIds.UnionWith(group.Puzzles.Select(p => p.PuzzleId));
             }
         }
 
@@ -132,6 +134,7 @@ public static class GameMappings
     {
         var viewModel = new ParentGameEditViewModel
         {
+            ParentGameId = parentGameDetails.ParentGameId,
             SubTitle = parentGameDetails.SubTitle,
             Description = parentGameDetails.Description,
             GameYear = parentGameDetails.Year
@@ -144,6 +147,7 @@ public static class GameMappings
     {
         var viewModel = new GameEditViewModel
         {
+            GameId = gameDetails.GameId,
             Description = gameDetails.Description,
             GameType = gameDetails.GameType.Description,
             GameTypeSlug = gameDetails.GameType?.Slug,
@@ -152,26 +156,26 @@ public static class GameMappings
 
         return viewModel;
     }
-    
+
     public static PuzzleDetailsViewModel ToPuzzleDetailsViewModel(this Puzzle puzzleDetails)
     {
         var viewModel = new PuzzleDetailsViewModel
         {
-            Id = puzzleDetails.PuzzleId,
+            PuzzleId = puzzleDetails.PuzzleId,
             Order = puzzleDetails.Order,
             Question = puzzleDetails.Question,
             Answer = puzzleDetails.Answer,
             QuestionMedia = puzzleDetails.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Question)
                 .Select(m => new MediaFileViewModel
                 {
-                    Id = m.MediaFile.MediaFileId,
+                    MediaFileId = m.MediaFile.MediaFileId,
                     FileName = Path.GetFileName(m.MediaFile.Path),
                     Path = m.MediaFile.Path
                 }).ToList() ?? [],
             AnswerMedia = puzzleDetails.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Answer)
                 .Select(m => new MediaFileViewModel
                 {
-                    Id = m.MediaFile.MediaFileId,
+                    MediaFileId = m.MediaFile.MediaFileId,
                     FileName = Path.GetFileName(m.MediaFile.Path),
                     Path = m.MediaFile.Path
                 }).ToList() ?? [],
@@ -181,28 +185,24 @@ public static class GameMappings
         return viewModel;
     }
 
-    public static GamePuzzleCreateViewModel ToGamePuzzleCreateViewModel(this Game gameDetails)
+    public static PuzzleCreateViewModel ToGamePuzzleCreateViewModel(this Game gameDetails)
     {
-        var viewModel = new GamePuzzleCreateViewModel
+        var viewModel = new PuzzleCreateViewModel
         {
-            GameId = gameDetails.GameId,
-            GameTypeSlug = gameDetails.GameType.Slug,
-            GameYear = gameDetails.ParentGame.Year
+            GameId = gameDetails.GameId
         };
 
         return viewModel;
     }
 
-    public static GamePuzzleEditViewModel ToGamePuzzleEditViewModel(this Puzzle puzzleDetails)
+    public static PuzzleEditViewModel ToGamePuzzleEditViewModel(this Puzzle puzzleDetails)
     {
-        var viewModel = new GamePuzzleEditViewModel
+        var viewModel = new PuzzleEditViewModel
         {
             PuzzleId = puzzleDetails.PuzzleId,
             Group = puzzleDetails.Group,
             Question = puzzleDetails.Question,
-            Answer = puzzleDetails.Answer,
-            GameTypeSlug = puzzleDetails.Game.GameType.Slug,
-            GameYear = puzzleDetails.Game.ParentGame.Year
+            Answer = puzzleDetails.Answer
         };
 
         return viewModel;
@@ -212,11 +212,12 @@ public static class GameMappings
     {
         var viewModel = new ParentGameMediaViewModel
         {
+            ParentGameId = parentGameDetails.ParentGameId,
             YearSlug = parentGameDetails.Year.ToString(),
             Ttitle = parentGameDetails.MainTitle,
             MediaFiles = parentGameDetails.MediaFiles.Select(x => new MediaFileViewModel
             {
-                Id = x.MediaFile.MediaFileId,
+                MediaFileId = x.MediaFile.MediaFileId,
                 FileName = Path.GetFileName(x.MediaFile.Path),
                 Path = x.MediaFile.Path
             }).ToList()

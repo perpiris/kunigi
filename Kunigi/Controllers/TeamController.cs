@@ -23,16 +23,17 @@ public class TeamController : Controller
         return View(viewModel);
     }
 
-    [HttpGet("{teamSlug}")]
-    public async Task<IActionResult> TeamDetails(string teamSlug)
+    [HttpGet("details")]
+    public async Task<IActionResult> TeamDetails(Guid teamId)
     {
         try
         {
-            var viewModel = await _teamService.GetTeamDetails(teamSlug);
+            var viewModel = await _teamService.GetTeamDetails(teamId);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
+            TempData["error"] = exception.Message;
             return RedirectToAction("TeamList");
         }
         catch (ArgumentNullException)
@@ -71,25 +72,26 @@ public class TeamController : Controller
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpGet("edit-team/{teamSlug}")]
-    public async Task<IActionResult> EditTeam(string teamSlug)
+    [HttpGet("edit-team")]
+    public async Task<IActionResult> EditTeam(Guid teamId)
     {
         try
         {
-            var viewModel = await _teamService.PrepareEditTeamViewModel(teamSlug, User);
+            var viewModel = await _teamService.PrepareEditTeamViewModel(teamId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (ArgumentNullException)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
-            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)
@@ -99,28 +101,29 @@ public class TeamController : Controller
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpPost("edit-team/{teamSlug}")]
-    public async Task<IActionResult> EditTeam(string teamSlug, TeamEditViewModel viewModel, IFormFile profileImage)
+    [HttpPost("edit-team")]
+    public async Task<IActionResult> EditTeam(TeamEditViewModel viewModel, IFormFile profileImage)
     {
         if (!ModelState.IsValid) return View(viewModel);
-        
+
         try
         {
-            await _teamService.EditTeam(teamSlug, viewModel, profileImage, User);
+            await _teamService.EditTeam(viewModel, profileImage, User);
             TempData["success"] = "Η ομάδα επεξεργάστηκε επιτυχώς.";
-            return RedirectToAction("TeamActions", new { teamSlug });
+            return RedirectToAction("TeamActions", new { viewModel.TeamId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (ArgumentNullException)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
-            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)
@@ -128,7 +131,7 @@ public class TeamController : Controller
             return View(viewModel);
         }
     }
-    
+
     [Authorize(Roles = "Admin")]
     [HttpGet("manage-teams")]
     public async Task<IActionResult> TeamManagement(int pageNumber = 1, int pageSize = 15)
@@ -138,25 +141,26 @@ public class TeamController : Controller
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpGet("edit-team-managers/{teamSlug}")]
-    public async Task<IActionResult> EditTeamManagers(string teamSlug)
+    [HttpGet("edit-team-managers")]
+    public async Task<IActionResult> EditTeamManagers(Guid teamId)
     {
         try
         {
-            var viewModel = await _teamService.PrepareTeamManagerEditViewModel(teamSlug, User);
+            var viewModel = await _teamService.PrepareTeamManagerEditViewModel(teamId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (ArgumentNullException)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
-            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)
@@ -166,27 +170,27 @@ public class TeamController : Controller
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpPost("edit-team-managers/{teamSlug}")]
-    public async Task<IActionResult> EditTeamManagers(string teamSlug,
-        TeamManagerEditViewModel viewModel)
+    [HttpPost("edit-team-managers")]
+    public async Task<IActionResult> EditTeamManagers(TeamManagerEditViewModel viewModel)
     {
         try
         {
             await _teamService.AddTeamManager(viewModel, User);
             TempData["success"] = "Ο χρήστης προστέθηκε με επιτυχία.";
-            return RedirectToAction("EditTeamManagers", new { teamSlug });
+            return RedirectToAction("EditTeamManagers", new { viewModel.TeamId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (ArgumentNullException)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
-            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)
@@ -196,26 +200,27 @@ public class TeamController : Controller
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpPost("remove-team-manager/{teamSlug}")]
-    public async Task<IActionResult> RemoveManager(string teamSlug, string managerId)
+    [HttpPost("remove-team-manager")]
+    public async Task<IActionResult> RemoveManager(Guid teamId, string managerId)
     {
         try
         {
-            await _teamService.RemoveTeamManager(teamSlug, managerId, User);
+            await _teamService.RemoveTeamManager(teamId, managerId, User);
             TempData["success"] = "Ο χρήστης αφαιρέθηκε με επιτυχία.";
-            return RedirectToAction("EditTeamManagers", new { teamSlug });
+            return RedirectToAction("EditTeamManagers", new { teamId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (ArgumentNullException)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
-            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)
@@ -225,25 +230,26 @@ public class TeamController : Controller
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpGet("manage-team-media/{teamSlug}")]
-    public async Task<IActionResult> TeamMediaManagement(string teamSlug)
+    [HttpGet("manage-team-media")]
+    public async Task<IActionResult> TeamMediaManagement(Guid teamId)
     {
         try
         {
-            var viewModel = await _teamService.GetTeamMedia(teamSlug, User);
+            var viewModel = await _teamService.GetTeamMedia(teamId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (ArgumentNullException)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
-            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)
@@ -253,26 +259,27 @@ public class TeamController : Controller
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpPost("upload-team-media/{teamSlug}")]
-    public async Task<IActionResult> UploadTeamMedia(string teamSlug, TeamMediaViewModel viewModel)
+    [HttpPost("upload-team-media")]
+    public async Task<IActionResult> UploadTeamMedia(Guid teamId, TeamMediaViewModel viewModel)
     {
         try
         {
-            await _teamService.AddTeamMedia(teamSlug, viewModel.NewMediaFiles, User);
+            await _teamService.AddTeamMedia(teamId, viewModel.NewMediaFiles, User);
             TempData["success"] = "Τα αρχεία ανέβηκαν επιτυχώς.";
-            return RedirectToAction("TeamMediaManagement", new { teamSlug });
+            return RedirectToAction("TeamMediaManagement", new { teamId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (ArgumentNullException)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
-            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)
@@ -282,26 +289,27 @@ public class TeamController : Controller
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpPost("delete-team-media/{teamSlug}")]
-    public async Task<IActionResult> DeleteTeamMedia(string teamSlug, int mediaId)
+    [HttpPost("delete-team-media")]
+    public async Task<IActionResult> DeleteTeamMedia(Guid teamId, Guid mediaId)
     {
         try
         {
-            await _teamService.DeleteTeamMedia(teamSlug, mediaId, User);
+            await _teamService.DeleteTeamMedia(teamId, mediaId, User);
             TempData["success"] = "Τα αρχείο διαγράφηκε επιτυχώς.";
-            return RedirectToAction("TeamMediaManagement", new { teamSlug });
+            return RedirectToAction("TeamMediaManagement", new { teamId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (ArgumentNullException)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
-            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)
@@ -311,25 +319,26 @@ public class TeamController : Controller
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpGet("team-actions/{teamSlug}")]
-    public async Task<IActionResult> TeamActions(string teamSlug)
+    [HttpGet("team-actions")]
+    public async Task<IActionResult> TeamActions(Guid teamId)
     {
         try
         {
-            var viewModel = await _teamService.GetTeamDetails(teamSlug, User);
+            var viewModel = await _teamService.GetTeamDetails(teamId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (ArgumentNullException)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
-            TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτής της ομάδας.";
+            TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception)

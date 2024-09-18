@@ -4,5 +4,5 @@ namespace Kunigi.Entities;
 
 public class AppUser : IdentityUser
 {
-    public virtual ICollection<Team> ManagedTeams { get; set; }
+    public virtual ICollection<TeamManager> ManagedTeams { get; set; }
 }

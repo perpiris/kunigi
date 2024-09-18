@@ -23,7 +23,7 @@ else
         @foreach (var team in Model.Items)
         {
             <div class="col data-item" data-item-name="@team.Name.ToLower()">
-                <a asp-controller="Team" asp-action="TeamActions" asp-route-teamSlug="@team.TeamSlug" class="card-link">
+                <a asp-controller="Team" asp-action="TeamActions" asp-route-teamId="@team.TeamId" class="card-link">
                     <div class="card h-100">
                         <div class="card-body">
                             <h5 class="card-title">@team.Name</h5>

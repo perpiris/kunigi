@@ -35,10 +35,6 @@ public class DataContext : IdentityDbContext<AppUser>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
-        modelBuilder.Entity<Team>()
-            .Property(t => t.IsActive)
-            .HasConversion<int>();
 
         modelBuilder.Entity<ParentGame>()
             .HasOne(x => x.Host)

@@ -11,11 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<DataContext>(opt =>
 {
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddScoped<ITeamService, TeamService>();
-builder.Services.AddScoped<IGameService, GameService>();
+// builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>

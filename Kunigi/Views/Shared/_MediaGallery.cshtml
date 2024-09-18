@@ -3,7 +3,7 @@
 <div class="media-gallery">
     @foreach (var item in Model)
     {
-        <div class="media-item" data-id="@item.Id" data-type="@GetMediaType(item.FileName)" data-path="@Url.Content($"~/{item.Path}")">
+        <div class="media-item" data-id="@item.MediaFileId" data-type="@GetMediaType(item.FileName)" data-path="@Url.Content($"~/{item.Path}")">
             @switch (GetMediaType(item.FileName))
             {
                 case "image":

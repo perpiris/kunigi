@@ -35,7 +35,9 @@ public class TeamService : ITeamService
             .Take(pageSize)
             .ToListAsync();
 
-        var teamViewModels = teams.Select(x => x.ToTeamDetailsViewModel()).ToList();
+        var teamViewModels = teams
+            .Select(x => x.ToTeamDetailsViewModel())
+            .ToList();
 
         return new PaginatedViewModel<TeamDetailsViewModel>
         {
@@ -46,31 +48,27 @@ public class TeamService : ITeamService
         };
     }
 
-    public async Task<TeamDetailsViewModel> GetTeamDetails(string teamSlug, ClaimsPrincipal user = null)
+    public async Task<TeamDetailsViewModel> GetTeamDetails(Guid teamId, ClaimsPrincipal user = null)
     {
         if (user is not null)
         {
-            await CheckTeamAndOwneship(teamSlug, user);
+            await CanEditTeam(teamId, user);
         }
         else
         {
-            if (string.IsNullOrEmpty(teamSlug))
-            {
-                throw new ArgumentNullException(nameof(teamSlug));
-            }
+            ArgumentNullException.ThrowIfNull(teamId);
         }
 
-        teamSlug = teamSlug.Trim();
         var teamDetails = await _context.Teams
             .Include(x => x.HostedGames.OrderBy(y => y.Year))
             .Include(x => x.WonGames.OrderBy(y => y.Year))
             .Include(x => x.MediaFiles)
             .ThenInclude(x => x.MediaFile)
-            .FirstOrDefaultAsync(x => x.Slug == teamSlug);
+            .FirstOrDefaultAsync(x => x.TeamId == teamId);
 
         if (teamDetails is null)
         {
-            throw new NotFoundException();
+            throw new NotFoundException("Η ομάδα δεν βρέθηκε");
         }
 
         return teamDetails.ToTeamDetailsViewModel(true);
@@ -78,12 +76,16 @@ public class TeamService : ITeamService
 
     public async Task CreateTeam(TeamCreateViewModel viewModel)
     {
-        var slug = SlugGenerator.GenerateSlug(viewModel.Name);
+        var slug = SlugGenerator.GenerateSlug(viewModel.Name.Trim());
         var newTeam = new Team
         {
             Name = viewModel.Name.Trim(),
             Slug = slug,
-            IsActive = viewModel.IsActive
+            IsActive = viewModel.IsActive,
+            HostedGames = new List<ParentGame>(),
+            WonGames = new List<ParentGame>(),
+            MediaFiles = new List<TeamMedia>(),
+            Managers = new List<TeamManager>()
         };
 
         _mediaService.CreateFolder($"teams/{slug}");
@@ -92,9 +94,30 @@ public class TeamService : ITeamService
         await _context.SaveChangesAsync();
     }
 
-    public async Task EditTeam(string teamSlug, TeamEditViewModel viewModel, IFormFile profileImage, ClaimsPrincipal user)
+    public async Task<TeamEditViewModel> PrepareEditTeamViewModel(Guid teamId, ClaimsPrincipal user)
     {
-        var teamDetails = await CheckTeamAndOwneship(teamSlug, user);
+        await CanEditTeam(teamId, user);
+
+        var teamDetails = await _context.Teams.FirstOrDefaultAsync(x => x.TeamId == teamId);
+
+        if (teamDetails is null)
+        {
+            throw new NotFoundException("Η ομάδα δεν βρέθηκε");
+        }
+
+        return teamDetails.ToTeamEditViewModel();
+    }
+
+    public async Task EditTeam(TeamEditViewModel viewModel, IFormFile profileImage, ClaimsPrincipal user)
+    {
+        await CanEditTeam(viewModel.TeamId, user);
+
+        var teamDetails = await _context.Teams.FirstOrDefaultAsync(x => x.TeamId == viewModel.TeamId);
+
+        if (teamDetails is null)
+        {
+            throw new NotFoundException("Η ομάδα δεν βρέθηκε");
+        }
 
         teamDetails.CreatedYear = viewModel.CreatedYear;
         teamDetails.IsActive = viewModel.IsActive;
@@ -106,7 +129,7 @@ public class TeamService : ITeamService
 
         if (profileImage != null)
         {
-            var profileImagePath = await _mediaService.SaveMediaFile(profileImage, $"teams/{teamDetails.Slug.Trim()}", true);
+            var profileImagePath = await _mediaService.SaveMediaFile(profileImage, $"teams/{teamDetails.Slug.Trim()}");
             teamDetails.ProfileImagePath = profileImagePath;
         }
 
@@ -114,9 +137,9 @@ public class TeamService : ITeamService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<TeamManagerEditViewModel> PrepareTeamManagerEditViewModel(string teamSlug, ClaimsPrincipal user)
+    public async Task<TeamManagerEditViewModel> PrepareTeamManagerEditViewModel(Guid teamId, ClaimsPrincipal user)
     {
-        var teamDetails = await CheckTeamAndOwneship(teamSlug, user);
+        await CanEditTeam(teamId, user);
 
         var users = await _context.AppUsers.ToListAsync();
         var managerSelectList = new List<SelectListItem>
@@ -130,6 +153,15 @@ public class TeamService : ITeamService
             Text = u.Email
         }));
 
+        var teamDetails = await _context.Teams
+            .Include(x => x.Managers)
+            .FirstOrDefaultAsync(x => x.TeamId == teamId);
+
+        if (teamDetails is null)
+        {
+            throw new NotFoundException("Η ομάδα δεν βρέθηκε");
+        }
+
         var viewModel = teamDetails.ToTeamManagerEditViewModel();
         viewModel.ManagerSelectList = new SelectList(managerSelectList, "Value", "Text");
 
@@ -138,10 +170,19 @@ public class TeamService : ITeamService
 
     public async Task AddTeamManager(TeamManagerEditViewModel viewModel, ClaimsPrincipal user)
     {
-        var teamDetails = await CheckTeamAndOwneship(viewModel.TeamSlug, user);
+        await CanEditTeam(viewModel.TeamId, user);
 
         var selectedUser = await _context.AppUsers
-            .SingleOrDefaultAsync(x => x.Id == viewModel.SelectedManagerId);
+            .FirstOrDefaultAsync(x => x.Id == viewModel.SelectedManagerId);
+
+        var teamDetails = await _context.Teams
+            .Include(x => x.Managers)
+            .FirstOrDefaultAsync(x => x.TeamId == viewModel.TeamId);
+
+        if (teamDetails is null)
+        {
+            throw new NotFoundException("Η ομάδα δεν βρέθηκε");
+        }
 
         if (selectedUser != null)
         {
@@ -156,10 +197,8 @@ public class TeamService : ITeamService
                 }
             }
 
-            if (teamDetails.Managers.All(m => m.Id != selectedUser.Id))
+            if (teamDetails.Managers.All(m => m.TeamManagerId.ToString() != selectedUser.Id))
             {
-                teamDetails.Managers.Add(selectedUser);
-
                 var teamManager = new TeamManager
                 {
                     TeamId = teamDetails.TeamId,
@@ -176,15 +215,25 @@ public class TeamService : ITeamService
         }
         else
         {
-            throw new NotFoundException();
+            throw new NotFoundException("Ο χρήστης δεν βρέθηκε");
         }
     }
 
-    public async Task RemoveTeamManager(string teamSlug, string managerId, ClaimsPrincipal user)
+    public async Task RemoveTeamManager(Guid teamId, string managerId, ClaimsPrincipal user)
     {
-        var teamDetails = await CheckTeamAndOwneship(teamSlug, user);
+        await CanEditTeam(teamId, user);
 
-        var selectedUser = teamDetails.Managers.SingleOrDefault(m => m.Id == managerId);
+        var teamDetails = await _context.Teams
+            .Include(x => x.Managers)
+            .FirstOrDefaultAsync(x => x.TeamId == teamId);
+
+        if (teamDetails is null)
+        {
+            throw new NotFoundException("Η ομάδα δεν βρέθηκε");
+        }
+
+        var selectedUser = teamDetails.Managers.SingleOrDefault(m => m.AppUserId == managerId);
+
         if (selectedUser != null)
         {
             teamDetails.Managers.Remove(selectedUser);
@@ -195,7 +244,7 @@ public class TeamService : ITeamService
                 _context.TeamManagers.Remove(teamManager);
                 await _context.SaveChangesAsync();
             }
-            
+
             var isStillManagerInOtherTeams = await _context.TeamManagers
                 .AnyAsync(tm => tm.AppUserId == managerId);
 
@@ -210,34 +259,35 @@ public class TeamService : ITeamService
         }
         else
         {
-            throw new NotFoundException();
+            throw new NotFoundException("Ο χρήστης δεν βρέθηκε");
         }
     }
 
-    public async Task<TeamEditViewModel> PrepareEditTeamViewModel(string teamSlug, ClaimsPrincipal user)
+    public async Task<TeamMediaViewModel> GetTeamMedia(Guid teamId, ClaimsPrincipal user)
     {
-        var teamDetails = await CheckTeamAndOwneship(teamSlug, user);
-        return teamDetails.ToTeamEditViewModel();
-    }
+        await CanEditTeam(teamId, user);
 
-    public async Task<TeamMediaViewModel> GetTeamMedia(string teamSlug, ClaimsPrincipal user)
-    {
-        var teamDetails = await CheckTeamAndOwneship(teamSlug, user);
-        var teamMedia = await _context.TeamMediaFiles
-            .Include(x => x.MediaFile)
-            .Where(x => x.TeamId == teamDetails.TeamId).ToListAsync();
+        var teamDetails = await _context.Teams
+            .Include(x => x.MediaFiles)
+            .ThenInclude(x => x.MediaFile)
+            .Where(x => x.TeamId == teamId)
+            .FirstOrDefaultAsync();
 
-        var viewModel = TeamMappings.ToTeamMediaViewModel(teamDetails, teamMedia);
+        var viewModel = teamDetails.ToTeamMediaViewModel();
         return viewModel;
     }
 
-    public async Task AddTeamMedia(string teamSlug, List<IFormFile> files, ClaimsPrincipal user)
+    public async Task AddTeamMedia(Guid teamId, List<IFormFile> files, ClaimsPrincipal user)
     {
-        var teamDetails = await CheckTeamAndOwneship(teamSlug, user);
+        await CanEditTeam(teamId, user);
+
+        var teamDetails = await _context.Teams
+            .Include(x => x.MediaFiles)
+            .Where(x => x.TeamId == teamId).FirstOrDefaultAsync();
 
         foreach (var file in files)
         {
-            var filePath = await _mediaService.SaveMediaFile(file, $"teams/{teamDetails.Slug}", false);
+            var filePath = await _mediaService.SaveMediaFile(file, $"teams/{teamDetails.Slug}");
             teamDetails.MediaFiles ??= new List<TeamMedia>();
             teamDetails.MediaFiles.Add(new TeamMedia
             {
@@ -252,40 +302,33 @@ public class TeamService : ITeamService
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteTeamMedia(string teamSlug, int mediafileId, ClaimsPrincipal user)
+    public async Task DeleteTeamMedia(Guid teamId, Guid mediafileId, ClaimsPrincipal user)
     {
-        await CheckTeamAndOwneship(teamSlug, user);
+        await CanEditTeam(teamId, user);
         await _mediaService.DeleteMediaFile(mediafileId);
     }
 
-    private async Task<Team> CheckTeamAndOwneship(string teamSlug, ClaimsPrincipal user)
+    private async Task CanEditTeam(Guid teamId, ClaimsPrincipal user)
     {
-        if (string.IsNullOrEmpty(teamSlug))
-        {
-            throw new ArgumentNullException(nameof(teamSlug));
-        }
-
+        ArgumentNullException.ThrowIfNull(teamId);
         ArgumentNullException.ThrowIfNull(user);
 
-        teamSlug = teamSlug.Trim();
         var teamDetails = await _context.Teams
             .Include(team => team.Managers)
-            .FirstOrDefaultAsync(x => x.Slug == teamSlug);
+            .FirstOrDefaultAsync(x => x.TeamId == teamId);
 
         if (teamDetails is null)
         {
-            throw new NotFoundException();
+            throw new NotFoundException("Η ομάδα δεν βρέθηκε");
         }
 
         if (user.IsInRole("Manager") && !user.IsInRole("Admin"))
         {
             var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (teamDetails.Managers.All(x => x.Id != userId))
+            if (teamDetails.Managers.All(x => x.AppUserId != userId))
             {
-                throw new UnauthorizedOperationException();
+                throw new UnauthorizedOperationException("Δεν έχετε δικαίωμα επεξεργασίας.");
             }
         }
-
-        return teamDetails;
     }
 }

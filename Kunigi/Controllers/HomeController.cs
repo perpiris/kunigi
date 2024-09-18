@@ -34,9 +34,10 @@ public class HomeController : Controller
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var teamList =
-                await _context.Teams
-                    .Include(x => x.Managers)
-                    .Where(x => x.Managers.Any(y => y.Id.Equals(userId)))
+                await _context.TeamManagers
+                    .Include(x => x.Team)
+                    .Where(x => x.AppUserId == userId)
+                    .Select(x => x.Team)
                     .ToListAsync();
 
             ViewBag.TeamList = teamList.Select(x => x.ToTeamDetailsViewModel()).ToList();

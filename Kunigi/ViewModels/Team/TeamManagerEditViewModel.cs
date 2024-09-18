@@ -4,9 +4,7 @@ namespace Kunigi.ViewModels.Team;
 
 public class TeamManagerEditViewModel
 {
-    public string TeamSlug { get; set; }
-    
-    public string Name { get; set; }
+    public Guid TeamId { get; set; }
     
     public string SelectedManagerId { get; set; }
     

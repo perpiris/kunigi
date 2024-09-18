@@ -43,16 +43,16 @@ else
         @foreach (var team in Model.Items)
         {
             <div class="col px-1">
-                <a asp-controller="Team" asp-action="TeamDetails" asp-route-teamSlug="@team.TeamSlug" class="text-decoration-none">
+                <a asp-controller="Team" asp-action="TeamDetails" asp-route-teamId="@team.TeamId" class="text-decoration-none">
                     <div class="card h-100 team-card">
                         <div class="card-img-top-wrapper">
-                            @if (string.IsNullOrEmpty(team.ProfileImageUrl))
+                            @if (string.IsNullOrEmpty(team.ProfileImagePath))
                             {
                                 <img src="~/media/profile.jpg" class="card-img-top" alt="Default Team Image">
                             }
                             else
                             {
-                                <img src="~/@Url.Content(team.ProfileImageUrl)" class="card-img-top" alt="@team.Name">
+                                <img src="~/@Url.Content(team.ProfileImagePath)" class="card-img-top" alt="@team.Name">
                             }
                         </div>
                         <div class="card-body">

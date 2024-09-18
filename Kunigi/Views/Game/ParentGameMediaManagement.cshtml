@@ -194,7 +194,7 @@
                     }
                     <h6 class="card-title mb-0 text-truncate" title="@mediaFile.FileName">@mediaFile.FileName</h6>
                 </div>
-                <form asp-action="DeleteParentGameMedia" asp-route-gameYear="@Model.YearSlug" asp-route-mediaId="@mediaFile.Id" method="post">
+                <form asp-action="DeleteParentGameMedia" asp-route-gameYear="@Model.YearSlug" asp-route-mediaId="@mediaFile.MediaFileId" method="post">
                     <button type="submit" class="delete-btn" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">
                         <i class="bi bi-trash"></i>
                     </button>

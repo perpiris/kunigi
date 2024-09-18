@@ -8,41 +8,41 @@ public interface IGameService
 {
     Task<PaginatedViewModel<ParentGameDetailsViewModel>> GetPaginatedGame(int pageNumber = 1, int pageSize = 10);
 
-    Task<ParentGameDetailsViewModel> GetParentGameDetails(short gameYear, ClaimsPrincipal user = null);
+    Task<ParentGameDetailsViewModel> GetParentGameDetails(Guid parentGameId, ClaimsPrincipal user = null);
     
-    Task<GameDetailsViewModel> GetGameDetails(short gameYear, string gameTypeSlug, ClaimsPrincipal user = null);
+    Task<GameDetailsViewModel> GetGameDetails(Guid gameId, ClaimsPrincipal user = null);
     
-    Task<GamePuzzleDetailsViewModel> GetGamePuzzleList(short gameYear, string gameTypeSlug);
+    Task<GamePuzzleDetailsViewModel> GetGamePuzzleList(Guid gameId);
 
     Task<ParentGameCreateViewModel> PrepareCreateParentGameViewModel(ParentGameCreateViewModel viewModel);
 
     Task CreateParentGame(ParentGameCreateViewModel viewModel);
     
-    Task<ParentGameEditViewModel> PrepareParentGameEditViewModel(short gameYear, ClaimsPrincipal user);
+    Task<ParentGameEditViewModel> PrepareParentGameEditViewModel(Guid parentGameId, ClaimsPrincipal user);
     
-    Task<GameEditViewModel> PrepareGameEditViewModel(short gameYear, string gameTypeSlug, ClaimsPrincipal user);
+    Task<GameEditViewModel> PrepareGameEditViewModel(Guid parentGameId, Guid gameId, ClaimsPrincipal user);
 
-    Task EditParentGame(short gameYear, ParentGameEditViewModel viewModel, IFormFile profileImage, ClaimsPrincipal user);
+    Task EditParentGame(ParentGameEditViewModel viewModel, IFormFile profileImage, ClaimsPrincipal user);
     
-    Task EditGame(short gameYear, string gameTypeSlug, GameEditViewModel viewModel, ClaimsPrincipal user);
+    Task EditGame(GameEditViewModel viewModel, ClaimsPrincipal user);
     
-    Task<ParentGameMediaViewModel> GetParentGameMedia(short gameYear, ClaimsPrincipal user);
+    Task<ParentGameMediaViewModel> GetParentGameMedia(Guid parentGameId, ClaimsPrincipal user);
 
-    Task AddParentGameMedia(short gameYear, List<IFormFile> files, ClaimsPrincipal user);
+    Task AddParentGameMedia(Guid parentGameId, List<IFormFile> files, ClaimsPrincipal user);
 
-    Task DeleteParentGameMedia(short gameYear, int mediafileId, ClaimsPrincipal user);
+    Task DeleteParentGameMedia(Guid parentGameId, Guid mediafileId, ClaimsPrincipal user);
 
-    Task<GamePuzzleCreateViewModel> PrepareCreateGamePuzzleViewModel(short gameYear, string gameTypeSlug);
+    Task<PuzzleCreateViewModel> PrepareCreateGamePuzzleViewModel(Guid gameId, ClaimsPrincipal user);
 
-    Task CreateGamePuzzle(GamePuzzleCreateViewModel viewModel);
+    Task CreateGamePuzzle(PuzzleCreateViewModel viewModel, ClaimsPrincipal user);
     
-    Task<GamePuzzleEditViewModel> PrepareEditGamePuzzleViewModel(int puzzleId);
+    Task<PuzzleEditViewModel> PrepareEditGamePuzzleViewModel(Guid puzzleId, ClaimsPrincipal user);
 
-    Task EditGamePuzzle(GamePuzzleEditViewModel viewModel);
+    Task EditGamePuzzle(PuzzleEditViewModel viewModel, ClaimsPrincipal user);
     
-    Task<PuzzleDetailsViewModel> GetPuzzleMedia(int puzzleId);
+    Task<PuzzleDetailsViewModel> GetPuzzleMedia(Guid puzzleId, ClaimsPrincipal user);
     
-    Task DeleteGamePuzzle(int puzzleId);
+    Task DeleteGamePuzzle(Guid puzzleId, ClaimsPrincipal user);
 
-    Task DeleteGamePuzzleMedia(int puzzleId, int mediaId);
+    Task DeleteGamePuzzleMedia(Guid puzzleId, Guid mediaId, ClaimsPrincipal user);
 }

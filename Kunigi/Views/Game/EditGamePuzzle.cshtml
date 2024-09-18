@@ -1,15 +1,13 @@
-﻿@model GamePuzzleEditViewModel
+﻿@model PuzzleEditViewModel
 
 @{
-    ViewData["Title"] = "επεξεργασία Γρίφου";
+    ViewData["Title"] = "Επεξεργασία Γρίφου";
 }
 
 <h2 class="mb-4 text-center">@ViewData["Title"]</h2>
 <div class="form-container-large">
     <form asp-action="EditGamePuzzle" asp-controller="Game" method="post" enctype="multipart/form-data">
         <input type="hidden" asp-for="PuzzleId"/>
-        <input type="hidden" asp-for="GameYear"/>
-        <input type="hidden" asp-for="GameTypeSlug"/>
         <div class="row">
             <div class="col-12 mb-4 form-group">
                 <label asp-for="Question" class="form-label"></label>
@@ -36,7 +34,7 @@
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Αποθήκευση</button>
-        <a asp-controller="Game" asp-action="GameActions" asp-route-gameYear="@Model.GameYear" asp-route-gameTypeSlug="@Model.GameTypeSlug" class="btn btn-secondary">Πίσω</a>
+        <a asp-controller="Game" asp-action="GameActions" asp-route-gameId="@Model.GameId" class="btn btn-secondary">Πίσω</a>
     </form>
 </div>
 

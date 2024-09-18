@@ -5,6 +5,8 @@ namespace Kunigi.ViewModels.Game;
 
 public class ParentGameEditViewModel
 {
+    public Guid ParentGameId { get; set; }
+    
     [DisplayName("Τίτλος")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
     public string SubTitle { get; set; }

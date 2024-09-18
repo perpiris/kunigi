@@ -1,6 +1,6 @@
 ﻿@model MediaFileViewModel
 
-<div class="media-item" data-id="@Model.Id" data-type="@GetMediaType(Model.FileName)" data-path="@Url.Content($"~/{Model.Path}")">
+<div class="media-item" data-id="@Model.MediaFileId" data-type="@GetMediaType(Model.FileName)" data-path="@Url.Content($"~/{Model.Path}")">
     @switch (GetMediaType(Model.FileName))
     {
         case "image":
@@ -27,20 +27,20 @@
     }
 </div>
 
-<div id="mediaModal_@Model.Id" class="modal">
+<div id="mediaModal_@Model.MediaFileId" class="modal">
     <div class="modal-container">
         <span class="close">&times;</span>
         <div class="modal-content">
-            <img id="modalImage_@Model.Id" src="" alt="" style="display: none;">
-            <video id="modalVideo_@Model.Id" controls style="display: none;">
+            <img id="modalImage_@Model.MediaFileId" src="" alt="" style="display: none;">
+            <video id="modalVideo_@Model.MediaFileId" controls style="display: none;">
                 <source src="" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-            <audio id="modalAudio_@Model.Id" controls style="display: none;">
+            <audio id="modalAudio_@Model.MediaFileId" controls style="display: none;">
                 <source src="" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
-            <iframe id="modalPdf_@Model.Id" src="" style="display: none;"></iframe>
+            <iframe id="modalPdf_@Model.MediaFileId" src="" style="display: none;"></iframe>
         </div>
     </div>
 </div>
@@ -184,12 +184,12 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        let mediaItem = document.querySelector('.media-item[data-id="@Model.Id"]');
-        let modal = document.getElementById('mediaModal_@Model.Id');
-        let modalImg = document.getElementById('modalImage_@Model.Id');
-        let modalVideo = document.getElementById('modalVideo_@Model.Id');
-        let modalAudio = document.getElementById('modalAudio_@Model.Id');
-        let modalPdf = document.getElementById('modalPdf_@Model.Id');
+        let mediaItem = document.querySelector('.media-item[data-id="@Model.MediaFileId"]');
+        let modal = document.getElementById('mediaModal_@Model.MediaFileId');
+        let modalImg = document.getElementById('modalImage_@Model.MediaFileId');
+        let modalVideo = document.getElementById('modalVideo_@Model.MediaFileId');
+        let modalAudio = document.getElementById('modalAudio_@Model.MediaFileId');
+        let modalPdf = document.getElementById('modalPdf_@Model.MediaFileId');
         let closeBtn = modal.querySelector('.close');
 
         function showMedia() {

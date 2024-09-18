@@ -22,10 +22,10 @@ public class MediaService : IMediaService
         Directory.CreateDirectory(fullPath);
     }
 
-    public async Task<string> SaveMediaFile(IFormFile file, string path, bool isProfileImage)
+    public async Task<string> SaveMediaFile(IFormFile file, string path)
     {
         var fullPath = NormalizeAndCombinePaths(_mediaPath, path);
-        var fileName = GetUniqueFileName(file.FileName, isProfileImage);
+        var fileName = GetUniqueFileName(file.FileName);
         var filePath = Path.Combine(fullPath, fileName);
 
         if (!Directory.Exists(fullPath))
@@ -40,17 +40,14 @@ public class MediaService : IMediaService
         return relativePath;
     }
 
-    public async Task DeleteMediaFile(int mediafileId)
+    public async Task DeleteMediaFile(Guid mediafileId)
     {
-        if (mediafileId <= default(int))
-        {
-            throw new ArgumentNullException(nameof(mediafileId));
-        }
+        ArgumentNullException.ThrowIfNull(mediafileId);
 
         var mediaFile = await _context.MediaFiles.FindAsync(mediafileId);
         if (mediaFile is null)
         {
-            throw new NotFoundException();
+            throw new NotFoundException("Το αρχείο δεν βρέθηκε.");
         }
         
         var relativePath = mediaFile.Path.Replace("media/", string.Empty);
@@ -73,10 +70,10 @@ public class MediaService : IMediaService
         return Path.GetFullPath(combinedPath);
     }
 
-    private static string GetUniqueFileName(string fileName, bool isProfileImage)
+    private static string GetUniqueFileName(string fileName)
     {
         var extension = Path.GetExtension(fileName);
-        var uniqueHash = isProfileImage ? "profile" : GenerateUniqueFileHash(fileName);
+        var uniqueHash = GenerateUniqueFileHash(fileName);
         return $"{uniqueHash}{extension}";
     }
 

@@ -48,7 +48,7 @@ public static class SlugGenerator
         input = input.Replace("--", "-", StringComparison.Ordinal);
         input = input.Trim('-');
 
-        return input;
+        return input.Trim();
     }
 
     private static string TransliterateGreekToLatin(string input)

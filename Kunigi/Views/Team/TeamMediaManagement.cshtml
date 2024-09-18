@@ -148,9 +148,10 @@
         <h4 class="mb-4">Υλικό</h4>
     </div>
     <div class="d-flex justify-content-between align-items-center">
-        <a asp-controller="Team" asp-action="TeamActions" asp-route-teamSlug="@Model.TeamSlug" class="btn btn-secondary">Πίσω</a>
+        <a asp-controller="Team" asp-action="TeamActions" asp-route-teamId="@Model.TeamId" class="btn btn-secondary">Πίσω</a>
     </div>
 </div>
+
 <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
     <div class="col">
         <div class="card h-100 upload-card" data-bs-toggle="modal" data-bs-target="#uploadModal">
@@ -162,6 +163,7 @@
             </div>
         </div>
     </div>
+    
     @foreach (var mediaFile in Model.MediaFiles)
     {
         <div class="col">
@@ -194,7 +196,8 @@
                     }
                     <h6 class="card-title mb-0 text-truncate" title="@mediaFile.FileName">@mediaFile.FileName</h6>
                 </div>
-                <form asp-action="DeleteTeamMedia" asp-route-teamSlug="@Model.TeamSlug" asp-route-mediaId="@mediaFile.Id" method="post">
+                
+                <form asp-action="DeleteTeamMedia" asp-route-teamId="@Model.TeamId" asp-route-mediaId="@mediaFile.MediaFileId" method="post">
                     <button type="submit" class="delete-btn" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">
                         <i class="bi bi-trash"></i>
                     </button>
@@ -207,7 +210,7 @@
 <div class="modal" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form asp-action="UploadTeamMedia" asp-route-teamSlug="@Model.TeamSlug" method="post" enctype="multipart/form-data">
+            <form asp-action="UploadTeamMedia" asp-route-teamId="@Model.TeamId" method="post" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h5 class="modal-title" id="uploadModalLabel">Προσθήκη Υλικού</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

@@ -2,7 +2,7 @@
 
 public class MediaFileViewModel
 {
-    public int Id { get; set; }
+    public Guid MediaFileId { get; set; }
     
     public string FileName { get; set; }
     

@@ -1,71 +1,75 @@
-﻿document.addEventListener('DOMContentLoaded', function() {
-    const alerts = document.querySelectorAll('.alert.auto-dismiss');
+﻿$(document).ready(function() {
 
-    alerts.forEach(function(alert) {
-        setTimeout(function() {
-            dismissAlert(alert);
-        }, 3000);
-        
-        alert.addEventListener('mouseenter', function() {
-            clearTimeout(alert.dismissTimeout);
+    function setupAlerts() {
+        $('.alert.auto-dismiss').each(function() {
+            const $alert = $(this);
+            let dismissTimeout;
+
+            function startDismissTimer() {
+                dismissTimeout = setTimeout(function() {
+                    dismissAlert($alert);
+                }, 5000);
+            }
+
+            function stopDismissTimer() {
+                clearTimeout(dismissTimeout);
+            }
+
+            startDismissTimer();
+
+            $alert.hover(stopDismissTimer, startDismissTimer);
         });
+    }
 
-        alert.addEventListener('mouseleave', function() {
-            alert.dismissTimeout = setTimeout(function() {
-                dismissAlert(alert);
-            }, 3000);
-        });
-    });
-
-    function dismissAlert(alert) {
+    function dismissAlert($alert) {
         if (typeof bootstrap !== 'undefined') {
-            const bsAlert = new bootstrap.Alert(alert);
+            const bsAlert = new bootstrap.Alert($alert[0]);
             bsAlert.close();
         } else {
-            alert.style.opacity = '0';
-            setTimeout(function() {
-                alert.remove();
-            }, 300);
+            $alert.fadeOut(500, function() {
+                $(this).remove();
+            });
         }
     }
-});
-
-$(document).ready(function () {
+    
     function applyValidationClasses() {
-        $('input, select, textarea').each(function () {
-            let inputElement = $(this);
-            let errorSpan = inputElement.next('.field-validation-error');
+        $('input, select, textarea').each(function() {
+            const $input = $(this);
+            const $errorSpan = $input.next('.field-validation-error');
 
-            if (errorSpan.length > 0 && errorSpan.text().trim() !== '') {
-                inputElement.addClass('is-invalid');
+            if ($errorSpan.length > 0 && $errorSpan.text().trim() !== '') {
+                $input.addClass('is-invalid');
             } else {
-                inputElement.removeClass('is-invalid');
+                $input.removeClass('is-invalid');
             }
         });
     }
 
+    function setupFormValidation() {
+        const $form = $('form');
+
+        $form.on('submit', function() {
+            setTimeout(applyValidationClasses, 0);
+        });
+
+        $form.on('change keyup', 'input, select, textarea', function() {
+            const $input = $(this);
+            const $errorSpan = $input.next('.field-validation-error');
+
+            if ($errorSpan.length === 0 || $errorSpan.text().trim() === '') {
+                $input.removeClass('is-invalid');
+            }
+        });
+
+        $form.on('blur', 'input, select, textarea', function() {
+            const $input = $(this);
+            $.validator.unobtrusive.parseElement(this);
+            $input.valid();
+            applyValidationClasses();
+        });
+    }
+    
+    setupAlerts();
     applyValidationClasses();
-
-    $('form').submit(function () {
-        setTimeout(applyValidationClasses, 0);
-    });
-
-    // Remove is-invalid class on input change
-    $('form').on('change keyup', 'input, select, textarea', function() {
-        let inputElement = $(this);
-        let errorSpan = inputElement.next('.field-validation-error');
-
-        if (errorSpan.length === 0 || errorSpan.text().trim() === '') {
-            inputElement.removeClass('is-invalid');
-        }
-    });
-
-    // Re-validate on blur
-    $('form').on('blur', 'input, select, textarea', function() {
-        let form = $(this).closest('form');
-        $.validator.unobtrusive.parseElement(this);
-        $(this).valid();
-        applyValidationClasses();
-    });
+    setupFormValidation();
 });
-

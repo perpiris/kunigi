@@ -17,14 +17,14 @@ public class ParentGameCreateViewModel
     
     [DisplayName("Διοργανωτής")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
-    public int HostId { get; set; }
+    public Guid HostId { get; set; }
     
     [DisplayName("Νικητής")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
-    public int WinnerId { get; set; }
+    public Guid WinnerId { get; set; }
     
     [DisplayName("Επιλογές")]
-    public List<int> SelectedGameTypeIds { get; set; } = [];
+    public List<Guid> SelectedGameTypeIds { get; set; } = [];
     
     public SelectList HostSelectList { get; set; }
     

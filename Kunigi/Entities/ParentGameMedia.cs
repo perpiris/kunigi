@@ -1,12 +1,17 @@
-﻿namespace Kunigi.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Kunigi.Entities;
 
 public class ParentGameMedia
 {
-    public int ParentGameMediaId { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public Guid ParentGameMediaId { get; set; }
     
-    public int ParentGameId { get; set; }
+    public Guid ParentGameId { get; set; }
     
-    public int MediaFileId { get; set; }
+    public Guid MediaFileId { get; set; }
     
     public virtual ParentGame ParentGame { get; set; }
     

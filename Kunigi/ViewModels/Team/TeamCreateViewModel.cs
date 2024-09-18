@@ -12,6 +12,5 @@ public class TeamCreateViewModel
     [UniqueTeamName]
     public string Name { get; set; }
 
-    [DisplayName("Ενεργή")]
-    public bool IsActive { get; set; }
+    [DisplayName("Ενεργή")] public bool IsActive { get; set; } = true;
 }

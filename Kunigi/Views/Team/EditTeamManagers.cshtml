@@ -1,7 +1,7 @@
 ﻿@model TeamManagerEditViewModel
 
 @{
-    ViewData["Title"] = $"Διαχειριστές {Model.Name}";
+    ViewData["Title"] = "Διαχειριστές";
 }
 
 <style>
@@ -14,15 +14,14 @@
     }
 </style>
 
-<h2 class="mb-4">@Model.Name</h2>
-<h4 class="mb-4">Διαχειριστές</h4>
+<h2 class="mb-4">Διαχειριστές</h2>
 <div class="row">
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title">Προσθήκη Διαχειριστή</h4>
                 <form asp-action="EditTeamManagers" asp-controller="Team" method="post">
-                    <input type="hidden" asp-for="TeamSlug"/>
+                    <input type="hidden" asp-for="TeamId"/>
                     <div class="mb-3">
                         <input type="text" id="filterInput" placeholder="Φίλτρο" class="form-control mb-2"/>
                         <select asp-for="SelectedManagerId" asp-items="Model.ManagerSelectList" class="form-select" id="managerSelect">
@@ -30,7 +29,7 @@
                         <span asp-validation-for="SelectedManagerId" class="text-danger"></span>
                     </div>
                     <button type="submit" class="btn btn-primary">Προσθήκη</button>
-                    <a asp-controller="Team" asp-action="TeamActions" asp-route-teamSlug="@Model.TeamSlug" class="btn btn-secondary">Πίσω</a>
+                    <a asp-controller="Team" asp-action="TeamActions" asp-route-teamId="@Model.TeamId" class="btn btn-secondary">Πίσω</a>
                 </form>
             </div>
         </div>
@@ -46,9 +45,9 @@
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 @item.Email
-                                @using (Html.BeginForm("RemoveManager", "Team", new { teamSlug = Model.TeamSlug }, FormMethod.Post, false, new { @class = "d-inline" }))
+                                @using (Html.BeginForm("RemoveManager", "Team", new { teamId = Model.TeamId }, FormMethod.Post, false, new { @class = "d-inline" }))
                                 {
-                                    <input type="hidden" name="managerId" value="@item.Id"/>
+                                    <input type="hidden" name="managerId" value="@item.AppUserId"/>
                                     <button type="submit" class="btn btn-danger btn-sm">Αφαίρεση</button>
                                 }
                             </li>

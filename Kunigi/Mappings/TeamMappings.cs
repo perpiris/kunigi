@@ -11,12 +11,12 @@ public static class TeamMappings
     {
         var viewModel = new TeamDetailsViewModel
         {
+            TeamId = teamDetails.TeamId,
             Name = teamDetails.Name,
-            TeamSlug = teamDetails.Slug,
             Description = teamDetails.Description,
             CreatedYear = teamDetails.CreatedYear,
             IsActive = teamDetails.IsActive,
-            ProfileImageUrl = teamDetails.ProfileImagePath,
+            ProfileImagePath = teamDetails.ProfileImagePath,
             Facebook = teamDetails.Facebook,
             Youtube = teamDetails.Youtube,
             Instagram = teamDetails.Instagram,
@@ -44,7 +44,7 @@ public static class TeamMappings
             viewModel.MediaFiles = teamDetails.MediaFiles?
                 .Select(teamMedia => new MediaFileViewModel
                 {
-                    Id = teamMedia.MediaFile.MediaFileId,
+                    MediaFileId = teamMedia.MediaFile.MediaFileId,
                     FileName = Path.GetFileName(teamMedia.MediaFile.Path),
                     Path = teamMedia.MediaFile.Path
                 })
@@ -58,8 +58,8 @@ public static class TeamMappings
     {
         var viewModel = new TeamEditViewModel
         {
+            TeamId = teamDetails.TeamId,
             Name = teamDetails.Name,
-            TeamSlug = teamDetails.Slug,
             CreatedYear = teamDetails.CreatedYear,
             IsActive = teamDetails.IsActive,
             Description = teamDetails.Description,
@@ -72,32 +72,32 @@ public static class TeamMappings
 
         return viewModel;
     }
-    
+
     public static TeamManagerEditViewModel ToTeamManagerEditViewModel(this Team teamDetails)
     {
         var viewModel = new TeamManagerEditViewModel
         {
-            Name = teamDetails.Name,
-            TeamSlug = teamDetails.Slug,
-            ManagerList = teamDetails.Managers.Select(m => new TeamManagerDetailsViewModel
+            TeamId = teamDetails.TeamId,
+            ManagerList = teamDetails.Managers.Select(x => new TeamManagerDetailsViewModel
             {
-                Id = m.Id,
-                Email = m.Email
+                AppUserId = x.AppUserId,
+                Email = x.User.Email
             }).ToList()
         };
 
         return viewModel;
     }
 
-    public static TeamMediaViewModel ToTeamMediaViewModel(Team teamDetails, List<TeamMedia> teamMedia)
+    public static TeamMediaViewModel ToTeamMediaViewModel(this Team teamDetails)
     {
         var viewModel = new TeamMediaViewModel
         {
+            TeamId = teamDetails.TeamId,
             Name = teamDetails.Name,
             TeamSlug = teamDetails.Slug,
-            MediaFiles = teamMedia.Select(x => new MediaFileViewModel
+            MediaFiles = teamDetails.MediaFiles.Select(x => new MediaFileViewModel
             {
-                Id = x.MediaFile.MediaFileId,
+                MediaFileId = x.MediaFile.MediaFileId,
                 FileName = Path.GetFileName(x.MediaFile.Path),
                 Path = x.MediaFile.Path
             }).ToList()

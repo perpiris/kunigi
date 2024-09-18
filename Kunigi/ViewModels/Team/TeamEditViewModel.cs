@@ -5,9 +5,10 @@ namespace Kunigi.ViewModels.Team;
 
 public class TeamEditViewModel
 {
-    public string TeamSlug { get; set; }
+    public Guid TeamId { get; set; }
     
     [DisplayName("Όνομα Ομάδας")]
+    [StringLength(255)]
     public string Name { get; set; }
     
     [DisplayName("Έτος Δημιουργίας")]
@@ -20,12 +21,16 @@ public class TeamEditViewModel
     [DisplayName("Περιγραφή")]
     public string Description { get; set; }
     
+    [StringLength(255)]
     public string Website { get; set; }
     
+    [StringLength(255)]
     public string Facebook { get; set; }
     
+    [StringLength(255)]
     public string Youtube { get; set; }
     
+    [StringLength(255)]
     public string Instagram { get; set; }
     
     [DisplayName("Φωτογραφία")]

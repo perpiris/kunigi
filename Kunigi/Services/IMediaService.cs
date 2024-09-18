@@ -4,7 +4,7 @@ public interface IMediaService
 {
     void CreateFolder(string path);
 
-    Task<string> SaveMediaFile(IFormFile file, string path, bool isProfileImage);
+    Task<string> SaveMediaFile(IFormFile file, string path);
 
-    Task DeleteMediaFile(int mediafileId);
+    Task DeleteMediaFile(Guid mediafileId);
 }

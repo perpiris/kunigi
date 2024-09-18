@@ -3,89 +3,76 @@ using System;
 using Kunigi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Kunigi.Data.Migrations
+namespace Kunigi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240905151242_team id change")]
-    partial class teamidchange
+    partial class DataContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("AppUserTeam", b =>
-                {
-                    b.Property<int>("ManagedTeamsTeamId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ManagersId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("ManagedTeamsTeamId", "ManagersId");
-
-                    b.HasIndex("ManagersId");
-
-                    b.ToTable("AppUserTeam");
-                });
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Kunigi.Entities.AppUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -101,20 +88,23 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.Game", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("GameId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Description")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
-                    b.Property<int>("GameTypeId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("GameTypeId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("ParentGameId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("ParentGameId")
+                        .HasColumnType("uuid");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Title")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("GameId");
 
                     b.HasIndex("GameTypeId");
 
@@ -125,9 +115,9 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.GameType", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("GameTypeId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Description")
                         .HasColumnType("varchar(255)");
@@ -135,62 +125,59 @@ namespace Kunigi.Data.Migrations
                     b.Property<string>("Slug")
                         .HasColumnType("varchar(255)");
 
-                    b.HasKey("Id");
+                    b.HasKey("GameTypeId");
 
                     b.ToTable("GameTypes");
                 });
 
             modelBuilder.Entity("Kunigi.Entities.MediaFile", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("MediaFileId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ParentId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Path")
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.HasKey("MediaFileId");
 
                     b.ToTable("MediaFiles");
                 });
 
             modelBuilder.Entity("Kunigi.Entities.ParentGame", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("ParentGameId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Description")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
-                    b.Property<int>("HostId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("HostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("MainTitle")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<short>("Order")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
-                    b.Property<string>("ParentGameFolderUrl")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("ProfileImageUrl")
-                        .HasColumnType("varchar(255)");
+                    b.Property<string>("ProfileImagePath")
+                        .HasColumnType("text");
 
                     b.Property<string>("Slug")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("SubTitle")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<int>("WinnerId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("WinnerId")
+                        .HasColumnType("uuid");
 
                     b.Property<short>("Year")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
-                    b.HasKey("Id");
+                    b.HasKey("ParentGameId");
 
                     b.HasIndex("HostId");
 
@@ -201,53 +188,48 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.ParentGameMedia", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("ParentGameMediaId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("GameId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("MediaFileId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("MediaFileId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("ParentGameId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("ParentGameId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
+                    b.HasKey("ParentGameMediaId");
 
                     b.HasIndex("MediaFileId");
 
                     b.HasIndex("ParentGameId", "MediaFileId")
                         .IsUnique();
 
-                    b.ToTable("GameYearMediaFiles");
+                    b.ToTable("ParentGameMediaFiles");
                 });
 
             modelBuilder.Entity("Kunigi.Entities.Puzzle", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("PuzzleId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Answer")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
-                    b.Property<int>("GameId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("Order")
-                        .HasColumnType("INTEGER");
+                    b.Property<short?>("Group")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("Order")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("Question")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
+                    b.HasKey("PuzzleId");
 
                     b.HasIndex("GameId");
 
@@ -256,20 +238,20 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.PuzzleMedia", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("PuzzleMediaId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("MediaFileId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("MediaFileId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("MediaType")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
-                    b.Property<int>("PuzzleId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("PuzzleId")
+                        .HasColumnType("uuid");
 
-                    b.HasKey("Id");
+                    b.HasKey("PuzzleMediaId");
 
                     b.HasIndex("MediaFileId");
 
@@ -281,12 +263,15 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.Team", b =>
                 {
-                    b.Property<int>("TeamId")
+                    b.Property<Guid>("TeamId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
+
+                    b.Property<short?>("CreatedYear")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Facebook")
                         .HasColumnType("varchar(255)");
@@ -294,16 +279,16 @@ namespace Kunigi.Data.Migrations
                     b.Property<string>("Instagram")
                         .HasColumnType("varchar(255)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("ProfileImageUrl")
-                        .HasColumnType("TEXT");
+                    b.Property<string>("ProfileImagePath")
+                        .HasColumnType("text");
 
                     b.Property<string>("Slug")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("TeamFolderUrl")
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("Website")
@@ -319,15 +304,15 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.TeamManager", b =>
                 {
-                    b.Property<int>("TeamManagerId")
+                    b.Property<Guid>("TeamManagerId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("AppUserId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
-                    b.Property<int>("TeamId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("TeamManagerId");
 
@@ -340,15 +325,15 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.TeamMedia", b =>
                 {
-                    b.Property<int>("TeamMediaId")
+                    b.Property<Guid>("TeamMediaId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("MediaFileId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("MediaFileId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("TeamId")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("TeamMediaId");
 
@@ -363,19 +348,19 @@ namespace Kunigi.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -390,17 +375,19 @@ namespace Kunigi.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -413,17 +400,19 @@ namespace Kunigi.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -435,17 +424,17 @@ namespace Kunigi.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -457,10 +446,10 @@ namespace Kunigi.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -472,35 +461,20 @@ namespace Kunigi.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("AppUserTeam", b =>
-                {
-                    b.HasOne("Kunigi.Entities.Team", null)
-                        .WithMany()
-                        .HasForeignKey("ManagedTeamsTeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kunigi.Entities.AppUser", null)
-                        .WithMany()
-                        .HasForeignKey("ManagersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Kunigi.Entities.Game", b =>
@@ -525,13 +499,13 @@ namespace Kunigi.Data.Migrations
             modelBuilder.Entity("Kunigi.Entities.ParentGame", b =>
                 {
                     b.HasOne("Kunigi.Entities.Team", "Host")
-                        .WithMany("HostedYears")
+                        .WithMany("HostedGames")
                         .HasForeignKey("HostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Kunigi.Entities.Team", "Winner")
-                        .WithMany("WonYears")
+                        .WithMany("WonGames")
                         .HasForeignKey("WinnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -543,10 +517,6 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.ParentGameMedia", b =>
                 {
-                    b.HasOne("Kunigi.Entities.Game", null)
-                        .WithMany("MediaFiles")
-                        .HasForeignKey("GameId");
-
                     b.HasOne("Kunigi.Entities.MediaFile", "MediaFile")
                         .WithMany("ParentGameMediaFiles")
                         .HasForeignKey("MediaFileId")
@@ -567,7 +537,7 @@ namespace Kunigi.Data.Migrations
             modelBuilder.Entity("Kunigi.Entities.Puzzle", b =>
                 {
                     b.HasOne("Kunigi.Entities.Game", "Game")
-                        .WithMany("Puzzles")
+                        .WithMany("PuzzleList")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -597,11 +567,11 @@ namespace Kunigi.Data.Migrations
             modelBuilder.Entity("Kunigi.Entities.TeamManager", b =>
                 {
                     b.HasOne("Kunigi.Entities.AppUser", "User")
-                        .WithMany()
+                        .WithMany("ManagedTeams")
                         .HasForeignKey("AppUserId");
 
                     b.HasOne("Kunigi.Entities.Team", "Team")
-                        .WithMany()
+                        .WithMany("Managers")
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -681,11 +651,14 @@ namespace Kunigi.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Kunigi.Entities.AppUser", b =>
+                {
+                    b.Navigation("ManagedTeams");
+                });
+
             modelBuilder.Entity("Kunigi.Entities.Game", b =>
                 {
-                    b.Navigation("MediaFiles");
-
-                    b.Navigation("Puzzles");
+                    b.Navigation("PuzzleList");
                 });
 
             modelBuilder.Entity("Kunigi.Entities.MediaFile", b =>
@@ -711,11 +684,13 @@ namespace Kunigi.Data.Migrations
 
             modelBuilder.Entity("Kunigi.Entities.Team", b =>
                 {
-                    b.Navigation("HostedYears");
+                    b.Navigation("HostedGames");
+
+                    b.Navigation("Managers");
 
                     b.Navigation("MediaFiles");
 
-                    b.Navigation("WonYears");
+                    b.Navigation("WonGames");
                 });
 #pragma warning restore 612, 618
         }

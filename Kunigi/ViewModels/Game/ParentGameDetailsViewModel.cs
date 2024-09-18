@@ -4,6 +4,8 @@ namespace Kunigi.ViewModels.Game;
 
 public class ParentGameDetailsViewModel
 {
+    public Guid ParentGameId { get; set; }
+    
     public short Year { get; set; }
 
     public short Order { get; set; }
@@ -16,11 +18,11 @@ public class ParentGameDetailsViewModel
     
     public string Slug { get; set; }
     
-    public string WinnerSlug { get; set; }
+    public Guid WinnerId { get; set; }
 
     public string Winner { get; set; }
     
-    public string HostSlug { get; set; }
+    public Guid HostId { get; set; }
     
     public string Host { get; set; }
     

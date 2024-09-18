@@ -4,6 +4,8 @@ namespace Kunigi.ViewModels.Game;
 
 public class ParentGameMediaViewModel
 {
+    public Guid ParentGameId { get; set; }
+    
     public string YearSlug { get; set; }
     
     public string Ttitle { get; set; }

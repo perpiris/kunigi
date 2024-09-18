@@ -3,10 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Kunigi.ViewModels.Game;
 
-public class GamePuzzleEditViewModel
+public class PuzzleEditViewModel
 {
-    [Required]
-    public int PuzzleId { get; set; }
+    public Guid PuzzleId { get; set; }
+
+    public Guid GameId { get; set; }
 
     [DisplayName("Περιγραφή Γρίφου")]
     public string Question { get; set; }
@@ -22,8 +23,4 @@ public class GamePuzzleEditViewModel
 
     [DisplayName("Υλικό Απάντησης")]
     public List<IFormFile> AnswerMediaFiles { get; set; }
-    
-    public string GameTypeSlug { get; set; }
-    
-    public short GameYear { get; set; }
 }

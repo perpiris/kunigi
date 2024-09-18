@@ -2,6 +2,8 @@
 
 public class GameDetailsViewModel
 {
+    public Guid GameId { get; set; }
+    
     public short Year { get; set; }
     
     public string GameType { get; set; }

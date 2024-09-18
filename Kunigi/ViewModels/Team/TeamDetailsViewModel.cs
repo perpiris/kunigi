@@ -5,9 +5,9 @@ namespace Kunigi.ViewModels.Team;
 
 public class TeamDetailsViewModel
 {
-    public string Name { get; set; }
+    public Guid TeamId { get; set; }
     
-    public string TeamSlug { get; set; }
+    public string Name { get; set; }
     
     public short? CreatedYear { get; set; }
     
@@ -23,7 +23,7 @@ public class TeamDetailsViewModel
     
     public string Instagram { get; set; }
     
-    public string ProfileImageUrl { get; set; }
+    public string ProfileImagePath { get; set; }
 
     public List<ParentGameDetailsViewModel> GamesWon { get; set; }
     

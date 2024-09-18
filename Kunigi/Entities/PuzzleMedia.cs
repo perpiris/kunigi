@@ -1,14 +1,18 @@
-﻿using Kunigi.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Kunigi.Enums;
 
 namespace Kunigi.Entities;
 
 public class PuzzleMedia
 {
-    public int PuzzleMediaId { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public Guid PuzzleMediaId { get; set; }
     
-    public int PuzzleId { get; set; }
+    public Guid PuzzleId { get; set; }
     
-    public int MediaFileId { get; set; }
+    public Guid MediaFileId { get; set; }
     
     public PuzzleMediaType MediaType { get; set; }
     

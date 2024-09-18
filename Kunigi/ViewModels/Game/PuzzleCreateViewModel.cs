@@ -1,12 +1,10 @@
 ﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 
 namespace Kunigi.ViewModels.Game;
 
-public class GamePuzzleCreateViewModel
+public class PuzzleCreateViewModel
 {
-    [Required]
-    public int GameId { get; set; }
+    public Guid GameId { get; set; }
 
     [DisplayName("Περιγραφή Γρίφου")]
     public string Question { get; set; }
@@ -22,8 +20,4 @@ public class GamePuzzleCreateViewModel
 
     [DisplayName("Υλικό Απάντησης")]
     public List<IFormFile> AnswerMediaFiles { get; set; }
-    
-    public string GameTypeSlug { get; set; }
-    
-    public short GameYear { get; set; }
 }

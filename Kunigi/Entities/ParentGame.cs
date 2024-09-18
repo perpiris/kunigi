@@ -1,10 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Kunigi.Entities;
 
 public class ParentGame
 {
-    public int ParentGameId { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public Guid ParentGameId { get; set; }
 
     public short Year { get; set; }
 
@@ -21,12 +24,11 @@ public class ParentGame
     [Column(TypeName = "varchar(255)")]
     public string Slug { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
     public string ProfileImagePath { get; set; }
     
-    public int HostId { get; set; }
+    public Guid HostId { get; set; }
     
-    public int WinnerId { get; set; }
+    public Guid WinnerId { get; set; }
     
     [ForeignKey("HostId")]
     public virtual Team Host { get; set; }
