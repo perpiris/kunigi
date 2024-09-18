@@ -16,12 +16,10 @@ public class MediaService : IMediaService
         _context = context;
     }
 
-    public string CreateFolder(string path)
+    public void CreateFolder(string path)
     {
         var fullPath = NormalizeAndCombinePaths(_mediaPath, path);
         Directory.CreateDirectory(fullPath);
-
-        return fullPath;
     }
 
     public async Task<string> SaveMediaFile(IFormFile file, string path, bool isProfileImage)

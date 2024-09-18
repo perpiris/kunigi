@@ -86,8 +86,7 @@ public class TeamService : ITeamService
             IsActive = viewModel.IsActive
         };
 
-        var teamFolderPath = _mediaService.CreateFolder($"teams/{slug}");
-        newTeam.TeamFolderPath = teamFolderPath;
+        _mediaService.CreateFolder($"teams/{slug}");
 
         _context.Teams.Add(newTeam);
         await _context.SaveChangesAsync();
@@ -108,7 +107,7 @@ public class TeamService : ITeamService
         if (profileImage != null)
         {
             var profileImagePath = await _mediaService.SaveMediaFile(profileImage, $"teams/{teamDetails.Slug.Trim()}", true);
-            teamDetails.TeamProfileImagePath = profileImagePath;
+            teamDetails.ProfileImagePath = profileImagePath;
         }
 
         _context.Teams.Update(teamDetails);

@@ -22,10 +22,7 @@ public class ParentGame
     public string Slug { get; set; }
     
     [Column(TypeName = "varchar(255)")]
-    public string ParentGameProfileImagePath { get; set; }
-    
-    [Column(TypeName = "varchar(255)")]
-    public string ParentGameFolderPath { get; set; }
+    public string ProfileImagePath { get; set; }
     
     public int HostId { get; set; }
     

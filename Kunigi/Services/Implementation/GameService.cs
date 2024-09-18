@@ -162,8 +162,7 @@ public class GameService : IGameService
             });
         }
 
-        var gameFolderPath = _mediaService.CreateFolder($"games/{slug}");
-        newParentGame.ParentGameFolderPath = gameFolderPath;
+        _mediaService.CreateFolder($"games/{slug}");
 
         _context.ParentGames.Add(newParentGame);
         await _context.SaveChangesAsync();
@@ -192,7 +191,7 @@ public class GameService : IGameService
         if (profileImage != null)
         {
             var profileImagePath = await _mediaService.SaveMediaFile(profileImage, $"games/{parentGameDetails.Slug}", true);
-            parentGameDetails.ParentGameProfileImagePath = profileImagePath;
+            parentGameDetails.ProfileImagePath = profileImagePath;
         }
 
         _context.ParentGames.Update(parentGameDetails);

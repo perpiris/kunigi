@@ -18,7 +18,7 @@ public static class GameMappings
             SubTitle = parentGameDetails.SubTitle,
             Description = parentGameDetails.Description,
             Slug = parentGameDetails.Slug,
-            ProfileImageUrl = parentGameDetails.ParentGameProfileImagePath
+            ProfileImageUrl = parentGameDetails.ProfileImagePath
         };
 
         if (includeFullDetails)

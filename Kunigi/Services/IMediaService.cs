@@ -2,7 +2,7 @@
 
 public interface IMediaService
 {
-    string CreateFolder(string path);
+    void CreateFolder(string path);
 
     Task<string> SaveMediaFile(IFormFile file, string path, bool isProfileImage);
 

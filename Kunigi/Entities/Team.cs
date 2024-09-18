@@ -30,10 +30,7 @@ public class Team
     [Column(TypeName = "varchar(255)")]
     public string Instagram { get; set; }
     
-    public string TeamProfileImagePath { get; set; }
-    
-    [Column(TypeName = "varchar(255)")]
-    public string TeamFolderPath { get; set; }
+    public string ProfileImagePath { get; set; }
     
     public virtual ICollection<ParentGame> HostedGames { get; set; }
     
