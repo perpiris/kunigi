@@ -131,7 +131,7 @@
                                                 @foreach (var game in Model.GamesWon)
                                                 {
                                                     <li>
-                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@($"{game.MainTitle} ({game.Year})")</a>
+                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-parentGameId="@game.ParentGameId">@($"{game.MainTitle} ({game.Year})")</a>
                                                     </li>
                                                 }
                                             </ul>
@@ -156,7 +156,7 @@
                                                 @foreach (var game in Model.GamesHosted)
                                                 {
                                                     <li>
-                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year">@($"{game.MainTitle} ({game.Year})")</a>
+                                                        <a type="button" class="btn btn-link" asp-controller="Game" asp-action="ParentGameDetails" asp-route-parentGameId="@game.ParentGameId">@($"{game.MainTitle} ({game.Year})")</a>
                                                     </li>
                                                 }
                                             </ul>

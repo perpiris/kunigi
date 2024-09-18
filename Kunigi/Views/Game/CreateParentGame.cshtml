@@ -5,6 +5,7 @@
 }
 
 <h2 class="mb-4 text-center">Δημιουργία νέου παιχνιδιού</h2>
+
 <div class="form-container-large">
     <form asp-action="CreateParentGame" asp-controller="Game" method="post">
         <div class="row">
@@ -44,7 +45,7 @@
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Αποθήκευση</button>
-        <button class="btn btn-secondary" id="previous-page-button">Πίσω</button>
+        <a asp-controller="Game" asp-action="ParentGameManagement" class="btn btn-secondary">Πίσω</a>
     </form>
 </div>
 

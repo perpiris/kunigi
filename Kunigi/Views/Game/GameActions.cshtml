@@ -22,7 +22,7 @@
 
 <div class="row row-cols-1 row-cols-md-4 g-4 mb-4">
     <div class="col">
-        <a asp-controller="Game" asp-action="EditGame" asp-route-gameId="@Model.GameId" asp-route-gameTypeSlug="@Model.TypeSlug"
+        <a asp-controller="Game" asp-action="EditGame" asp-route-gameId="@Model.GameId"
            class="card-link">
             <div class="card h-100">
                 <div class="card-body">
@@ -33,7 +33,7 @@
         </a>
     </div>
     <div class="col">
-        <a asp-controller="Game" asp-action="ManageGamePuzzleList" asp-route-gameId="@Model.GameId" asp-route-gameTypeSlug="@Model.TypeSlug"
+        <a asp-controller="Game" asp-action="ManagePuzzles" asp-route-gameId="@Model.GameId"
            class="card-link">
             <div class="card h-100">
                 <div class="card-body">

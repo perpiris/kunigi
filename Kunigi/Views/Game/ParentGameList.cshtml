@@ -43,7 +43,7 @@ else
         @foreach (var game in Model.Items)
         {
             <div class="col px-1">
-                <a asp-controller="Game" asp-action="ParentGameDetails" asp-route-gameYear="@game.Year"
+                <a asp-controller="Game" asp-action="ParentGameDetails" asp-route-parentGameId="@game.ParentGameId"
                    class="text-decoration-none">
                     <div class="card h-100 game-card">
                         <div class="card-img-top-wrapper">

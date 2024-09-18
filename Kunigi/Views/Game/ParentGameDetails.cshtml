@@ -10,6 +10,7 @@
     </li>
     <li class="breadcrumb-item active">@ViewData["Title"]</li>
 </ol>
+
 <div class="container">
     <div class="row gy-4 gy-lg-0">
         <div class="col-12 col-lg-4 col-xl-3">
@@ -54,7 +55,7 @@
                                 @foreach (var game in Model.GameList)
                                 {
                                     <li class="list-group-item">
-                                        <a asp-controller="Game" asp-action="GamePuzzleList" asp-route-gameYear="@game.Year" asp-route-gameTypeSlug="@game.TypeSlug">@game.GameType</a>
+                                        <a asp-controller="Game" asp-action="PuzzleList" asp-route-gameYear="@game.Year" asp-route-gameId="@game.GameId">@game.GameType</a>
                                     </li>
                                 }
                             </ul>

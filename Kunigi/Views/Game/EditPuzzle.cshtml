@@ -5,8 +5,9 @@
 }
 
 <h2 class="mb-4 text-center">@ViewData["Title"]</h2>
+
 <div class="form-container-large">
-    <form asp-action="EditGamePuzzle" asp-controller="Game" method="post" enctype="multipart/form-data">
+    <form asp-action="EditPuzzle" asp-controller="Game" method="post" enctype="multipart/form-data">
         <input type="hidden" asp-for="PuzzleId"/>
         <div class="row">
             <div class="col-12 mb-4 form-group">

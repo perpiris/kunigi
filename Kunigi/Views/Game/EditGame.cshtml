@@ -5,6 +5,7 @@
 }
 
 <h2 class="mb-4 text-center">@ViewData["Title"]</h2>
+
 <div class="form-container-large">
     <form asp-action="EditGame" asp-controller="Game" method="post">
         <div class="row">
@@ -20,7 +21,7 @@
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Αποθήκευση</button>
-        <a asp-controller="Game" asp-action="GameActions" asp-route-gameYear="@Model.GameYear" asp-route-gameTypeSlug="@Model.GameTypeSlug" class="btn btn-secondary">Πίσω</a>
+        <a asp-controller="Game" asp-action="GameActions" asp-route-gameId="@Model.GameId" asp-route-gameTypeSlug="@Model.GameTypeSlug" class="btn btn-secondary">Πίσω</a>
     </form>
 </div>
 

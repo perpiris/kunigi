@@ -24,7 +24,7 @@ else
         @foreach (var team in Model.Items)
         {
             <div class="col data-item" data-item-name="@team.Year">
-                <a asp-controller="Game" asp-action="ParentGameActions" asp-route-gameYear="@team.Year" class="card-link">
+                <a asp-controller="Game" asp-action="ParentGameActions" asp-route-parentGameId="@team.ParentGameId" class="card-link">
                     <div class="card h-100">
                         <div class="card-body">
                             <h5 class="card-title text-center">@team.Year</h5>

@@ -19,6 +19,7 @@
 
 <h2 class="mb-4">@Model.Name</h2>
 <h4 class="mb-4">Ενέργειες</h4>
+
 <div class="row row-cols-1 row-cols-md-4 g-4">
     <div class="col">
         <a asp-controller="Team" asp-action="TeamDetails" asp-route-teamId="@Model.TeamId"
@@ -73,7 +74,7 @@
         @foreach (var game in Model.GamesHosted)
         {
             <div class="col">
-                <a asp-controller="Game" asp-action="ParentGameActions" asp-route-gameId="@game.ParentGameId" class="card-link">
+                <a asp-controller="Game" asp-action="ParentGameActions" asp-route-parentGameId="@game.ParentGameId" class="card-link">
                     <div class="card h-100">
                         <div class="card-body">
                             <h5 class="card-title text-center">@game.Year</h5>
