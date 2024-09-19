@@ -24,6 +24,8 @@ public class ParentGameCreateViewModel
     public Guid WinnerId { get; set; }
     
     [DisplayName("Επιλογές")]
+    [Required(ErrorMessage = "Πρέπει να επιλέξετε τουλάχιστον έναν τύπο παιχνιδιού.")]
+    [MinLength(1, ErrorMessage = "Πρέπει να επιλέξετε τουλάχιστον έναν τύπο παιχνιδιού.")]
     public List<Guid> SelectedGameTypeIds { get; set; } = [];
     
     public SelectList HostSelectList { get; set; }

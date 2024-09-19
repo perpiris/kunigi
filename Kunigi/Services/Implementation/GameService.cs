@@ -155,7 +155,7 @@ public class GameService : IGameService
         }
 
         var parentGameList = await _context.ParentGames.ToListAsync();
-        
+
         var yearExists = parentGameList.Any(x => x.Year == viewModel.Year);
         if (yearExists)
         {
@@ -165,7 +165,7 @@ public class GameService : IGameService
         {
             modelState.Remove("Year");
         }
-        
+
         var orderExists = parentGameList.Any(x => x.Order == viewModel.Order);
         if (orderExists)
         {
@@ -180,7 +180,7 @@ public class GameService : IGameService
         {
             throw new InvalidFormException();
         }
-        
+
         var slug = viewModel.Year.ToString();
         var newParentGame = new ParentGame
         {
@@ -215,14 +215,27 @@ public class GameService : IGameService
     {
         await CanEditParentGame(parentGameId, user);
 
-        var parentGameDetails = await _context.ParentGames.FirstOrDefaultAsync(x => x.ParentGameId == parentGameId);
+        var parentGameDetails = await _context.ParentGames
+            .Include(x => x.Games)
+            .ThenInclude(x => x.GameType)
+            .FirstOrDefaultAsync(x => x.ParentGameId == parentGameId);
 
         if (parentGameDetails == null)
         {
             throw new NotFoundException("Το παιχνίδι δεν βρέθηκε");
         }
 
-        return parentGameDetails.ToParentGameEditViewModel();
+        var allGameTypes = await _context.GameTypes.ToListAsync();
+
+        return new ParentGameEditViewModel
+        {
+            ParentGameId = parentGameDetails.ParentGameId,
+            SubTitle = parentGameDetails.SubTitle,
+            Description = parentGameDetails.Description,
+            ProfileImageUrl = parentGameDetails.ProfileImagePath,
+            SelectedGameTypeIds = parentGameDetails.Games.Select(g => g.GameTypeId).ToList(),
+            GameTypes = allGameTypes
+        };
     }
 
     public async Task<GameEditViewModel> PrepareGameEditViewModel(Guid gameId, ClaimsPrincipal user)
@@ -243,7 +256,11 @@ public class GameService : IGameService
     {
         await CanEditParentGame(viewModel.ParentGameId, user);
 
-        var parentGameDetails = await _context.ParentGames.FirstOrDefaultAsync(x => x.ParentGameId == viewModel.ParentGameId);
+        var parentGameDetails = await _context.ParentGames
+            .Include(x => x.Games)
+            .ThenInclude(g => g.PuzzleList)
+            .ThenInclude(p => p.MediaFiles)
+            .FirstOrDefaultAsync(x => x.ParentGameId == viewModel.ParentGameId);
 
         if (parentGameDetails == null)
         {
@@ -257,6 +274,37 @@ public class GameService : IGameService
         {
             var profileImagePath = await _mediaService.SaveMediaFile(profileImage, $"games/{parentGameDetails.Slug}");
             parentGameDetails.ProfileImagePath = profileImagePath;
+        }
+        
+        var currentGameTypeIds = parentGameDetails.Games.Select(g => g.GameTypeId).ToList();
+        var gameTypesToAdd = viewModel.SelectedGameTypeIds.Except(currentGameTypeIds).ToList();
+        var gameTypesToRemove = currentGameTypeIds.Except(viewModel.SelectedGameTypeIds).ToList();
+        
+        var gamesToRemove = parentGameDetails.Games.Where(g => gameTypesToRemove.Contains(g.GameTypeId)).ToList();
+        foreach (var game in gamesToRemove)
+        {
+            foreach (var puzzle in game.PuzzleList)
+            {
+                foreach (var media in puzzle.MediaFiles)
+                {
+                    await DeletePuzzleMedia(puzzle.PuzzleId, media.MediaFileId, user);
+                }
+
+                _context.Puzzles.Remove(puzzle);
+            }
+
+            parentGameDetails.Games.Remove(game);
+        }
+        
+        var gameTypes = await _context.GameTypes.ToListAsync();
+        foreach (var gameTypeId in gameTypesToAdd)
+        {
+            parentGameDetails.Games.Add(new Game
+            {
+                GameTypeId = gameTypeId,
+                Title = gameTypes.FirstOrDefault(x => x.GameTypeId == gameTypeId)?.Description ?? "Unknown",
+                Description = "Δεν υπάρχουν πληροφορίες"
+            });
         }
 
         _context.ParentGames.Update(parentGameDetails);
