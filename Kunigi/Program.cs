@@ -79,6 +79,8 @@ using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 try
 {
+    var context = services.GetRequiredService<DataContext>();
+    context.Database.Migrate();
     await SeedData.SeedRoles(services);
     await SeedData.SeedMainAdmin(services);
     await SeedData.SeedGameTypes(services);
