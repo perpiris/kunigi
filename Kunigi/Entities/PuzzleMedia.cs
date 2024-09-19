@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Kunigi.Enums;
 
 namespace Kunigi.Entities;
 
@@ -14,7 +13,8 @@ public class PuzzleMedia
     
     public Guid MediaFileId { get; set; }
     
-    public PuzzleMediaType MediaType { get; set; }
+    [MaxLength(1)]
+    public string MediaType { get; set; }
     
     public virtual Puzzle Puzzle { get; set; }
     

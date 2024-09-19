@@ -64,6 +64,7 @@ else
             </div>
         }
     </div>
+    
     @if (Model.TotalPages > 1)
     {
         <nav class="mt-4">
@@ -71,7 +72,7 @@ else
                 @for (var i = 1; i <= Model.TotalPages; i++)
                 {
                     <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                        <a class="page-link" asp-action="TeamList" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                        <a class="page-link" asp-controller="Team" asp-action="TeamList" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
                     </li>
                 }
             </ul>

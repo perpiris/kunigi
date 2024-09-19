@@ -1,4 +1,4 @@
-﻿@model TeamMediaViewModel
+﻿@model PuzzleDetailsViewModel
 
 <style>
     .card {
@@ -139,7 +139,7 @@
 </style>
 
 @{
-    ViewData["Title"] = $"{Model.Name}";
+    ViewData["Title"] = "Διαχείριση Υλικού Γρίφου";
 }
 
 <div class="d-flex justify-content-between align-items-center">
@@ -148,22 +148,12 @@
         <h4 class="mb-4">Υλικό</h4>
     </div>
     <div class="d-flex justify-content-between align-items-center">
-        <a asp-controller="Team" asp-action="TeamActions" asp-route-teamId="@Model.TeamId" class="btn btn-secondary">Πίσω</a>
+        <a asp-controller="Game" asp-action="ManagePuzzles" asp-route-gameId="@Model.GameId" class="btn btn-secondary">Πίσω</a>
     </div>
 </div>
 
 <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
-    <div class="col">
-        <div class="card h-100 upload-card" data-bs-toggle="modal" data-bs-target="#uploadModal">
-            <div class="card-body">
-                <i class="bi bi-plus-circle" style="font-size: 3rem;"></i>
-                <div class="mt-2">
-                    <small class="text-muted">Προσθήκη</small>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+
     @foreach (var mediaFile in Model.MediaFiles)
     {
         <div class="col">
@@ -196,8 +186,7 @@
                     }
                     <h6 class="card-title mb-0 text-truncate" title="@mediaFile.FileName">@mediaFile.FileName</h6>
                 </div>
-                
-                <form asp-action="DeleteTeamMedia" asp-route-teamId="@Model.TeamId" asp-route-mediaId="@mediaFile.MediaFileId" method="post">
+                <form asp-controller="Game" asp-action="DeletePuzzleMedia" asp-route-puzzleId="@Model.PuzzleId" asp-route-puzzleMediaId="@mediaFile.MediaFileId" method="post">
                     <button type="submit" class="delete-btn" onclick="return confirm('Σίγουρα θέλετε να διαγράψετε αυτό το αρχείο;')">
                         <i class="bi bi-trash"></i>
                     </button>
@@ -205,29 +194,6 @@
             </div>
         </div>
     }
-</div>
-
-<div class="modal" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-action="UploadTeamMedia" asp-route-teamId="@Model.TeamId" method="post" enctype="multipart/form-data">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="uploadModalLabel">Προσθήκη Υλικού</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="NewMediaFiles" class="form-label">Επιλογή Αρχείων</label>
-                        <input type="file" class="form-control" id="NewMediaFiles" name="NewMediaFiles" multiple required accept="image/*,video/*">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Πίσω</button>
-                    <button type="submit" class="btn btn-primary">Προσθήκη</button>
-                </div>
-            </form>
-        </div>
-    </div>
 </div>
 
 <div class="modal" id="mediaPreviewModal" tabindex="-1" aria-hidden="true">

@@ -1,13 +1,12 @@
-﻿@model ManageUserViewModel
+﻿@model PaginatedViewModel<AppUserDetailsViewModel>
 
 @{
     ViewData["Title"] = "Διαχείριση Χρηστών";
 }
 
-<div class="d-flex flex-wrap align-items-center mb-4">
-    <h2 class="mb-0 me-3 flex-grow-1">Διαχείριση Χρηστών</h2>
-</div>
-@if (Model == null || Model.UserList.Count == 0)
+<h2 class="mb-4">Διαχείριση Χρηστών</h2>
+
+@if (Model == null || !Model.Items.Any())
 {
     <h2 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h2>
 }
@@ -21,7 +20,7 @@ else
         </tr>
         </thead>
         <tbody>
-        @foreach (var user in Model.UserList)
+        @foreach (var user in Model.Items)
         {
             <tr>
                 <td>@user.Email</td>
@@ -32,4 +31,20 @@ else
         }
         </tbody>
     </table>
+    
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" asp-controller="Account" asp-action="UserManagement" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                    </li>
+                }
+
+            </ul>
+        </nav>
+    }
 }

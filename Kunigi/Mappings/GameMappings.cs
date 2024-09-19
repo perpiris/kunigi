@@ -1,5 +1,4 @@
 ﻿using Kunigi.Entities;
-using Kunigi.Enums;
 using Kunigi.ViewModels.Common;
 using Kunigi.ViewModels.Game;
 
@@ -67,18 +66,19 @@ public static class GameMappings
         var puzzles = gameDetails.PuzzleList
             .Select(p => new PuzzleDetailsViewModel
             {
+                GameId = p.GameId,
                 PuzzleId = p.PuzzleId,
                 Order = p.Order,
                 Question = p.Question,
                 Answer = p.Answer,
-                QuestionMedia = p.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Question)
+                QuestionMedia = p.MediaFiles?.Where(m => m.MediaType == "Q")
                     .Select(m => new MediaFileViewModel
                     {
                         MediaFileId = m.MediaFile.MediaFileId,
                         FileName = Path.GetFileName(m.MediaFile.Path),
                         Path = m.MediaFile.Path
                     }).ToList() ?? [],
-                AnswerMedia = p.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Answer)
+                AnswerMedia = p.MediaFiles?.Where(m => m.MediaType == "A")
                     .Select(m => new MediaFileViewModel
                     {
                         MediaFileId = m.MediaFile.MediaFileId,
@@ -136,8 +136,7 @@ public static class GameMappings
         {
             ParentGameId = parentGameDetails.ParentGameId,
             SubTitle = parentGameDetails.SubTitle,
-            Description = parentGameDetails.Description,
-            GameYear = parentGameDetails.Year
+            Description = parentGameDetails.Description
         };
 
         return viewModel;
@@ -148,10 +147,7 @@ public static class GameMappings
         var viewModel = new GameEditViewModel
         {
             GameId = gameDetails.GameId,
-            Description = gameDetails.Description,
-            GameType = gameDetails.GameType.Description,
-            GameTypeSlug = gameDetails.GameType?.Slug,
-            GameYear = gameDetails.ParentGame.Year
+            Description = gameDetails.Description
         };
 
         return viewModel;
@@ -161,18 +157,19 @@ public static class GameMappings
     {
         var viewModel = new PuzzleDetailsViewModel
         {
+            GameId = puzzleDetails.GameId,
             PuzzleId = puzzleDetails.PuzzleId,
             Order = puzzleDetails.Order,
             Question = puzzleDetails.Question,
             Answer = puzzleDetails.Answer,
-            QuestionMedia = puzzleDetails.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Question)
+            QuestionMedia = puzzleDetails.MediaFiles?.Where(m => m.MediaType == "Q")
                 .Select(m => new MediaFileViewModel
                 {
                     MediaFileId = m.MediaFile.MediaFileId,
                     FileName = Path.GetFileName(m.MediaFile.Path),
                     Path = m.MediaFile.Path
                 }).ToList() ?? [],
-            AnswerMedia = puzzleDetails.MediaFiles?.Where(m => m.MediaType == PuzzleMediaType.Answer)
+            AnswerMedia = puzzleDetails.MediaFiles?.Where(m => m.MediaType == "A")
                 .Select(m => new MediaFileViewModel
                 {
                     MediaFileId = m.MediaFile.MediaFileId,

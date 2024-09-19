@@ -36,11 +36,16 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("TeamList");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("TeamList");
         }
-        catch (Exception)
+        catch (UnauthorizedOperationException exception)
+        {
+            TempData["error"] = exception.Message;
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception exception)
         {
             return RedirectToAction("TeamList");
         }
@@ -65,7 +70,7 @@ public class TeamController : Controller
             TempData["success"] = "Η ομάδα δημιουργήθηκε.";
             return RedirectToAction("TeamManagement");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("TeamManagement");
         }
@@ -85,7 +90,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -94,7 +99,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -117,7 +122,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -126,7 +131,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return View(viewModel);
         }
@@ -154,7 +159,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -163,7 +168,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -184,7 +189,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -193,7 +198,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -214,7 +219,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -223,7 +228,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -243,7 +248,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -252,7 +257,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -273,7 +278,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -282,7 +287,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -303,7 +308,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -312,7 +317,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -332,7 +337,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -341,7 +346,7 @@ public class TeamController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }

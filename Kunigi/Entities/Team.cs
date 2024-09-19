@@ -11,26 +11,26 @@ public class Team
     
     public string Description { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
+    [MaxLength(150)]
     public string Name { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
+    [MaxLength(150)]
     public string Slug { get; set; }
     
     public short? CreatedYear { get; set; }
     
     public bool IsActive { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
+    [MaxLength(150)]
     public string Website { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
+    [MaxLength(150)]
     public string Facebook { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
+    [MaxLength(150)]
     public string Youtube { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
+    [MaxLength(150)]
     public string Instagram { get; set; }
     
     public string ProfileImagePath { get; set; }

@@ -1,5 +1,6 @@
 ﻿using Kunigi.Entities;
 using Kunigi.ViewModels.Account;
+using Kunigi.ViewModels.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,19 +22,23 @@ public class AccountController : Controller
         _roleManager = roleManager;
     }
 
-    [HttpGet("manage")]
+    [HttpGet("manage-users")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> UserManagement()
+    public async Task<IActionResult> UserManagement(int pageNumber = 1, int pageSize = 10)
     {
-        var users =
-            await _userManager.Users
-                .ToListAsync();
-        var userList = new List<UserDetailsUpdateViewModel>();
+        var query = _userManager.Users.AsQueryable();
+        var totalItems = await query.CountAsync();
+        
+        var users = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
 
+        var paginatedUsers = new List<AppUserDetailsViewModel>();
         foreach (var user in users)
         {
             var userRoles = await _userManager.GetRolesAsync(user);
-            userList.Add(new UserDetailsUpdateViewModel
+            paginatedUsers.Add(new AppUserDetailsViewModel
             {
                 Id = user.Id,
                 Email = user.Email,
@@ -41,9 +46,12 @@ public class AccountController : Controller
             });
         }
 
-        var viewModel = new ManageUserViewModel
+        var viewModel = new PaginatedViewModel<AppUserDetailsViewModel>
         {
-            UserList = userList
+            Items = paginatedUsers,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalItems = totalItems
         };
 
         return View(viewModel);
@@ -62,7 +70,7 @@ public class AccountController : Controller
         var userRoles = await _userManager.GetRolesAsync(user);
         var roleList =
             await _roleManager.Roles.Select(r => r.Name).ToListAsync();
-        var viewModel = new UserDetailsUpdateViewModel
+        var viewModel = new AppUserDetailsViewModel
         {
             Id = userId,
             Email = user.Email,
@@ -75,10 +83,10 @@ public class AccountController : Controller
 
     [HttpPost]
     public async Task<IActionResult> EditRoles(
-        UserDetailsUpdateViewModel userDetailsViewModel,
+        AppUserDetailsViewModel appUserDetailsViewModel,
         List<string> selectedRoles)
     {
-        var user = await _userManager.FindByIdAsync(userDetailsViewModel.Id);
+        var user = await _userManager.FindByIdAsync(appUserDetailsViewModel.Id);
         if (user == null)
         {
             TempData["error"] = "User not found";

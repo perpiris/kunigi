@@ -28,6 +28,7 @@ public static class TeamMappings
             viewModel.GamesWon = teamDetails.WonGames?
                 .Select(year => new ParentGameDetailsViewModel
                 {
+                    ParentGameId = year.ParentGameId,
                     MainTitle = year.MainTitle,
                     Year = year.Year
                 })
@@ -36,6 +37,7 @@ public static class TeamMappings
             viewModel.GamesHosted = teamDetails.HostedGames?
                 .Select(year => new ParentGameDetailsViewModel
                 {
+                    ParentGameId = year.ParentGameId,
                     MainTitle = year.MainTitle,
                     Year = year.Year
                 })

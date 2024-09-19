@@ -5,6 +5,8 @@ namespace Kunigi.ViewModels.Game;
 public class PuzzleDetailsViewModel
 {
     public Guid PuzzleId { get; set; }
+
+    public Guid GameId { get; set; }
     
     public string Question { get; set; }
     
@@ -19,4 +21,6 @@ public class PuzzleDetailsViewModel
     public List<MediaFileViewModel> QuestionMedia { get; set; }
     
     public List<MediaFileViewModel> AnswerMedia { get; set; }
+
+    public List<MediaFileViewModel> MediaFiles => QuestionMedia.Concat(AnswerMedia).ToList();
 }

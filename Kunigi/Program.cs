@@ -1,5 +1,6 @@
 using Kunigi.Data;
 using Kunigi.Entities;
+using Kunigi.Exceptions;
 using Kunigi.Services;
 using Kunigi.Services.Implementation;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +9,16 @@ using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddLogging(x =>
+{
+    x.AddConfiguration(builder.Configuration.GetSection("Logging"))
+        .AddConsole()
+        .AddDebug();
+});
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(typeof(GlobalExceptionFilter));
+});
 builder.Services.AddDbContext<DataContext>(opt =>
 {
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));

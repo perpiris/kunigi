@@ -1,6 +1,6 @@
 ﻿namespace Kunigi.ViewModels.Account;
 
-public class UserDetailsUpdateViewModel
+public class AppUserDetailsViewModel
 {
     public string Id { get; set; }
 

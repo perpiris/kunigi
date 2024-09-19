@@ -6,7 +6,6 @@
 
 <div class="d-flex justify-content-between align-items-center">
     <h2 class="mb-4">Διαχείρηση Παιχνιδιών</h2>
-
     <div class="d-flex justify-content-between align-items-center">
         <a class="btn btn-primary"
            asp-controller="Game" asp-action="CreateParentGame">
@@ -14,6 +13,7 @@
         </a>
     </div>
 </div>
+
 @if (Model == null || !Model.Items.Any())
 {
     <h4 class="mb-4 text-center">Δεν βρέθηκαν αποτελέσματα.</h4>
@@ -34,16 +34,15 @@ else
             </div>
         }
     </div>
+    
     <nav class="mt-4">
         <ul class="pagination justify-content-center">
-
             @for (var i = 1; i <= Model.TotalPages; i++)
             {
                 <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                    <a class="page-link" asp-action="ParentGameList" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                    <a class="page-link" asp-controller="Game" asp-action="ParentGameList" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
                 </li>
             }
-
         </ul>
     </nav>
 }

@@ -8,16 +8,9 @@ public class GameEditViewModel
     public Guid GameId { get; set; }
     
     [DisplayName("Τίτλος")]
-    [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
+    [StringLength(150)]
     public string Title { get; set; }
 
     [DisplayName("Περιγραφή")]
-    [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
     public string Description { get; set; }
-    
-    public string GameType { get; set; }
-    
-    public string GameTypeSlug { get; set; }
-    
-    public short GameYear { get; set; }
 }

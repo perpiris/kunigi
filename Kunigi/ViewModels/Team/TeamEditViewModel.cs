@@ -8,7 +8,7 @@ public class TeamEditViewModel
     public Guid TeamId { get; set; }
     
     [DisplayName("Όνομα Ομάδας")]
-    [StringLength(255)]
+    [StringLength(150)]
     public string Name { get; set; }
     
     [DisplayName("Έτος Δημιουργίας")]
@@ -21,16 +21,16 @@ public class TeamEditViewModel
     [DisplayName("Περιγραφή")]
     public string Description { get; set; }
     
-    [StringLength(255)]
+    [StringLength(150)]
     public string Website { get; set; }
     
-    [StringLength(255)]
+    [StringLength(150)]
     public string Facebook { get; set; }
     
-    [StringLength(255)]
+    [StringLength(150)]
     public string Youtube { get; set; }
     
-    [StringLength(255)]
+    [StringLength(150)]
     public string Instagram { get; set; }
     
     [DisplayName("Φωτογραφία")]

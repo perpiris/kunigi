@@ -13,15 +13,15 @@ public class ParentGame
 
     public short Order { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
+    [MaxLength(150)]
     public string MainTitle { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
+    [MaxLength(150)]
     public string SubTitle { get; set; }
     
     public string Description { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
+    [MaxLength(150)]
     public string Slug { get; set; }
     
     public string ProfileImagePath { get; set; }

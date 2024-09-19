@@ -9,7 +9,7 @@ public class Game
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid GameId { get; set; }
     
-    [Column(TypeName = "varchar(255)")]
+    [MaxLength(150)]
     public string Title { get; set; }
     
     public string Description { get; set; }

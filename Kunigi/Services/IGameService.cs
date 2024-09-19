@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Kunigi.ViewModels.Common;
 using Kunigi.ViewModels.Game;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Kunigi.Services;
 
@@ -16,7 +17,7 @@ public interface IGameService
 
     Task<ParentGameCreateViewModel> PrepareCreateParentGameViewModel(ParentGameCreateViewModel viewModel);
 
-    Task CreateParentGame(ParentGameCreateViewModel viewModel);
+    Task CreateParentGame(ParentGameCreateViewModel viewModel, ModelStateDictionary modelState);
     
     Task<ParentGameEditViewModel> PrepareParentGameEditViewModel(Guid parentGameId, ClaimsPrincipal user);
 
@@ -38,11 +39,11 @@ public interface IGameService
     
     Task<PuzzleEditViewModel> PrepareEditPuzzleViewModel(Guid puzzleId, ClaimsPrincipal user);
 
-    Task EditPuzzle(PuzzleEditViewModel viewModel, ClaimsPrincipal user);
+    Task<Guid> EditPuzzle(PuzzleEditViewModel viewModel, ClaimsPrincipal user);
     
     Task<PuzzleDetailsViewModel> GetPuzzleMedia(Guid puzzleId, ClaimsPrincipal user);
     
     Task<Guid> DeletePuzzle(Guid puzzleId, ClaimsPrincipal user);
 
-    Task DeletePuzzleMedia(Guid puzzleId, Guid mediaId, ClaimsPrincipal user);
+    Task DeletePuzzleMedia(Guid puzzleId, Guid puzzleMediaId, ClaimsPrincipal user);
 }

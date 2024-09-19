@@ -1,11 +1,11 @@
 ﻿using System.Security.Claims;
 using Kunigi.Data;
 using Kunigi.Entities;
-using Kunigi.Enums;
 using Kunigi.Exceptions;
 using Kunigi.Mappings;
 using Kunigi.ViewModels.Common;
 using Kunigi.ViewModels.Game;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,7 +54,7 @@ public class GameService : IGameService
         {
             ArgumentNullException.ThrowIfNull(parentGameId);
         }
-        
+
         var parentGameDetails = await _context.ParentGames
             .Include(x => x.Host)
             .ThenInclude(team => team.Managers)
@@ -63,7 +63,7 @@ public class GameService : IGameService
             .ThenInclude(x => x.GameType)
             .Include(x => x.MediaFiles)
             .ThenInclude(x => x.MediaFile)
-            .FirstOrDefaultAsync(x =>x.ParentGameId == parentGameId);
+            .FirstOrDefaultAsync(x => x.ParentGameId == parentGameId);
 
         if (parentGameDetails is null)
         {
@@ -83,15 +83,16 @@ public class GameService : IGameService
         {
             ArgumentNullException.ThrowIfNull(gameId);
         }
-        
+
         var gameDetails = await _context.Games
-            .FirstOrDefaultAsync(x =>x.GameId == gameId);
+            .Include(x => x.GameType)
+            .FirstOrDefaultAsync(x => x.GameId == gameId);
 
         if (gameDetails is null)
         {
             throw new NotFoundException("Το παιχνίδι δεν βρέθηκε");
         }
-        
+
         return gameDetails.ToGameDetailsViewModel();
     }
 
@@ -133,8 +134,53 @@ public class GameService : IGameService
         return viewModel;
     }
 
-    public async Task CreateParentGame(ParentGameCreateViewModel viewModel)
+    public async Task CreateParentGame(ParentGameCreateViewModel viewModel, ModelStateDictionary modelState)
     {
+        if (!(viewModel.HostId != Guid.Empty))
+        {
+            modelState.AddModelError("HostId", "Το πεδίο απαιτείται.");
+        }
+        else
+        {
+            modelState.Remove("HostId");
+        }
+
+        if (!(viewModel.WinnerId != Guid.Empty))
+        {
+            modelState.AddModelError("WinnerId", "Το πεδίο απαιτείται.");
+        }
+        else
+        {
+            modelState.Remove("WinnerId");
+        }
+
+        var parentGameList = await _context.ParentGames.ToListAsync();
+        
+        var yearExists = parentGameList.Any(x => x.Year == viewModel.Year);
+        if (yearExists)
+        {
+            modelState.AddModelError("Year", "Υπάρχει ήδη παιχνίδι για αυτή τη χρονιά.");
+        }
+        else
+        {
+            modelState.Remove("Year");
+        }
+        
+        var orderExists = parentGameList.Any(x => x.Order == viewModel.Order);
+        if (orderExists)
+        {
+            modelState.AddModelError("Order", "Υπάρχει ήδη παιχνίδι για αυτή τη σειρά.");
+        }
+        else
+        {
+            modelState.Remove("Order");
+        }
+
+        if (!modelState.IsValid)
+        {
+            throw new InvalidFormException();
+        }
+        
         var slug = viewModel.Year.ToString();
         var newParentGame = new ParentGame
         {
@@ -144,14 +190,17 @@ public class GameService : IGameService
             MainTitle = $"{viewModel.Order}ο Κυνήγι Θησαυρού",
             WinnerId = viewModel.WinnerId,
             HostId = viewModel.HostId,
-            Games = new List<Game>()
+            Games = new List<Game>(),
+            MediaFiles = new List<ParentGameMedia>()
         };
 
+        var gameTypes = await _context.GameTypes.ToListAsync();
         foreach (var gameTypeId in viewModel.SelectedGameTypeIds)
         {
             newParentGame.Games.Add(new Game
             {
                 GameTypeId = gameTypeId,
+                Title = gameTypes.Where(x => x.GameTypeId == gameTypeId).Select(x => x.Description).FirstOrDefault(),
                 Description = "Δεν υπάρχουν πληροφορίες"
             });
         }
@@ -165,37 +214,37 @@ public class GameService : IGameService
     public async Task<ParentGameEditViewModel> PrepareParentGameEditViewModel(Guid parentGameId, ClaimsPrincipal user)
     {
         await CanEditParentGame(parentGameId, user);
-        
+
         var parentGameDetails = await _context.ParentGames.FirstOrDefaultAsync(x => x.ParentGameId == parentGameId);
-        
+
         if (parentGameDetails == null)
         {
             throw new NotFoundException("Το παιχνίδι δεν βρέθηκε");
         }
-        
+
         return parentGameDetails.ToParentGameEditViewModel();
     }
 
     public async Task<GameEditViewModel> PrepareGameEditViewModel(Guid gameId, ClaimsPrincipal user)
     {
         await CanEditGame(gameId, user);
-        
+
         var gameDetails = await _context.Games.FirstOrDefaultAsync(x => x.GameId == gameId);
-        
+
         if (gameDetails == null)
         {
             throw new NotFoundException("Το παιχνίδι δεν βρέθηκε");
         }
-        
+
         return gameDetails.ToGameEditViewModel();
     }
 
     public async Task EditParentGame(ParentGameEditViewModel viewModel, IFormFile profileImage, ClaimsPrincipal user)
     {
         await CanEditParentGame(viewModel.ParentGameId, user);
-        
+
         var parentGameDetails = await _context.ParentGames.FirstOrDefaultAsync(x => x.ParentGameId == viewModel.ParentGameId);
-        
+
         if (parentGameDetails == null)
         {
             throw new NotFoundException("Το παιχνίδι δεν βρέθηκε");
@@ -217,9 +266,9 @@ public class GameService : IGameService
     public async Task EditGame(GameEditViewModel viewModel, ClaimsPrincipal user)
     {
         await CanEditGame(viewModel.GameId, user);
-        
+
         var gameDetails = await _context.Games.FirstOrDefaultAsync(x => x.GameId == viewModel.GameId);
-        
+
         if (gameDetails == null)
         {
             throw new NotFoundException("Το παιχνίδι δεν βρέθηκε");
@@ -235,16 +284,16 @@ public class GameService : IGameService
     public async Task<ParentGameMediaViewModel> GetParentGameMedia(Guid parentGameId, ClaimsPrincipal user)
     {
         await CanEditParentGame(parentGameId, user);
-        
+
         var parentGameDetails = await _context.ParentGames
             .Include(x => x.MediaFiles)
             .FirstOrDefaultAsync(x => x.ParentGameId == parentGameId);
-        
+
         if (parentGameDetails == null)
         {
             throw new NotFoundException("Το παιχνίδι δεν βρέθηκε");
         }
-        
+
         var viewModel = parentGameDetails.ToParentGameMediaViewModel();
         return viewModel;
     }
@@ -252,11 +301,11 @@ public class GameService : IGameService
     public async Task AddParentGameMedia(Guid parentGameId, List<IFormFile> files, ClaimsPrincipal user)
     {
         await CanEditParentGame(parentGameId, user);
-        
+
         var parentGameDetails = await _context.ParentGames
             .Include(x => x.MediaFiles)
             .FirstOrDefaultAsync(x => x.ParentGameId == parentGameId);
-        
+
         if (parentGameDetails == null)
         {
             throw new NotFoundException("Το παιχνίδι δεν βρέθηκε");
@@ -288,18 +337,18 @@ public class GameService : IGameService
     public async Task<PuzzleCreateViewModel> PrepareCreatePuzzleViewModel(Guid gameId, ClaimsPrincipal user)
     {
         await CanEditGame(gameId, user);
-        
+
         var gameDetails = await _context.Games
             .Include(x => x.ParentGame)
             .Include(x => x.GameType)
             .Include(x => x.PuzzleList)
             .FirstOrDefaultAsync(x => x.GameId == gameId);
-        
+
         if (gameDetails == null)
         {
             throw new NotFoundException("Το παιχνίδι δεν βρέθηκε");
         }
-        
+
         var viewModel = gameDetails.ToGamePuzzleCreateViewModel();
         return viewModel;
     }
@@ -307,7 +356,7 @@ public class GameService : IGameService
     public async Task CreatePuzzle(PuzzleCreateViewModel viewModel, ClaimsPrincipal user)
     {
         await CanEditGame(viewModel.GameId, user);
-        
+
         var gameDetails = await _context.Games
             .Include(x => x.ParentGame)
             .Include(x => x.PuzzleList)
@@ -337,7 +386,7 @@ public class GameService : IGameService
                 var mediaFilePath = await _mediaService.SaveMediaFile(mediaFile, $"games/{gameDetails.ParentGame.Year}");
                 puzzle.MediaFiles.Add(new PuzzleMedia
                 {
-                    MediaType = PuzzleMediaType.Question,
+                    MediaType = "Q",
                     MediaFile = new MediaFile
                     {
                         Path = mediaFilePath
@@ -353,7 +402,7 @@ public class GameService : IGameService
                 var mediaFilePath = await _mediaService.SaveMediaFile(mediaFile, $"games/{gameDetails.ParentGame.Year}");
                 puzzle.MediaFiles.Add(new PuzzleMedia
                 {
-                    MediaType = PuzzleMediaType.Answer,
+                    MediaType = "A",
                     MediaFile = new MediaFile
                     {
                         Path = mediaFilePath
@@ -369,7 +418,7 @@ public class GameService : IGameService
     public async Task<PuzzleEditViewModel> PrepareEditPuzzleViewModel(Guid puzzleId, ClaimsPrincipal user)
     {
         await CanEditPuzzle(puzzleId, user);
-        
+
         var puzzleDetails = await _context.Puzzles
             .Include(x => x.Game.GameType)
             .Include(x => x.Game.ParentGame)
@@ -379,10 +428,10 @@ public class GameService : IGameService
         return viewModel;
     }
 
-    public async Task EditPuzzle(PuzzleEditViewModel viewModel, ClaimsPrincipal user)
+    public async Task<Guid> EditPuzzle(PuzzleEditViewModel viewModel, ClaimsPrincipal user)
     {
         await CanEditPuzzle(viewModel.PuzzleId, user);
-        
+
         var puzzleDetails = await _context.Puzzles
             .Include(x => x.Game)
             .ThenInclude(x => x.ParentGame)
@@ -400,7 +449,7 @@ public class GameService : IGameService
                 var mediaFilePath = await _mediaService.SaveMediaFile(mediaFile, $"games/{puzzleDetails.Game.ParentGame.Year}");
                 puzzleDetails.MediaFiles.Add(new PuzzleMedia
                 {
-                    MediaType = PuzzleMediaType.Question,
+                    MediaType = "Q",
                     MediaFile = new MediaFile
                     {
                         Path = mediaFilePath
@@ -416,7 +465,7 @@ public class GameService : IGameService
                 var mediaFilePath = await _mediaService.SaveMediaFile(mediaFile, $"games/{puzzleDetails.Game.ParentGame.Year}");
                 puzzleDetails.MediaFiles.Add(new PuzzleMedia
                 {
-                    MediaType = PuzzleMediaType.Answer,
+                    MediaType = "A",
                     MediaFile = new MediaFile
                     {
                         Path = mediaFilePath
@@ -427,14 +476,16 @@ public class GameService : IGameService
 
         _context.Puzzles.Update(puzzleDetails);
         await _context.SaveChangesAsync();
+        return puzzleDetails.GameId;
     }
 
     public async Task<PuzzleDetailsViewModel> GetPuzzleMedia(Guid puzzleId, ClaimsPrincipal user)
     {
         await CanEditPuzzle(puzzleId, user);
-        
+
         var puzzle = await _context.Puzzles
             .Include(x => x.MediaFiles)
+            .ThenInclude(x => x.MediaFile)
             .FirstOrDefaultAsync(x => x.PuzzleId == puzzleId);
 
         return puzzle.ToPuzzleDetailsViewModel();
@@ -443,7 +494,7 @@ public class GameService : IGameService
     public async Task<Guid> DeletePuzzle(Guid puzzleId, ClaimsPrincipal user)
     {
         await CanEditPuzzle(puzzleId, user);
-        
+
         var puzzleToDelete = await _context.Puzzles
             .Include(x => x.MediaFiles)
             .FirstOrDefaultAsync(x => x.PuzzleId == puzzleId);
@@ -452,18 +503,18 @@ public class GameService : IGameService
         {
             throw new NotFoundException("Ο γρίφος δεν βρέθηκε.");
         }
-        
+
         var gameId = puzzleToDelete.GameId;
         var orderToDelete = puzzleToDelete.Order;
         var groupToDelete = puzzleToDelete.Group;
-        
+
         foreach (var media in puzzleToDelete.MediaFiles)
         {
             await _mediaService.DeleteMediaFile(media.MediaFileId);
         }
-        
+
         _context.Puzzles.Remove(puzzleToDelete);
-        
+
         var remainingPuzzles = await _context.Puzzles
             .Where(p => p.GameId == gameId && p.Order > orderToDelete)
             .ToListAsync();
@@ -472,7 +523,7 @@ public class GameService : IGameService
         {
             puzzle.Order--;
         }
-        
+
         if (groupToDelete.HasValue)
         {
             var puzzlesInSameGroup = await _context.Puzzles
@@ -486,22 +537,21 @@ public class GameService : IGameService
         }
 
         await _context.SaveChangesAsync();
-        return puzzleToDelete.PuzzleId;
+        return puzzleToDelete.GameId;
     }
 
-    public async Task DeletePuzzleMedia(Guid puzzleId, Guid mediaId, ClaimsPrincipal user)
+    public async Task DeletePuzzleMedia(Guid puzzleId, Guid puzzleMediaId, ClaimsPrincipal user)
     {
         await CanEditPuzzle(puzzleId, user);
-        
-        var puzzleDetails = await _context.Puzzles.Include(x => x.MediaFiles)
+
+        var puzzleDetails = await _context.Puzzles
+            .Include(x => x.MediaFiles)
             .FirstOrDefaultAsync(x => x.PuzzleId == puzzleId);
 
-        var mediaDetails = puzzleDetails.MediaFiles.FirstOrDefault(x => x.MediaFileId == mediaId);
+        var mediaDetails = puzzleDetails.MediaFiles.FirstOrDefault(x => x.MediaFileId == puzzleMediaId);
         if (mediaDetails != null)
         {
             await _mediaService.DeleteMediaFile(mediaDetails.MediaFileId);
-            _context.PuzzleMediaFiles.Remove(mediaDetails);
-            await _context.SaveChangesAsync();
         }
     }
 
@@ -514,7 +564,7 @@ public class GameService : IGameService
             .Include(x => x.Host)
             .ThenInclude(x => x.Managers)
             .FirstOrDefaultAsync(x => x.ParentGameId == parentGameId);
-        
+
         if (parentGameDetails is null)
         {
             throw new NotFoundException("Το παιχνίδι δεν βρέθηκε");
@@ -529,7 +579,7 @@ public class GameService : IGameService
             }
         }
     }
-    
+
     private async Task CanEditGame(Guid gameId, ClaimsPrincipal user)
     {
         ArgumentNullException.ThrowIfNull(gameId);
@@ -539,8 +589,8 @@ public class GameService : IGameService
             .Include(x => x.ParentGame)
             .ThenInclude(x => x.Host)
             .ThenInclude(x => x.Managers)
-            .FirstOrDefaultAsync(x => x.ParentGameId == gameId);
-        
+            .FirstOrDefaultAsync(x => x.GameId == gameId);
+
         if (gameDetails is null)
         {
             throw new NotFoundException("Το παιχνίδι δεν βρέθηκε");
@@ -555,7 +605,7 @@ public class GameService : IGameService
             }
         }
     }
-    
+
     private async Task CanEditPuzzle(Guid puzzleId, ClaimsPrincipal user)
     {
         ArgumentNullException.ThrowIfNull(puzzleId);
@@ -567,7 +617,7 @@ public class GameService : IGameService
             .ThenInclude(x => x.Host)
             .ThenInclude(x => x.Managers)
             .FirstOrDefaultAsync(x => x.PuzzleId == puzzleId);
-    
+
         if (puzzleDetails is null)
         {
             throw new NotFoundException("Ο γρίφος δεν βρέθηκε");

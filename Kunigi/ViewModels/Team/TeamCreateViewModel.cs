@@ -8,7 +8,7 @@ public class TeamCreateViewModel
 {
     [DisplayName("Όνομα Ομάδας")]
     [Required(ErrorMessage = "Το πεδίο απαιτείται.")]
-    [StringLength(255)]
+    [StringLength(150)]
     [UniqueTeamName]
     public string Name { get; set; }
 

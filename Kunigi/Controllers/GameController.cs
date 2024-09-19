@@ -31,15 +31,20 @@ public class GameController : Controller
             var viewModel = await _gameService.GetParentGameDetails(parentGameId);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("ParentGameList");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("ParentGameList");
         }
-        catch (Exception)
+        catch (UnauthorizedOperationException exception)
+        {
+            TempData["error"] = exception.Message;
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception exception)
         {
             return RedirectToAction("ParentGameList");
         }
@@ -53,15 +58,15 @@ public class GameController : Controller
             var viewModel = await _gameService.GetGamePuzzleList(gameId);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("ParentGameList");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("ParentGameList");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("ParentGameList");
         }
@@ -76,11 +81,11 @@ public class GameController : Controller
             var viewModel = await _gameService.GetGamePuzzleList(gameId);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("ParentGameList");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("ParentGameList");
         }
@@ -89,7 +94,7 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("ParentGameList", "Game");
         }
@@ -104,11 +109,11 @@ public class GameController : Controller
             var viewModel = await _gameService.PrepareCreatePuzzleViewModel(gameId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("ParentGameList");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -117,14 +122,14 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("ParentGameList", "Game");
         }
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpPost("create-games")]
+    [HttpPost("create-puzzle")]
     public async Task<IActionResult> CreatePuzzle(PuzzleCreateViewModel viewModel)
     {
         if (!ModelState.IsValid)
@@ -138,11 +143,11 @@ public class GameController : Controller
             TempData["success"] = "Το γρίφος δημιουργήθηκε επιτυχώς.";
             return RedirectToAction("ManagePuzzles", new { viewModel.GameId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("ParentGameList");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("ParentGameList");
         }
@@ -151,7 +156,7 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return View(viewModel);
         }
@@ -166,11 +171,11 @@ public class GameController : Controller
             var viewModel = await _gameService.PrepareEditPuzzleViewModel(puzzleId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("ParentGameList");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -179,7 +184,7 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("ParentGameList", "Game");
         }
@@ -196,15 +201,15 @@ public class GameController : Controller
 
         try
         {
-            await _gameService.EditPuzzle(viewModel, User);
+            var gameId = await _gameService.EditPuzzle(viewModel, User);
             TempData["success"] = "Το γρίφος επεξεργάστηκε επιτυχώς.";
-            return RedirectToAction("ManagePuzzles", new { viewModel.PuzzleId });
+            return RedirectToAction("ManagePuzzles", new { gameId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("ParentGameList");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("ParentGameList");
         }
@@ -213,7 +218,7 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return View(viewModel);
         }
@@ -221,19 +226,19 @@ public class GameController : Controller
 
     [Authorize(Roles = "Admin,Manager")]
     [HttpPost("delete-puzzle")]
-    public async Task<IActionResult> DeleteGamePuzzle(Guid puzzleId)
+    public async Task<IActionResult> DeletePuzzle(Guid puzzleId)
     {
         try
         {
-            var managingGameId = await _gameService.DeletePuzzle(puzzleId, User);
+            var gameId = await _gameService.DeletePuzzle(puzzleId, User);
             TempData["success"] = "Ο γρίφος διαγράφηκε επιτυχώς.";
-            return RedirectToAction("ManagePuzzles", new { managingGameId });
+            return RedirectToAction("ManagePuzzles", new { gameId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -242,26 +247,27 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpGet("delete-puzzle")]
-    public async Task<IActionResult> DeletePuzzleMedia(Guid puzzleId, Guid mediaId)
+    [HttpPost("delete-puzzle-media")]
+    public async Task<IActionResult> DeletePuzzleMedia(Guid puzzleId, Guid puzzleMediaId)
     {
         try
         {
-            // await _gameService.DeletePuzzleMedia(puzzleId, User);
-            return View();
+            await _gameService.DeletePuzzleMedia(puzzleId, puzzleMediaId, User);
+            TempData["success"] = "το αρχείο διαγράφηκε επιτυχώς.";
+            return RedirectToAction("PuzzleMediaManagement", new { puzzleId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -270,7 +276,7 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -288,45 +294,26 @@ public class GameController : Controller
     [HttpPost("create-parent-game")]
     public async Task<IActionResult> CreateParentGame(ParentGameCreateViewModel viewModel)
     {
-        if (!(viewModel.HostId != Guid.Empty))
+        try
         {
-            ModelState.AddModelError("HostId", "Το πεδίο απαιτείται.");
+            await _gameService.CreateParentGame(viewModel, ModelState);
+            TempData["success"] = "Το παιχνίδι δημιουργήθηκε επιτυχώς.";
+            return RedirectToAction("ParentGameManagement");
         }
-        else
+        catch (NotFoundException exception)
         {
-            ModelState.Remove("HostId");
+            return RedirectToAction("ParentGameManagement");
         }
-
-        if (!(viewModel.WinnerId != Guid.Empty))
+        catch (ArgumentNullException exception)
         {
-            ModelState.AddModelError("WinnerId", "Το πεδίο απαιτείται.");
+            return RedirectToAction("ParentGameManagement");
         }
-        else
-        {
-            ModelState.Remove("WinnerId");
-        }
-
-        if (!ModelState.IsValid)
+        catch (InvalidFormException exception)
         {
             viewModel = await _gameService.PrepareCreateParentGameViewModel(viewModel);
             return View(viewModel);
         }
-
-        try
-        {
-            await _gameService.CreateParentGame(viewModel);
-            TempData["success"] = "Το παιχνίδι δημιουργήθηκε επιτυχώς.";
-            return RedirectToAction("ParentGameManagement");
-        }
-        catch (NotFoundException)
-        {
-            return RedirectToAction("ParentGameManagement");
-        }
-        catch (ArgumentNullException)
-        {
-            return RedirectToAction("ParentGameManagement");
-        }
-        catch (Exception)
+        catch (Exception exception)
         {
             viewModel = await _gameService.PrepareCreateParentGameViewModel(viewModel);
             return View(viewModel);
@@ -342,11 +329,11 @@ public class GameController : Controller
             var viewModel = await _gameService.PrepareParentGameEditViewModel(parentGameId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -355,7 +342,7 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -373,11 +360,11 @@ public class GameController : Controller
             TempData["success"] = "Το παιχνίδι επεξεργάστηκε επιτυχώς.";
             return RedirectToAction("ParentGameActions", new { viewModel.ParentGameId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -386,7 +373,7 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return View(viewModel);
         }
@@ -401,11 +388,11 @@ public class GameController : Controller
             var viewModel = await _gameService.PrepareGameEditViewModel(gameId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -414,7 +401,7 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -430,11 +417,11 @@ public class GameController : Controller
             TempData["success"] = "Το παιχνίδι επεξεργάστηκε επιτυχώς.";
             return RedirectToAction("GameActions", new { viewModel.GameId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -443,7 +430,7 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return View(viewModel);
         }
@@ -466,11 +453,11 @@ public class GameController : Controller
             var viewModel = await _gameService.GetParentGameDetails(parentGameId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -483,18 +470,18 @@ public class GameController : Controller
 
     [Authorize(Roles = "Admin,Manager")]
     [HttpGet("manage-parent-game-media")]
-    public async Task<IActionResult> ParentGameMediaManagement(Guid gameId)
+    public async Task<IActionResult> ParentGameMediaManagement(Guid parentGameId)
     {
         try
         {
-            var viewModel = await _gameService.GetParentGameMedia(gameId, User);
+            var viewModel = await _gameService.GetParentGameMedia(parentGameId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -503,26 +490,26 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
     }
 
     [Authorize(Roles = "Admin,Manager")]
-    [HttpGet("manage-game-puzzle-media")]
-    public async Task<IActionResult> GamePuzzleMediaManagement(Guid puzzleId)
+    [HttpGet("manage-puzzle-media")]
+    public async Task<IActionResult> PuzzleMediaManagement(Guid puzzleId)
     {
         try
         {
             var viewModel = await _gameService.GetPuzzleMedia(puzzleId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -531,7 +518,7 @@ public class GameController : Controller
             TempData["error"] = exception.Message;
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -547,20 +534,20 @@ public class GameController : Controller
             TempData["success"] = "Τα αρχεία ανέβηκαν επιτυχώς.";
             return RedirectToAction("ParentGameMediaManagement", new { parentGameId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
             TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -576,20 +563,20 @@ public class GameController : Controller
             TempData["success"] = "Τα αρχείο διαγράφηκε επιτυχώς.";
             return RedirectToAction("ParentGameMediaManagement", new { parentGameId });
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
             TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
@@ -604,15 +591,15 @@ public class GameController : Controller
             var viewModel = await _gameService.GetGameDetails(gameId, User);
             return View(viewModel);
         }
-        catch (NotFoundException)
+        catch (NotFoundException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (ArgumentNullException)
+        catch (ArgumentNullException exception)
         {
             return RedirectToAction("Dashboard", "Home");
         }
-        catch (UnauthorizedOperationException)
+        catch (UnauthorizedOperationException exception)
         {
             TempData["error"] = "Δεν έχετε δικαίωμα επεξεργασίας αυτού του παιχνιδιού";
             return RedirectToAction("Dashboard", "Home");
